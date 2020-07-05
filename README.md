@@ -15,8 +15,8 @@
 【效果图】https://www.figma.com/file/F2DJVCtZMtaWAI3VIAJmt6/SQUADS?node-id=0%3A1<br/>
 【腾讯IM】https://cloud.tencent.com/document/product/269/32675<br/>
 【开发计划】https://www.yuque.com/docs/share/3dc9bfe6-2309-4be2-9933-5d2162c84422?#dB3n<br/>
-【工时安排】https://docs.qq.com/sheet/DWUh0aW9Jd3l4QkFj<br/>
-【建议收集】https://docs.qq.com/doc/DT0Jtd2piWXVXbEZz<br/>
+【开发需求问题】https://docs.qq.com/sheet/DWUh0aW9Jd3l4QkFj<br/>
+【产品建议收集】https://docs.qq.com/doc/DT0Jtd2piWXVXbEZz<br/>
 
 
 
