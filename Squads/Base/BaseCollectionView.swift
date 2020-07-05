@@ -42,7 +42,9 @@ class VC1: UIViewController {
             .disposed(by: rx.disposeBag)
         
         provider
-            .request(target: .login, model: String.self, atKeyPath: .data)
+            .request(target: .signUp(username: "123", password: "123", rePassword: "123", inviteCode: "123"),
+                     model: String.self,
+                     atKeyPath: .data)
             .asObservable()
             .debug()
             .compactMap{ $0.error }

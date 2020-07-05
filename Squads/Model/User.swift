@@ -27,6 +27,7 @@ struct User: Codable {
         date = Date()
     }
 
+    
 }
 
 extension User: Hashable {

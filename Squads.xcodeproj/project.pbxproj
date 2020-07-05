@@ -148,6 +148,7 @@
 				17F39BC924AECB8B00EC90ED /* Extensions */,
 				17BF5CAD24AEC77F00D5D8D8 /* Base */,
 				17BF5CAB24AEC76400D5D8D8 /* Networking */,
+				1795369F24B0542E00FE1185 /* Model */,
 				17BF5CAA24AEC74B00D5D8D8 /* Config */,
 				17BF5CA924AEC74200D5D8D8 /* Tool */,
 				17BF5CA824AEC73200D5D8D8 /* Business */,
@@ -163,21 +164,20 @@
 			path = Squads;
 			sourceTree = "<group>";
 		};
-		17B89B8224B0480500E6AE78 /* My */ = {
-			isa = PBXGroup;
-			children = (
-				17B89B8424B0484D00E6AE78 /* View */,
-				17B89B8324B0484600E6AE78 /* Model */,
-			);
-			path = My;
-			sourceTree = "<group>";
-		};
-		17B89B8324B0484600E6AE78 /* Model */ = {
+		1795369F24B0542E00FE1185 /* Model */ = {
 			isa = PBXGroup;
 			children = (
 				17B89B8524B0486300E6AE78 /* User.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		17B89B8224B0480500E6AE78 /* My */ = {
+			isa = PBXGroup;
+			children = (
+				17B89B8424B0484D00E6AE78 /* View */,
+			);
+			path = My;
 			sourceTree = "<group>";
 		};
 		17B89B8424B0484D00E6AE78 /* View */ = {
