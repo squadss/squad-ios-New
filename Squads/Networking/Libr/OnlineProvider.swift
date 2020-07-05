@@ -35,7 +35,7 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
         var list: Array<PluginType> = [logger]
         
         if let token = UserDefaults.standard.token, token.isEmpty == false {
-            list.append(AccessTokenPlugin { token })
+            list.append(CustomTokenPlugin { token })
         }
         
         return list
@@ -124,5 +124,35 @@ extension Swift.Result {
             return error
         }
         return nil
+    }
+}
+
+public struct CustomTokenPlugin: PluginType {
+
+    /// A closure returning the access token to be applied in the header.
+    public let tokenClosure: () -> String
+
+    /**
+     Initialize a new `AccessTokenPlugin`.
+
+     - parameters:
+       - tokenClosure: A closure returning the token to be applied in the pattern `Authorization: <AuthorizationType> <token>`
+    */
+    public init(tokenClosure: @escaping () -> String) {
+        self.tokenClosure = tokenClosure
+    }
+
+    /**
+     Prepare a request by adding an authorization header if necessary.
+
+     - parameters:
+       - request: The request to modify.
+       - target: The target of the request.
+     - returns: The modified `URLRequest`.
+    */
+    public func prepare(_ request: URLRequest, target: TargetType) -> URLRequest {
+        var request = request
+        request.addValue(tokenClosure(), forHTTPHeaderField: "token")
+        return request
     }
 }
