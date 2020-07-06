@@ -7,6 +7,68 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
+import RxRelay
+
+class AuthManager {
+    
+    static let shared = AuthManager()
+    private var token = XAppToken()
+    private let loggedIn = BehaviorRelay<Bool>(value: false)
+    
+    var hasValidToken: Bool {
+        return token.isValid
+    }
+    
+    var isLoggedIn: Observable<Bool> {
+        return loggedIn.asObservable()
+    }
+    
+    init() {
+        loggedIn.accept(hasValidToken)
+    }
+    
+    class func setToken(_ value: XAppToken) {
+        AuthManager.shared.token = value
+    }
+    
+    class func removeToken() {
+        AuthManager.shared.token.token = nil
+    }
+}
+
+final class Application: NSObject {
+    
+    static let shared = Application()
+    let authManager: AuthManager
+    private var window: UIWindow?
+    
+    private override init() {
+        authManager = AuthManager.shared
+        super.init()
+    }
+    
+    func presentInitialScreent(in window: UIWindow? = nil) {
+        
+        if let unwrappedWindow = window {
+            self.window = unwrappedWindow
+        }
+        
+//        if authManager.hasValidToken {
+            let reactor = SquadReactor()
+            let squadVC = SquadViewController(reactor: reactor)
+            squadVC.title = "Squad Page"
+            let nav = BaseNavigationController(rootViewController: squadVC)
+            self.window?.rootViewController = nav
+//        } else {
+//            let reactor = LoginReactor()
+//            let loginVC = LoginViewController(reactor: reactor)
+//            let nav = BaseNavigationController(rootViewController: loginVC)
+//            self.window?.rootViewController = nav
+//        }
+    }
+}
 
 @available(iOS 13, *)
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -15,10 +77,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+       
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        window = UIWindow(windowScene: windowScene)
+        window?.backgroundColor = .white
+        Application.shared.presentInitialScreent(in: window)
+        window?.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

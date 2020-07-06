@@ -1,6 +1,6 @@
 # Uncomment the next line to define a global platform for your project
 source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '9.0'
+platform :ios, '10.0'
 
 target 'Squads' do
   # Comment the next line if you don't want to use dynamic frameworks
@@ -37,5 +37,8 @@ target 'Squads' do
   pod 'Disk'
   pod 'DynamicColor', '~> 4.2.0'
   pod 'ETNavBarTransparent', '~> 1.1.3'
-  
+  # 侧边栏
+  pod 'SideMenu', '~> 6.0'
+  # 浏览器
+  pod 'JXPhotoBrowser', :git => 'https://github.com/JiongXing/PhotoBrowser.git'
 end

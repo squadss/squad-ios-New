@@ -38,12 +38,15 @@ class BaseViewController: UIViewController, CustomNavigationBarItem {
         }
         
         setupView()
+        setupConstraints()
         addTouchAction()
     }
     
     func initData() { }
     
     func setupView() { }
+    
+    func setupConstraints() {}
     
     func addTouchAction() { }
     
