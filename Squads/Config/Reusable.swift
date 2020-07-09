@@ -22,4 +22,14 @@ enum Reusable {
     static let squadSqrollCell = ReusableCell<SquadSqrollViewCell>()
     
     static let squadSqrollCollectionCell = ReusableCell<SquadSqrollCollectionCell>()
+    
+    static let squadPreViewCell = ReusableCell<SquadPreViewCell>()
+    
+    static let activityCalendarCell = ReusableCell<ActivityCalendarCell>()
+    
+    
+    //MARK: - My
+    static let friendProfileViewCell = ReusableCell<FriendProfileViewCell>()
+    
+    static let mySquadsViewCell = ReusableCell<MySquadsViewCell>()
 }

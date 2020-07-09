@@ -7,12 +7,13 @@
 //
 
 import UIKit
+import Hero
 
 class SquadCalendarViewController: ReactorViewController<SquadCalendarReactor> {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.theme.backgroundColor = UIColor.background
     }
     
@@ -35,6 +36,27 @@ class SquadCalendarViewController: ReactorViewController<SquadCalendarReactor> {
         rightBtn.addTarget(self, action: #selector(rightBtnBtnDidTapped), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: rightBtn)
         
+        let scrollView = UIScrollView(frame: view.bounds)
+        scrollView.contentSize = CGSize(width: 1000, height: 1000)
+        view.addSubview(scrollView)
+        
+        let btn = UIButton()
+        btn.addTarget(self, action: #selector(btnDidTapped), for: .touchUpInside)
+        btn.backgroundColor = .red
+        btn.hero.id = "batMan"
+        btn.frame = CGRect(x: 100, y: 300, width: 300, height: 300)
+        scrollView.addSubview(btn)
+    }
+    
+    @objc
+    private func btnDidTapped() {
+        let reactor = ChattingReactor()
+        let chattingVC = ChattingViewController(reactor: reactor)
+        let nav = BaseNavigationController(rootViewController: chattingVC)
+        nav.hero.isEnabled = true
+        nav.hero.modalAnimationType = .selectBy(presenting: .fade, dismissing: .fade)
+        nav.modalPresentationStyle = .fullScreen
+        present(nav, animated: true)
     }
     
     @objc
@@ -47,3 +69,4 @@ class SquadCalendarViewController: ReactorViewController<SquadCalendarReactor> {
         dismiss(animated: true)
     }
 }
+

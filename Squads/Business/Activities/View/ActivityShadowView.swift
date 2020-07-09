@@ -45,6 +45,8 @@ class ActivityShadowView: BaseView {
             let rect = CGRect(x: 0, y: 0, width: frame.width - contentMargin.left - contentMargin.right, height: frame.height - contentMargin.bottom - contentMargin.top)
             contentView.layer.shadowPath = UIBezierPath(roundedRect: rect, cornerRadius: 4).cgPath
             borderLayer?.frame = rect
+            separatorline.frame = CGRect(x: lineMarginHor, y: lineMarginTop, width: frame.width - lineMarginHor * 2, height: lineHeight)
+            contentView.frame = CGRect(x: contentMargin.left, y: contentMargin.top, width: frame.width - contentMargin.left - contentMargin.right, height: frame.height - contentMargin.bottom - contentMargin.top)
         }
     }
     
@@ -59,11 +61,5 @@ class ActivityShadowView: BaseView {
         
         separatorline.backgroundColor = UIColor(hexString: "#FAFAFA")
         addSubviews(contentView, separatorline)
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        separatorline.frame = CGRect(x: lineMarginHor, y: lineMarginTop, width: bounds.width - lineMarginHor * 2, height: lineHeight)
-        contentView.frame = CGRect(x: contentMargin.left, y: contentMargin.top, width: bounds.width - contentMargin.left - contentMargin.right, height: bounds.height - contentMargin.bottom - contentMargin.top)
     }
 }

@@ -89,7 +89,8 @@ struct LightTheme: Theme {
     
     var primaryDark: UIColor = .white
     
-    var secondary: UIColor = .white
+    // 红色
+    var secondary: UIColor = UIColor(red: 0.925, green: 0.384, blue: 0.337, alpha: 1)
     
     var secondaryDark: UIColor = .white
     

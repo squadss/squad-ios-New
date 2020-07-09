@@ -22,13 +22,13 @@ class MyProfileReactor: Reactor {
     }
     
     struct State {
-        
+        var repos: Array<String>
     }
     
     var initialState: State
     
     init() {
-        initialState = State()
+        initialState = State(repos: ["1", "1", "1", "1", "1", "1", "1", "1"])
     }
     
     func mutate(action: Action) -> Observable<Mutation> {

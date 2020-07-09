@@ -22,13 +22,14 @@ class SquadActivitiesReactor: Reactor {
     }
     
     struct State {
-        
+        var repos = Array<String>()
     }
     
     var initialState: State
     
     init() {
         initialState = State()
+        initialState.repos = ["2", "1"]
     }
     
     func mutate(action: Action) -> Observable<Mutation> {

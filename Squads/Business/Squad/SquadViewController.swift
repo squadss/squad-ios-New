@@ -17,6 +17,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     private var stackView: UIStackView!
     private var separatorLine = SeparatorLine()
     private var tableView = UITableView(frame: .zero, style: .grouped)
+    private var sideMenuManager = SideMenuManager()
     
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadPrimaryKey>>!
     override var allowedCustomBackBarItem: Bool {
@@ -26,6 +27,19 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        var setting = SideMenuSettings()
+        setting.statusBarEndAlpha = 0
+        setting.menuWidth = view.bounds.width * 0.8
+        
+        let reactor = MyProfileReactor()
+        let rootVC = MyProfileViewController(reactor: reactor)
+        let menu = CustomSideMenuNavigationController(rootViewController: rootVC, settings: setting)
+        
+        let style = SideMenuPresentationStyle.menuSlideIn
+        style.presentingEndAlpha = 0.6
+        
+        menu.presentationStyle = style
+        sideMenuManager.leftMenuNavigationController = menu
     }
     
     override func setupView() {
@@ -82,8 +96,15 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     override func addTouchAction() {
         tableView.rx.itemSelected
             .subscribe(onNext: { [unowned self] indexPath in
-                print(indexPath)
-//                (self.tableView.cellForRow(at: indexPath) as? SquadActivityCell)?.startAnimation()
+                if indexPath.section == 1 {
+                    let activityReactor = ActivityDetailReactor()
+                    let activityDetailVC = ActivityDetailViewController(reactor: activityReactor)
+                    self.navigationController?.pushViewController(activityDetailVC, animated: true)
+                } else if indexPath.section == 2 {
+                    let chattingReactor = ChattingReactor()
+                    let chattingVC = ChattingViewController(reactor: chattingReactor)
+                    self.navigationController?.pushViewController(chattingVC, animated: true)
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -208,13 +229,11 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         }
     }
 
+    
+    
     @objc
     private func leftBtnDidTapped() {
-        let setting = SideMenuSettings()
-        let reactor = MyProfileReactor()
-        let rootVC = MyProfileViewController(reactor: reactor)
-        let menu = SideMenuNavigationController(rootViewController: rootVC, settings: setting)
-        present(menu, animated: true)
+        present(sideMenuManager.leftMenuNavigationController!, animated: true)
     }
     
     @objc
@@ -310,6 +329,29 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             return 100.0
         default:
             fatalError("没有配置cell")
+        }
+    }
+    
+}
+
+fileprivate class CustomSideMenuNavigationController: SideMenuNavigationController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        navigationBar.isTranslucent = false
+        navigationBar.setBackgroundImage(UIImage(color: UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)), for: .default)
+        
+        if #available(iOS 11, *) {
+            navigationBar.shadowImage = UIImage()
+        }
+        else {
+            //此方法会导致在push到下个页面时，状态栏会闪一下，因此需要给状态栏加个白色背景
+            navigationBar.clipsToBounds = true
+            
+            let window = UIApplication.shared.value(forKey: "statusBarWindow") as? UIWindow
+            let statusBar = window?.value(forKey: "statusBar") as? UIView
+            statusBar?.backgroundColor = .white
         }
     }
     

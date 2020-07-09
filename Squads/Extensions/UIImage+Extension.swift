@@ -141,6 +141,15 @@ extension UIImage {
     }
     
     func drawColor(_ color: UIColor) -> UIImage? {
+        if #available(iOS 13, *) {
+            return withTintColor(color)
+        }
+        else {
+            return _drawColor(color)
+        }
+    }
+    
+    private func _drawColor(_ color: UIColor) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
         color.setFill()
         let bounds = CGRect(x: 0, y: 0, width: size.width, height: size.height)
@@ -262,17 +271,49 @@ extension CALayer {
     func maskCorners(_ radius: CGFloat) {
         maskCorners(radius, rect: bounds)
     }
+       
 }
 
-class CornersView: UIImageView {
+class CornersImageView: UIImageView {
     
-    var radius: CGFloat = 0.0
+    var radius: CGFloat?
     
     override var frame: CGRect {
         didSet {
-            guard frame != oldValue && radius != 0 else { return }
-            layer.maskCorners(radius)
+            guard frame != oldValue else { return }
+            
+            var value: CGFloat {
+                if let unwrappedRadius = radius {
+                    return unwrappedRadius
+                } else {
+                    return min(frame.width, frame.height) / 2
+                }
+            }
+            if value >= 0 {
+                layer.maskCorners(value)
+            }
         }
     }
 }
 
+class CornersButton: UIButton {
+    
+    var radius: CGFloat?
+    
+    override var frame: CGRect {
+        didSet {
+            guard frame != oldValue else { return }
+            
+            var value: CGFloat {
+                if let unwrappedRadius = radius {
+                    return unwrappedRadius
+                } else {
+                    return min(frame.width, frame.height) / 2
+                }
+            }
+            if value >= 0 {
+                layer.maskCorners(value)
+            }
+        }
+    }
+}

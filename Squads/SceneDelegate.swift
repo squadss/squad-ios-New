@@ -64,7 +64,7 @@ final class Application: NSObject {
 //        } else {
 //            let reactor = LoginReactor()
 //            let loginVC = LoginViewController(reactor: reactor)
-//            let nav = BaseNavigationController(rootViewController: loginVC)
+//            let nav = UINavigationController(rootViewController: loginVC)
 //            self.window?.rootViewController = nav
 //        }
     }

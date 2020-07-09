@@ -39,6 +39,10 @@ target 'Squads' do
   pod 'ETNavBarTransparent', '~> 1.1.3'
   # 侧边栏
   pod 'SideMenu', '~> 6.0'
+  # 转场
+  pod 'Hero'
+  # 消息库
+  pod 'MessageKit'
   # 浏览器
   pod 'JXPhotoBrowser', :git => 'https://github.com/JiongXing/PhotoBrowser.git'
 end
