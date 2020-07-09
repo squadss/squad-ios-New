@@ -5,8 +5,13 @@ PODS:
   - Disk (0.6.4)
   - DynamicColor (4.2.0)
   - ETNavBarTransparent (1.1.3)
+  - Hero (1.5.0)
   - HGPlaceholders (0.4.0)
+  - InputBarAccessoryView (4.2.2)
+  - JXPhotoBrowser (3.1.2)
   - Kingfisher (4.10.1)
+  - MessageKit (3.0.0):
+    - InputBarAccessoryView (~> 4.2.2)
   - MonkeyKing (1.16.0)
   - Moya (13.0.1):
     - Moya/Core (= 13.0.1)
@@ -34,6 +39,7 @@ PODS:
   - RxTheme (4.0.0):
     - RxCocoa (~> 5.0)
     - RxSwift (~> 5.0)
+  - SideMenu (6.4.7)
   - SnapKit (4.2.0)
   - SwiftDate (6.1.0)
   - SwiftyUserDefaults (5.0.0)
@@ -46,8 +52,11 @@ DEPENDENCIES:
   - Disk
   - DynamicColor (~> 4.2.0)
   - ETNavBarTransparent (~> 1.1.3)
+  - Hero
   - HGPlaceholders
+  - JXPhotoBrowser (from `https://github.com/JiongXing/PhotoBrowser.git`)
   - Kingfisher
+  - MessageKit
   - MonkeyKing
   - Moya
   - "NSObject+Rx"
@@ -57,6 +66,7 @@ DEPENDENCIES:
   - RxDataSources
   - RxSwift (from `https://github.com/ReactiveX/RxSwift.git`)
   - RxTheme
+  - SideMenu (~> 6.0)
   - SnapKit
   - SwiftDate
   - SwiftyUserDefaults
@@ -71,8 +81,11 @@ SPEC REPOS:
     - Disk
     - DynamicColor
     - ETNavBarTransparent
+    - Hero
     - HGPlaceholders
+    - InputBarAccessoryView
     - Kingfisher
+    - MessageKit
     - MonkeyKing
     - Moya
     - "NSObject+Rx"
@@ -82,6 +95,7 @@ SPEC REPOS:
     - RxDataSources
     - RxRelay
     - RxTheme
+    - SideMenu
     - SnapKit
     - SwiftDate
     - SwiftyUserDefaults
@@ -89,12 +103,17 @@ SPEC REPOS:
     - TXIMSDK_iOS
 
 EXTERNAL SOURCES:
+  JXPhotoBrowser:
+    :git: https://github.com/JiongXing/PhotoBrowser.git
   RxCocoa:
     :git: https://github.com/ReactiveX/RxSwift.git
   RxSwift:
     :git: https://github.com/ReactiveX/RxSwift.git
 
 CHECKOUT OPTIONS:
+  JXPhotoBrowser:
+    :commit: a42dab484075136fb6dd18845478ba1b3fb71e68
+    :git: https://github.com/JiongXing/PhotoBrowser.git
   RxCocoa:
     :commit: a580d07ed002217fd91d8446c3a852486e9beefa
     :git: https://github.com/ReactiveX/RxSwift.git
@@ -109,8 +128,12 @@ SPEC CHECKSUMS:
   Disk: dcee5c2e98fb72f9a924cde8da8435b08244a80e
   DynamicColor: c475f66bda1cabf602f2c54ac1171c0c07148a5a
   ETNavBarTransparent: dd05fd593b31d5d786e05631149ceea1e13b30ef
+  Hero: b7385b75e7259da62f4f85462f59a5082d66b058
   HGPlaceholders: fd580aaf6050782bf2ee51eb62ed499ded6615b7
+  InputBarAccessoryView: 2b937602598e2fab3149f37f51dd7ad795653812
+  JXPhotoBrowser: 7f0bc11f02fbc84ae06829f922f32ce822aa9661
   Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
+  MessageKit: e892a9ca49ebe6d82684d3a93ad84021fa23e2c6
   MonkeyKing: dc5076dc206bf9e6eb427d618317eff1b44b0666
   Moya: f4a4b80ff2f8a4ffc208dfb31cd91636622fee6e
   "NSObject+Rx": 2eb2cf51fd1c554118449a7fbc36e4cd620b9e94
@@ -122,12 +145,13 @@ SPEC CHECKSUMS:
   RxRelay: 89d54507f4fd4d969e6ec1d4bd7f3673640b4640
   RxSwift: 81470a2074fa8780320ea5fe4102807cb7118178
   RxTheme: 0b642f47c7d197a803c6b9c083964188c34f7ddb
+  SideMenu: 928a015669c3afc201e1fe3a87f1b0bc8993a664
   SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
   SwiftyUserDefaults: 33fcb42bd1feb53a37d873feb62c82967db5f7f6
   Toast-Swift: 9b6a70f28b3bf0b96c40d46c0c4b9d6639846711
   TXIMSDK_iOS: 3e71bcdc7a829437d7b7d11d884293e15be8bedf
 
-PODFILE CHECKSUM: c5873d7a05982ca6820efbaabacca360fa2262d9
+PODFILE CHECKSUM: b686eb120f35f5a7b28ab6d27825a79411fb4b9a
 
 COCOAPODS: 1.9.1

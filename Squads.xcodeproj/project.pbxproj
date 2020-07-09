@@ -13,7 +13,64 @@
 		170429D324AEBF4E0046F757 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 170429D124AEBF4E0046F757 /* Main.storyboard */; };
 		170429D524AEBF530046F757 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 170429D424AEBF530046F757 /* Assets.xcassets */; };
 		170429D824AEBF530046F757 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 170429D624AEBF530046F757 /* LaunchScreen.storyboard */; };
+		171E07B424B31E4200603F76 /* SquadMembersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E07B324B31E4200603F76 /* SquadMembersView.swift */; };
+		171E07B824B31E7800603F76 /* ActivityShadowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E07B724B31E7800603F76 /* ActivityShadowView.swift */; };
+		171F957124B356D600BD229F /* ActivityCalendarCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F957024B356D600BD229F /* ActivityCalendarCell.swift */; };
+		171F957324B35B0000BD229F /* ActivityCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F957224B35B0000BD229F /* ActivityCalendarView.swift */; };
+		1724412924B2067200666135 /* SquadActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412824B2067200666135 /* SquadActivitiesViewController.swift */; };
+		1724412B24B2067F00666135 /* SquadActivitiesReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */; };
+		172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */; };
+		172A4B8B24B6A06400A69803 /* VerificationCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */; };
+		172A4B8D24B6BC6000A69803 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8C24B6BC6000A69803 /* WelcomeViewController.swift */; };
+		172A4B9124B6D36300A69803 /* EditableAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B9024B6D36300A69803 /* EditableAvatarView.swift */; };
+		174F6C1524B70FD200E5A1C6 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1424B70FD200E5A1C6 /* SessionManager.swift */; };
+		174F6C1B24B7291F00E5A1C6 /* ChatSoundRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */; };
+		174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */; };
+		174F6C1F24B7297300E5A1C6 /* ProximityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */; };
+		178FCB7224B46F6A0054212F /* SquadPreViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB7124B46F6A0054212F /* SquadPreViewCell.swift */; };
+		178FCB7424B476D40054212F /* SquadNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB7324B476D40054212F /* SquadNotificationsViewController.swift */; };
+		178FCB7624B476E40054212F /* SquadNotificationsReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB7524B476E40054212F /* SquadNotificationsReactor.swift */; };
+		178FCB7824B4771D0054212F /* SquadThemeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB7724B4771D0054212F /* SquadThemeViewController.swift */; };
+		178FCB7A24B4773B0054212F /* SquadMembersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB7924B4773B0054212F /* SquadMembersViewController.swift */; };
+		178FCB7C24B4777C0054212F /* SquadInvithNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB7B24B4777C0054212F /* SquadInvithNewViewController.swift */; };
+		178FCB7E24B4778C0054212F /* SquadInvithNewReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB7D24B4778C0054212F /* SquadInvithNewReactor.swift */; };
+		178FCB8024B4779B0054212F /* SquadMembersReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB7F24B4779B0054212F /* SquadMembersReactor.swift */; };
+		178FCB8224B477AA0054212F /* SquadThemeReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB8124B477AA0054212F /* SquadThemeReactor.swift */; };
+		178FCB8424B49E7A0054212F /* FriendProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB8324B49E7A0054212F /* FriendProfileViewController.swift */; };
+		178FCB8624B49E890054212F /* FriendProfileReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB8524B49E890054212F /* FriendProfileReactor.swift */; };
+		178FCB8824B49ED70054212F /* FriendProfileViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB8724B49ED70054212F /* FriendProfileViewCell.swift */; };
+		178FCB8C24B4A8BF0054212F /* ChattingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB8B24B4A8BF0054212F /* ChattingViewController.swift */; };
+		178FCB8E24B4A8CD0054212F /* ChattingReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB8D24B4A8CD0054212F /* ChattingReactor.swift */; };
+		178FCB9024B4AEAF0054212F /* ActivityDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB8F24B4AEAF0054212F /* ActivityDetailViewController.swift */; };
+		178FCB9324B4AEC90054212F /* ActivityDetailReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB9224B4AEC90054212F /* ActivityDetailReactor.swift */; };
+		178FCB9524B4B4490054212F /* MySquadsViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178FCB9424B4B4490054212F /* MySquadsViewCell.swift */; };
 		1795369E24B04D4C00FE1185 /* DataCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1795369D24B04D4C00FE1185 /* DataCenter.swift */; };
+		179536A624B181E400FE1185 /* SquadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536A524B181E400FE1185 /* SquadViewController.swift */; };
+		179536A924B1820A00FE1185 /* SquadReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536A824B1820A00FE1185 /* SquadReactor.swift */; };
+		179536AB24B18B4C00FE1185 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536AA24B18B4C00FE1185 /* LoginViewController.swift */; };
+		179536AE24B18B7000FE1185 /* LoginReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536AD24B18B7000FE1185 /* LoginReactor.swift */; };
+		179536B024B1912000FE1185 /* MyProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536AF24B1912000FE1185 /* MyProfileViewController.swift */; };
+		179536B224B1913200FE1185 /* MyProfileReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536B124B1913200FE1185 /* MyProfileReactor.swift */; };
+		179536B424B192BE00FE1185 /* UIButton+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536B324B192BE00FE1185 /* UIButton+Extension.swift */; };
+		179536B624B1A5BF00FE1185 /* Reusable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536B524B1A5BF00FE1185 /* Reusable.swift */; };
+		179536B924B1A63B00FE1185 /* SquadFickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536B824B1A63B00FE1185 /* SquadFickerCell.swift */; };
+		179C04FB24B1A82D00A669FA /* SquadActivityCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C04FA24B1A82D00A669FA /* SquadActivityCell.swift */; };
+		179C04FD24B1A83F00A669FA /* SquadChannelsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C04FC24B1A83E00A669FA /* SquadChannelsCell.swift */; };
+		179C04FF24B1AE5E00A669FA /* SquadPlaceholderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C04FE24B1AE5E00A669FA /* SquadPlaceholderCell.swift */; };
+		179C050124B1BFD100A669FA /* SquadSectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050024B1BFD100A669FA /* SquadSectionTitleView.swift */; };
+		179C050324B1C5E800A669FA /* SquadSqrollViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050224B1C5E800A669FA /* SquadSqrollViewCell.swift */; };
+		179C050524B1C73400A669FA /* SquadCalendarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050424B1C73400A669FA /* SquadCalendarViewController.swift */; };
+		179C050724B1C74A00A669FA /* SquadNewMemoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050624B1C74A00A669FA /* SquadNewMemoryViewController.swift */; };
+		179C050924B1C75900A669FA /* SquadGameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050824B1C75900A669FA /* SquadGameViewController.swift */; };
+		179C050B24B1C76A00A669FA /* SquadPhoneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050A24B1C76A00A669FA /* SquadPhoneViewController.swift */; };
+		179C050D24B1C77B00A669FA /* SquadPhoneReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050C24B1C77B00A669FA /* SquadPhoneReactor.swift */; };
+		179C050F24B1C78B00A669FA /* SquadGameReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050E24B1C78B00A669FA /* SquadGameReactor.swift */; };
+		179C051124B1C79900A669FA /* SquadCalendarReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051024B1C79900A669FA /* SquadCalendarReactor.swift */; };
+		179C051324B1C7A700A669FA /* SquadNewMemoryReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051224B1C7A700A669FA /* SquadNewMemoryReactor.swift */; };
+		179C051524B1DD2900A669FA /* PaddingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051424B1DD2900A669FA /* PaddingLabel.swift */; };
+		179C051724B1E15F00A669FA /* SquadSqrollCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051624B1E15F00A669FA /* SquadSqrollCollectionCell.swift */; };
+		179C051F24B1FCC400A669FA /* FlicksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051E24B1FCC400A669FA /* FlicksViewController.swift */; };
+		179C052124B1FCD800A669FA /* FlicksReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C052024B1FCD800A669FA /* FlicksReactor.swift */; };
 		17B89B8624B0486300E6AE78 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B89B8524B0486300E6AE78 /* User.swift */; };
 		17BF5CB024AEC7E000D5D8D8 /* XAppToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CAF24AEC7E000D5D8D8 /* XAppToken.swift */; };
 		17BF5CB224AEC82200D5D8D8 /* UserAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CB124AEC82200D5D8D8 /* UserAPI.swift */; };
@@ -21,11 +78,20 @@
 		17BF5CB824AEC92F00D5D8D8 /* UserDefaultHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CB724AEC92F00D5D8D8 /* UserDefaultHelper.swift */; };
 		17BF5CBB24AECA0800D5D8D8 /* UIColor+Squads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CBA24AECA0800D5D8D8 /* UIColor+Squads.swift */; };
 		17BF5CBD24AECA1F00D5D8D8 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CBC24AECA1F00D5D8D8 /* ThemeManager.swift */; };
+		17D3443624B6084700AEB0E5 /* LoginBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D3443524B6084700AEB0E5 /* LoginBackgroundView.swift */; };
+		17D3443924B60E4E00AEB0E5 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D3443824B60E4E00AEB0E5 /* RegisterViewController.swift */; };
+		17D3443B24B60E4E00AEB0E5 /* RegisterReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D3443A24B60E4E00AEB0E5 /* RegisterReactor.swift */; };
 		17D9AF4D24AF1EB800FEF4DA /* BaseCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D9AF4C24AF1EB800FEF4DA /* BaseCollectionView.swift */; };
 		17D9AF4F24AF1ECF00FEF4DA /* BaseTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D9AF4E24AF1ECF00FEF4DA /* BaseTableView.swift */; };
 		17D9AF5124B0294E00FEF4DA /* OnlineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D9AF5024B0294E00FEF4DA /* OnlineProvider.swift */; };
 		17D9AF5324B0297000FEF4DA /* NetworkLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D9AF5224B0297000FEF4DA /* NetworkLogger.swift */; };
 		17D9AF5524B03F8B00FEF4DA /* Rx+HGPlaceholders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D9AF5424B03F8B00FEF4DA /* Rx+HGPlaceholders.swift */; };
+		17E2B77F24B587E5008EC166 /* MyProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E2B77E24B587E5008EC166 /* MyProfileHeaderView.swift */; };
+		17E2B78124B587F1008EC166 /* MyProfileFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E2B78024B587F1008EC166 /* MyProfileFooterView.swift */; };
+		17E5FA5C24B41FD600E8B819 /* SquadPreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E5FA5B24B41FD600E8B819 /* SquadPreViewController.swift */; };
+		17E5FA5E24B41FF900E8B819 /* SquadPreReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E5FA5D24B41FF900E8B819 /* SquadPreReactor.swift */; };
+		17E5FA6024B4207D00E8B819 /* SquadPreInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E5FA5F24B4207D00E8B819 /* SquadPreInfoView.swift */; };
+		17E5FA6224B44FB300E8B819 /* SquadPreMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E5FA6124B44FB300E8B819 /* SquadPreMenuView.swift */; };
 		17F355DF24AED9F800AE00EC /* MoyaProvider+Rx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F355DE24AED9F800AE00EC /* MoyaProvider+Rx.swift */; };
 		17F355E124AEDA0700AE00EC /* Observable+Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F355E024AEDA0700AE00EC /* Observable+Response.swift */; };
 		17F355E324AEDA1300AE00EC /* Single+Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F355E224AEDA1300AE00EC /* Single+Response.swift */; };
@@ -66,7 +132,64 @@
 		170429D424AEBF530046F757 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		170429D724AEBF530046F757 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		170429D924AEBF530046F757 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		171E07B324B31E4200603F76 /* SquadMembersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadMembersView.swift; sourceTree = "<group>"; };
+		171E07B724B31E7800603F76 /* ActivityShadowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityShadowView.swift; sourceTree = "<group>"; };
+		171F957024B356D600BD229F /* ActivityCalendarCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityCalendarCell.swift; sourceTree = "<group>"; };
+		171F957224B35B0000BD229F /* ActivityCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityCalendarView.swift; sourceTree = "<group>"; };
+		1724412824B2067200666135 /* SquadActivitiesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivitiesViewController.swift; sourceTree = "<group>"; };
+		1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivitiesReactor.swift; sourceTree = "<group>"; };
+		172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrickInputFieldStyle.swift; sourceTree = "<group>"; };
+		172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationCodeViewController.swift; sourceTree = "<group>"; };
+		172A4B8C24B6BC6000A69803 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
+		172A4B9024B6D36300A69803 /* EditableAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableAvatarView.swift; sourceTree = "<group>"; };
+		174F6C1424B70FD200E5A1C6 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSoundRecorder.swift; sourceTree = "<group>"; };
+		174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helper.swift"; sourceTree = "<group>"; };
+		174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityManager.swift; sourceTree = "<group>"; };
+		178FCB7124B46F6A0054212F /* SquadPreViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreViewCell.swift; sourceTree = "<group>"; };
+		178FCB7324B476D40054212F /* SquadNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadNotificationsViewController.swift; sourceTree = "<group>"; };
+		178FCB7524B476E40054212F /* SquadNotificationsReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadNotificationsReactor.swift; sourceTree = "<group>"; };
+		178FCB7724B4771D0054212F /* SquadThemeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadThemeViewController.swift; sourceTree = "<group>"; };
+		178FCB7924B4773B0054212F /* SquadMembersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadMembersViewController.swift; sourceTree = "<group>"; };
+		178FCB7B24B4777C0054212F /* SquadInvithNewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadInvithNewViewController.swift; sourceTree = "<group>"; };
+		178FCB7D24B4778C0054212F /* SquadInvithNewReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadInvithNewReactor.swift; sourceTree = "<group>"; };
+		178FCB7F24B4779B0054212F /* SquadMembersReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadMembersReactor.swift; sourceTree = "<group>"; };
+		178FCB8124B477AA0054212F /* SquadThemeReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadThemeReactor.swift; sourceTree = "<group>"; };
+		178FCB8324B49E7A0054212F /* FriendProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendProfileViewController.swift; sourceTree = "<group>"; };
+		178FCB8524B49E890054212F /* FriendProfileReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendProfileReactor.swift; sourceTree = "<group>"; };
+		178FCB8724B49ED70054212F /* FriendProfileViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendProfileViewCell.swift; sourceTree = "<group>"; };
+		178FCB8B24B4A8BF0054212F /* ChattingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChattingViewController.swift; sourceTree = "<group>"; };
+		178FCB8D24B4A8CD0054212F /* ChattingReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChattingReactor.swift; sourceTree = "<group>"; };
+		178FCB8F24B4AEAF0054212F /* ActivityDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDetailViewController.swift; sourceTree = "<group>"; };
+		178FCB9224B4AEC90054212F /* ActivityDetailReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDetailReactor.swift; sourceTree = "<group>"; };
+		178FCB9424B4B4490054212F /* MySquadsViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MySquadsViewCell.swift; sourceTree = "<group>"; };
 		1795369D24B04D4C00FE1185 /* DataCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCenter.swift; sourceTree = "<group>"; };
+		179536A524B181E400FE1185 /* SquadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadViewController.swift; sourceTree = "<group>"; };
+		179536A824B1820A00FE1185 /* SquadReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadReactor.swift; sourceTree = "<group>"; };
+		179536AA24B18B4C00FE1185 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		179536AD24B18B7000FE1185 /* LoginReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginReactor.swift; sourceTree = "<group>"; };
+		179536AF24B1912000FE1185 /* MyProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileViewController.swift; sourceTree = "<group>"; };
+		179536B124B1913200FE1185 /* MyProfileReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileReactor.swift; sourceTree = "<group>"; };
+		179536B324B192BE00FE1185 /* UIButton+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+Extension.swift"; sourceTree = "<group>"; };
+		179536B524B1A5BF00FE1185 /* Reusable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reusable.swift; sourceTree = "<group>"; };
+		179536B824B1A63B00FE1185 /* SquadFickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadFickerCell.swift; sourceTree = "<group>"; };
+		179C04FA24B1A82D00A669FA /* SquadActivityCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivityCell.swift; sourceTree = "<group>"; };
+		179C04FC24B1A83E00A669FA /* SquadChannelsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadChannelsCell.swift; sourceTree = "<group>"; };
+		179C04FE24B1AE5E00A669FA /* SquadPlaceholderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPlaceholderCell.swift; sourceTree = "<group>"; };
+		179C050024B1BFD100A669FA /* SquadSectionTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadSectionTitleView.swift; sourceTree = "<group>"; };
+		179C050224B1C5E800A669FA /* SquadSqrollViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadSqrollViewCell.swift; sourceTree = "<group>"; };
+		179C050424B1C73400A669FA /* SquadCalendarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadCalendarViewController.swift; sourceTree = "<group>"; };
+		179C050624B1C74A00A669FA /* SquadNewMemoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadNewMemoryViewController.swift; sourceTree = "<group>"; };
+		179C050824B1C75900A669FA /* SquadGameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadGameViewController.swift; sourceTree = "<group>"; };
+		179C050A24B1C76A00A669FA /* SquadPhoneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPhoneViewController.swift; sourceTree = "<group>"; };
+		179C050C24B1C77B00A669FA /* SquadPhoneReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPhoneReactor.swift; sourceTree = "<group>"; };
+		179C050E24B1C78B00A669FA /* SquadGameReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadGameReactor.swift; sourceTree = "<group>"; };
+		179C051024B1C79900A669FA /* SquadCalendarReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadCalendarReactor.swift; sourceTree = "<group>"; };
+		179C051224B1C7A700A669FA /* SquadNewMemoryReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadNewMemoryReactor.swift; sourceTree = "<group>"; };
+		179C051424B1DD2900A669FA /* PaddingLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddingLabel.swift; sourceTree = "<group>"; };
+		179C051624B1E15F00A669FA /* SquadSqrollCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadSqrollCollectionCell.swift; sourceTree = "<group>"; };
+		179C051E24B1FCC400A669FA /* FlicksViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksViewController.swift; sourceTree = "<group>"; };
+		179C052024B1FCD800A669FA /* FlicksReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksReactor.swift; sourceTree = "<group>"; };
 		17B89B8524B0486300E6AE78 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		17BF5CAF24AEC7E000D5D8D8 /* XAppToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XAppToken.swift; sourceTree = "<group>"; };
 		17BF5CB124AEC82200D5D8D8 /* UserAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAPI.swift; sourceTree = "<group>"; };
@@ -74,11 +197,20 @@
 		17BF5CB724AEC92F00D5D8D8 /* UserDefaultHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultHelper.swift; sourceTree = "<group>"; };
 		17BF5CBA24AECA0800D5D8D8 /* UIColor+Squads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Squads.swift"; sourceTree = "<group>"; };
 		17BF5CBC24AECA1F00D5D8D8 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		17D3443524B6084700AEB0E5 /* LoginBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginBackgroundView.swift; sourceTree = "<group>"; };
+		17D3443824B60E4E00AEB0E5 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
+		17D3443A24B60E4E00AEB0E5 /* RegisterReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterReactor.swift; sourceTree = "<group>"; };
 		17D9AF4C24AF1EB800FEF4DA /* BaseCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionView.swift; sourceTree = "<group>"; };
 		17D9AF4E24AF1ECF00FEF4DA /* BaseTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTableView.swift; sourceTree = "<group>"; };
 		17D9AF5024B0294E00FEF4DA /* OnlineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineProvider.swift; sourceTree = "<group>"; };
 		17D9AF5224B0297000FEF4DA /* NetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkLogger.swift; sourceTree = "<group>"; };
 		17D9AF5424B03F8B00FEF4DA /* Rx+HGPlaceholders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rx+HGPlaceholders.swift"; sourceTree = "<group>"; };
+		17E2B77E24B587E5008EC166 /* MyProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileHeaderView.swift; sourceTree = "<group>"; };
+		17E2B78024B587F1008EC166 /* MyProfileFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileFooterView.swift; sourceTree = "<group>"; };
+		17E5FA5B24B41FD600E8B819 /* SquadPreViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreViewController.swift; sourceTree = "<group>"; };
+		17E5FA5D24B41FF900E8B819 /* SquadPreReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreReactor.swift; sourceTree = "<group>"; };
+		17E5FA5F24B4207D00E8B819 /* SquadPreInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreInfoView.swift; sourceTree = "<group>"; };
+		17E5FA6124B44FB300E8B819 /* SquadPreMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreMenuView.swift; sourceTree = "<group>"; };
 		17F355DE24AED9F800AE00EC /* MoyaProvider+Rx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MoyaProvider+Rx.swift"; sourceTree = "<group>"; };
 		17F355E024AEDA0700AE00EC /* Observable+Response.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Observable+Response.swift"; sourceTree = "<group>"; };
 		17F355E224AEDA1300AE00EC /* Single+Response.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Single+Response.swift"; sourceTree = "<group>"; };
@@ -164,6 +296,59 @@
 			path = Squads;
 			sourceTree = "<group>";
 		};
+		171E07B524B31E6600603F76 /* Activities */ = {
+			isa = PBXGroup;
+			children = (
+				178FCB9124B4AEBC0054212F /* Reactor */,
+				171E07B624B31E6F00603F76 /* View */,
+				178FCB8F24B4AEAF0054212F /* ActivityDetailViewController.swift */,
+			);
+			path = Activities;
+			sourceTree = "<group>";
+		};
+		171E07B624B31E6F00603F76 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				171E07B724B31E7800603F76 /* ActivityShadowView.swift */,
+				171F957024B356D600BD229F /* ActivityCalendarCell.swift */,
+				171F957224B35B0000BD229F /* ActivityCalendarView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		174F6C1324B70FC700E5A1C6 /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+				174F6C1424B70FD200E5A1C6 /* SessionManager.swift */,
+			);
+			path = Manager;
+			sourceTree = "<group>";
+		};
+		174F6C1624B728C800E5A1C6 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		174F6C1724B728D200E5A1C6 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */,
+				174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */,
+				174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */,
+			);
+			path = Other;
+			sourceTree = "<group>";
+		};
+		178FCB9124B4AEBC0054212F /* Reactor */ = {
+			isa = PBXGroup;
+			children = (
+				178FCB9224B4AEC90054212F /* ActivityDetailReactor.swift */,
+			);
+			path = Reactor;
+			sourceTree = "<group>";
+		};
 		1795369F24B0542E00FE1185 /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -172,10 +357,137 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
+		179536A424B181A200FE1185 /* Squad */ = {
+			isa = PBXGroup;
+			children = (
+				179536B724B1A62500FE1185 /* Reactor */,
+				179536A724B181F600FE1185 /* View */,
+				179536A524B181E400FE1185 /* SquadViewController.swift */,
+				17E5FA5B24B41FD600E8B819 /* SquadPreViewController.swift */,
+				179C050624B1C74A00A669FA /* SquadNewMemoryViewController.swift */,
+				179C050424B1C73400A669FA /* SquadCalendarViewController.swift */,
+				179C050824B1C75900A669FA /* SquadGameViewController.swift */,
+				179C050A24B1C76A00A669FA /* SquadPhoneViewController.swift */,
+				1724412824B2067200666135 /* SquadActivitiesViewController.swift */,
+				178FCB7324B476D40054212F /* SquadNotificationsViewController.swift */,
+				178FCB7724B4771D0054212F /* SquadThemeViewController.swift */,
+				178FCB7924B4773B0054212F /* SquadMembersViewController.swift */,
+				178FCB7B24B4777C0054212F /* SquadInvithNewViewController.swift */,
+			);
+			path = Squad;
+			sourceTree = "<group>";
+		};
+		179536A724B181F600FE1185 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				179536B824B1A63B00FE1185 /* SquadFickerCell.swift */,
+				179C04FA24B1A82D00A669FA /* SquadActivityCell.swift */,
+				179C04FC24B1A83E00A669FA /* SquadChannelsCell.swift */,
+				179C04FE24B1AE5E00A669FA /* SquadPlaceholderCell.swift */,
+				179C050024B1BFD100A669FA /* SquadSectionTitleView.swift */,
+				179C050224B1C5E800A669FA /* SquadSqrollViewCell.swift */,
+				179C051624B1E15F00A669FA /* SquadSqrollCollectionCell.swift */,
+				171E07B324B31E4200603F76 /* SquadMembersView.swift */,
+				17E5FA5F24B4207D00E8B819 /* SquadPreInfoView.swift */,
+				17E5FA6124B44FB300E8B819 /* SquadPreMenuView.swift */,
+				178FCB7124B46F6A0054212F /* SquadPreViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		179536AC24B18B6400FE1185 /* Reactor */ = {
+			isa = PBXGroup;
+			children = (
+				179536AD24B18B7000FE1185 /* LoginReactor.swift */,
+				179536B124B1913200FE1185 /* MyProfileReactor.swift */,
+				178FCB8524B49E890054212F /* FriendProfileReactor.swift */,
+				17D3443A24B60E4E00AEB0E5 /* RegisterReactor.swift */,
+			);
+			path = Reactor;
+			sourceTree = "<group>";
+		};
+		179536B724B1A62500FE1185 /* Reactor */ = {
+			isa = PBXGroup;
+			children = (
+				179536A824B1820A00FE1185 /* SquadReactor.swift */,
+				179C050C24B1C77B00A669FA /* SquadPhoneReactor.swift */,
+				179C050E24B1C78B00A669FA /* SquadGameReactor.swift */,
+				179C051024B1C79900A669FA /* SquadCalendarReactor.swift */,
+				179C051224B1C7A700A669FA /* SquadNewMemoryReactor.swift */,
+				1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */,
+				17E5FA5D24B41FF900E8B819 /* SquadPreReactor.swift */,
+				178FCB7524B476E40054212F /* SquadNotificationsReactor.swift */,
+				178FCB7D24B4778C0054212F /* SquadInvithNewReactor.swift */,
+				178FCB7F24B4779B0054212F /* SquadMembersReactor.swift */,
+				178FCB8124B477AA0054212F /* SquadThemeReactor.swift */,
+			);
+			path = Reactor;
+			sourceTree = "<group>";
+		};
+		179C051824B1FC0200A669FA /* Channels */ = {
+			isa = PBXGroup;
+			children = (
+				174F6C1724B728D200E5A1C6 /* Other */,
+				174F6C1624B728C800E5A1C6 /* Model */,
+				174F6C1324B70FC700E5A1C6 /* Manager */,
+				179C051B24B1FC3B00A669FA /* View */,
+				179C051A24B1FC3600A669FA /* Reactor */,
+				178FCB8B24B4A8BF0054212F /* ChattingViewController.swift */,
+			);
+			path = Channels;
+			sourceTree = "<group>";
+		};
+		179C051924B1FC2200A669FA /* Flicks */ = {
+			isa = PBXGroup;
+			children = (
+				179C051D24B1FC4500A669FA /* Reactor */,
+				179C051C24B1FC4100A669FA /* View */,
+				179C051E24B1FCC400A669FA /* FlicksViewController.swift */,
+			);
+			path = Flicks;
+			sourceTree = "<group>";
+		};
+		179C051A24B1FC3600A669FA /* Reactor */ = {
+			isa = PBXGroup;
+			children = (
+				178FCB8D24B4A8CD0054212F /* ChattingReactor.swift */,
+			);
+			path = Reactor;
+			sourceTree = "<group>";
+		};
+		179C051B24B1FC3B00A669FA /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		179C051C24B1FC4100A669FA /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		179C051D24B1FC4500A669FA /* Reactor */ = {
+			isa = PBXGroup;
+			children = (
+				179C052024B1FCD800A669FA /* FlicksReactor.swift */,
+			);
+			path = Reactor;
+			sourceTree = "<group>";
+		};
 		17B89B8224B0480500E6AE78 /* My */ = {
 			isa = PBXGroup;
 			children = (
+				179536AC24B18B6400FE1185 /* Reactor */,
 				17B89B8424B0484D00E6AE78 /* View */,
+				179536AA24B18B4C00FE1185 /* LoginViewController.swift */,
+				17D3443824B60E4E00AEB0E5 /* RegisterViewController.swift */,
+				172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */,
+				179536AF24B1912000FE1185 /* MyProfileViewController.swift */,
+				178FCB8324B49E7A0054212F /* FriendProfileViewController.swift */,
+				172A4B8C24B6BC6000A69803 /* WelcomeViewController.swift */,
 			);
 			path = My;
 			sourceTree = "<group>";
@@ -183,6 +495,12 @@
 		17B89B8424B0484D00E6AE78 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				178FCB8724B49ED70054212F /* FriendProfileViewCell.swift */,
+				178FCB9424B4B4490054212F /* MySquadsViewCell.swift */,
+				17E2B77E24B587E5008EC166 /* MyProfileHeaderView.swift */,
+				17E2B78024B587F1008EC166 /* MyProfileFooterView.swift */,
+				17D3443524B6084700AEB0E5 /* LoginBackgroundView.swift */,
+				172A4B9024B6D36300A69803 /* EditableAvatarView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -190,6 +508,10 @@
 		17BF5CA824AEC73200D5D8D8 /* Business */ = {
 			isa = PBXGroup;
 			children = (
+				171E07B524B31E6600603F76 /* Activities */,
+				179C051924B1FC2200A669FA /* Flicks */,
+				179C051824B1FC0200A669FA /* Channels */,
+				179536A424B181A200FE1185 /* Squad */,
 				17B89B8224B0480500E6AE78 /* My */,
 			);
 			path = Business;
@@ -202,6 +524,8 @@
 				17F39BF424AED13B00EC90ED /* SeparatorLine.swift */,
 				17F355E824AEDD2500AE00EC /* RxMediaPicker.swift */,
 				17F355EA24AEDE2C00AE00EC /* AvatarPicker.swift */,
+				179C051424B1DD2900A669FA /* PaddingLabel.swift */,
+				172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */,
 			);
 			path = Tool;
 			sourceTree = "<group>";
@@ -214,6 +538,7 @@
 				17F39BCC24AECC7700EC90ED /* GeneralError.swift */,
 				17F39BCE24AECD5800EC90ED /* GeneralModel.swift */,
 				1795369D24B04D4C00FE1185 /* DataCenter.swift */,
+				179536B524B1A5BF00FE1185 /* Reusable.swift */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -299,6 +624,7 @@
 				17F39BD524AECE8F00EC90ED /* UIViewController+Toast.swift */,
 				17F39BE624AECFB800EC90ED /* UIImage+Extension.swift */,
 				17F39BD724AECE8F00EC90ED /* UIWindow+Extension.swift */,
+				179536B324B192BE00FE1185 /* UIButton+Extension.swift */,
 				17F39BCA24AECBD600EC90ED /* Codable+Extension.swift */,
 				17F39BE224AECF2A00EC90ED /* NSParagraphStyle+Extension.swift */,
 				17F39BE424AECF5F00EC90ED /* SnapKit+Extension.swift */,
@@ -441,49 +767,115 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				179C050124B1BFD100A669FA /* SquadSectionTitleView.swift in Sources */,
+				179C051124B1C79900A669FA /* SquadCalendarReactor.swift in Sources */,
+				179C050724B1C74A00A669FA /* SquadNewMemoryViewController.swift in Sources */,
 				17F39BF324AED11F00EC90ED /* ReactorViewController.swift in Sources */,
 				17F39BE024AECE8F00EC90ED /* UIWindow+Extension.swift in Sources */,
+				174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */,
 				1795369E24B04D4C00FE1185 /* DataCenter.swift in Sources */,
 				17F39BCF24AECD5800EC90ED /* GeneralModel.swift in Sources */,
+				174F6C1524B70FD200E5A1C6 /* SessionManager.swift in Sources */,
 				17F39BE524AECF5F00EC90ED /* SnapKit+Extension.swift in Sources */,
+				179536A624B181E400FE1185 /* SquadViewController.swift in Sources */,
+				178FCB9524B4B4490054212F /* MySquadsViewCell.swift in Sources */,
 				17F39BDF24AECE8F00EC90ED /* UINavigationController+Extension.swift in Sources */,
 				17D9AF4D24AF1EB800FEF4DA /* BaseCollectionView.swift in Sources */,
 				17F39BDB24AECE8F00EC90ED /* Runtime+Extension.swift in Sources */,
+				178FCB9024B4AEAF0054212F /* ActivityDetailViewController.swift in Sources */,
 				17F355E924AEDD2500AE00EC /* RxMediaPicker.swift in Sources */,
+				178FCB7624B476E40054212F /* SquadNotificationsReactor.swift in Sources */,
+				178FCB8824B49ED70054212F /* FriendProfileViewCell.swift in Sources */,
+				178FCB9324B4AEC90054212F /* ActivityDetailReactor.swift in Sources */,
+				1724412924B2067200666135 /* SquadActivitiesViewController.swift in Sources */,
 				17F39BE924AED04B00EC90ED /* BaseViewController.swift in Sources */,
 				17BF5CBB24AECA0800D5D8D8 /* UIColor+Squads.swift in Sources */,
+				179536AB24B18B4C00FE1185 /* LoginViewController.swift in Sources */,
+				1724412B24B2067F00666135 /* SquadActivitiesReactor.swift in Sources */,
+				179C050924B1C75900A669FA /* SquadGameViewController.swift in Sources */,
+				178FCB8E24B4A8CD0054212F /* ChattingReactor.swift in Sources */,
+				178FCB7A24B4773B0054212F /* SquadMembersViewController.swift in Sources */,
+				171F957124B356D600BD229F /* ActivityCalendarCell.swift in Sources */,
+				178FCB8C24B4A8BF0054212F /* ChattingViewController.swift in Sources */,
 				17BF5CB524AEC91700D5D8D8 /* UserDefaults+Squads.swift in Sources */,
+				172A4B9124B6D36300A69803 /* EditableAvatarView.swift in Sources */,
 				17F39BCD24AECC7700EC90ED /* GeneralError.swift in Sources */,
+				17E5FA6224B44FB300E8B819 /* SquadPreMenuView.swift in Sources */,
 				17D9AF5324B0297000FEF4DA /* NetworkLogger.swift in Sources */,
 				17BF5CB024AEC7E000D5D8D8 /* XAppToken.swift in Sources */,
+				179C051324B1C7A700A669FA /* SquadNewMemoryReactor.swift in Sources */,
 				17F355E724AEDB9000AE00EC /* Rx+UIAlertController.swift in Sources */,
 				17F39BE724AECFB800EC90ED /* UIImage+Extension.swift in Sources */,
+				172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */,
+				178FCB8424B49E7A0054212F /* FriendProfileViewController.swift in Sources */,
+				171F957324B35B0000BD229F /* ActivityCalendarView.swift in Sources */,
+				17D3443B24B60E4E00AEB0E5 /* RegisterReactor.swift in Sources */,
 				17F355EB24AEDE2C00AE00EC /* AvatarPicker.swift in Sources */,
+				17E2B77F24B587E5008EC166 /* MyProfileHeaderView.swift in Sources */,
 				17F39BF124AED0D700EC90ED /* BaseView.swift in Sources */,
+				179C04FF24B1AE5E00A669FA /* SquadPlaceholderCell.swift in Sources */,
+				174F6C1F24B7297300E5A1C6 /* ProximityManager.swift in Sources */,
 				17BF5CB824AEC92F00D5D8D8 /* UserDefaultHelper.swift in Sources */,
+				178FCB8624B49E890054212F /* FriendProfileReactor.swift in Sources */,
+				17D3443624B6084700AEB0E5 /* LoginBackgroundView.swift in Sources */,
+				172A4B8B24B6A06400A69803 /* VerificationCodeViewController.swift in Sources */,
+				179C051524B1DD2900A669FA /* PaddingLabel.swift in Sources */,
 				17F39BDD24AECE8F00EC90ED /* String+Extension.swift in Sources */,
 				17D9AF5524B03F8B00FEF4DA /* Rx+HGPlaceholders.swift in Sources */,
+				179536B924B1A63B00FE1185 /* SquadFickerCell.swift in Sources */,
 				170429D024AEBF4E0046F757 /* ViewController.swift in Sources */,
+				178FCB7224B46F6A0054212F /* SquadPreViewCell.swift in Sources */,
+				179C04FB24B1A82D00A669FA /* SquadActivityCell.swift in Sources */,
+				179C050524B1C73400A669FA /* SquadCalendarViewController.swift in Sources */,
+				179536A924B1820A00FE1185 /* SquadReactor.swift in Sources */,
 				17F39BDC24AECE8F00EC90ED /* NSString+Entension.swift in Sources */,
 				17F39BEB24AED07000EC90ED /* BaseCollectionViewCell.swift in Sources */,
+				179C051F24B1FCC400A669FA /* FlicksViewController.swift in Sources */,
 				17F355E324AEDA1300AE00EC /* Single+Response.swift in Sources */,
 				17BF5CBD24AECA1F00D5D8D8 /* ThemeManager.swift in Sources */,
+				178FCB8224B477AA0054212F /* SquadThemeReactor.swift in Sources */,
 				17F355E124AEDA0700AE00EC /* Observable+Response.swift in Sources */,
 				170429CC24AEBF4E0046F757 /* AppDelegate.swift in Sources */,
 				17F39BE124AECE8F00EC90ED /* UIView+Extension.swift in Sources */,
 				17F355E524AEDACC00AE00EC /* Rx+Kingfisher.swift in Sources */,
+				174F6C1B24B7291F00E5A1C6 /* ChatSoundRecorder.swift in Sources */,
+				179C04FD24B1A83F00A669FA /* SquadChannelsCell.swift in Sources */,
 				17BF5CB224AEC82200D5D8D8 /* UserAPI.swift in Sources */,
 				17F39BCB24AECBD600EC90ED /* Codable+Extension.swift in Sources */,
+				17E5FA6024B4207D00E8B819 /* SquadPreInfoView.swift in Sources */,
+				179C050B24B1C76A00A669FA /* SquadPhoneViewController.swift in Sources */,
 				17F39BE324AECF2A00EC90ED /* NSParagraphStyle+Extension.swift in Sources */,
+				179536B224B1913200FE1185 /* MyProfileReactor.swift in Sources */,
+				179536AE24B18B7000FE1185 /* LoginReactor.swift in Sources */,
 				17D9AF5124B0294E00FEF4DA /* OnlineProvider.swift in Sources */,
+				172A4B8D24B6BC6000A69803 /* WelcomeViewController.swift in Sources */,
+				179C050F24B1C78B00A669FA /* SquadGameReactor.swift in Sources */,
+				178FCB7E24B4778C0054212F /* SquadInvithNewReactor.swift in Sources */,
 				17D9AF4F24AF1ECF00FEF4DA /* BaseTableView.swift in Sources */,
+				17E5FA5E24B41FF900E8B819 /* SquadPreReactor.swift in Sources */,
+				17E5FA5C24B41FD600E8B819 /* SquadPreViewController.swift in Sources */,
+				179536B424B192BE00FE1185 /* UIButton+Extension.swift in Sources */,
+				179C050324B1C5E800A669FA /* SquadSqrollViewCell.swift in Sources */,
+				17D3443924B60E4E00AEB0E5 /* RegisterViewController.swift in Sources */,
+				178FCB7424B476D40054212F /* SquadNotificationsViewController.swift in Sources */,
+				179536B024B1912000FE1185 /* MyProfileViewController.swift in Sources */,
+				178FCB7C24B4777C0054212F /* SquadInvithNewViewController.swift in Sources */,
 				170429CE24AEBF4E0046F757 /* SceneDelegate.swift in Sources */,
 				17F39BEF24AED0C800EC90ED /* BaseNavigationController.swift in Sources */,
 				17F39BDE24AECE8F00EC90ED /* UIViewController+Toast.swift in Sources */,
 				17F39BF524AED13B00EC90ED /* SeparatorLine.swift in Sources */,
+				179C050D24B1C77B00A669FA /* SquadPhoneReactor.swift in Sources */,
+				178FCB8024B4779B0054212F /* SquadMembersReactor.swift in Sources */,
+				17E2B78124B587F1008EC166 /* MyProfileFooterView.swift in Sources */,
+				171E07B824B31E7800603F76 /* ActivityShadowView.swift in Sources */,
+				171E07B424B31E4200603F76 /* SquadMembersView.swift in Sources */,
 				17F355DF24AED9F800AE00EC /* MoyaProvider+Rx.swift in Sources */,
+				178FCB7824B4771D0054212F /* SquadThemeViewController.swift in Sources */,
+				179536B624B1A5BF00FE1185 /* Reusable.swift in Sources */,
+				179C051724B1E15F00A669FA /* SquadSqrollCollectionCell.swift in Sources */,
 				17F39BED24AED08F00EC90ED /* BaseTableViewCell.swift in Sources */,
 				17F39BDA24AECE8F00EC90ED /* NSAttributedString+Extension.swift in Sources */,
+				179C052124B1FCD800A669FA /* FlicksReactor.swift in Sources */,
 				17B89B8624B0486300E6AE78 /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -632,7 +1024,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X5J2T8L4Z6;
 				INFOPLIST_FILE = Squads/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -652,7 +1044,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X5J2T8L4Z6;
 				INFOPLIST_FILE = Squads/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

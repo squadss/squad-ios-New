@@ -7,14 +7,26 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
+import RxRelay
+import MonkeyKing
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
+    static var shared: AppDelegate? {
+        return UIApplication.shared.delegate as? AppDelegate
+    }
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        // 在初始化的时候替换默认方法
+        InitializeNSObjects([
+            UINavigationController.self
+        ])
+                
         return true
     }
 
@@ -33,6 +45,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        if MonkeyKing.handleOpenURL(url) {
+            return true
+        }
+        return false
+    }
 
 }
 

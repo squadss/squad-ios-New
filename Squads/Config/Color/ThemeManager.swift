@@ -81,19 +81,21 @@ protocol Theme {
 
 struct LightTheme: Theme {
     
-    var text: UIColor = UIColor(hexString: "#2c2f36")
+    var text: UIColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
     
-    var textGray: UIColor = UIColor(hexString: "#666666")
+    var textGray: UIColor = UIColor(red: 0.68, green: 0.68, blue: 0.68, alpha: 1.0)
     
-    var background: UIColor = .white
+    var background: UIColor = UIColor(hexString: "#FEFFFE")
     
     var primaryDark: UIColor = .white
     
-    var secondary: UIColor = .white
+    // 红色
+    var secondary: UIColor = UIColor(red: 0.925, green: 0.384, blue: 0.337, alpha: 1)
     
     var secondaryDark: UIColor = .white
     
-    var primary: UIColor = UIColor.white
+    // 蓝色
+    var primary: UIColor = UIColor(red: 0.329, green: 0.345, blue: 0.969, alpha: 1)
     
     var separator: UIColor = UIColor.lightGray
     
