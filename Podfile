@@ -38,7 +38,7 @@ target 'Squads' do
   pod 'DynamicColor', '~> 4.2.0'
   pod 'ETNavBarTransparent', '~> 1.1.3'
   # 侧边栏
-  pod 'SideMenu', '~> 6.0'
+  pod 'SideMenu', :git => 'https://github.com/jonkykong/SideMenu.git'
   # 转场
   pod 'Hero'
   # 消息库
