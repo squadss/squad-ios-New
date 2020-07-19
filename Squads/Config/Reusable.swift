@@ -25,11 +25,18 @@ enum Reusable {
     
     static let squadPreViewCell = ReusableCell<SquadPreViewCell>()
     
-    static let activityCalendarCell = ReusableCell<ActivityCalendarCell>()
+    static let squadNotificationsViewCell = ReusableCell<SquadNotificationsViewCell>()
     
+    static let activityCalendarCell = ReusableCell<ActivityCalendarCell>()
+    static let createEventTextEditedCell = ReusableCell<CreateEventTextEditedCell>()
+    static let createEventLabelsCell = ReusableCell<CreateEventLabelsCell>()
+    static let createEventCalendarCell = ReusableCell<CreateEventCalendarCell>()
+    static let createEventAvailabilityCell = ReusableCell<CreateEventAvailabilityCell>()
     
     //MARK: - My
     static let friendProfileViewCell = ReusableCell<FriendProfileViewCell>()
     
     static let mySquadsViewCell = ReusableCell<MySquadsViewCell>()
+    
+    static let applyListViewCell = ReusableCell<ApplyListViewCell>()
 }

@@ -12,6 +12,10 @@ class SquadMembersView: BaseView {
     
     var memberWidth: CGFloat = 16
     var maxIndex: Int = 10
+    var margin: CGFloat {
+        set { stackView.spacing = newValue }
+        get { stackView.spacing }
+    }
     
     private var stackView = UIStackView()
     private var listView = Array<UIImageView>()
@@ -32,7 +36,7 @@ class SquadMembersView: BaseView {
         }
     }
     
-    private var width: CGFloat = 0 {
+    private(set) var width: CGFloat = 0 {
         didSet {
             invalidateIntrinsicContentSize()
         }
@@ -94,9 +98,4 @@ class SquadMembersView: BaseView {
             return imageView
         }
     }
-    
-//    override func layoutSubviews() {
-//        super.layoutSubviews()
-//        stackView.frame = bounds
-//    }
 }
