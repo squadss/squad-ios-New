@@ -317,3 +317,25 @@ class CornersButton: UIButton {
         }
     }
 }
+
+class CornersView: BaseView {
+    
+    var radius: CGFloat?
+    
+    override var frame: CGRect {
+        didSet {
+            guard frame != oldValue else { return }
+            
+            var value: CGFloat {
+                if let unwrappedRadius = radius {
+                    return unwrappedRadius
+                } else {
+                    return min(frame.width, frame.height) / 2
+                }
+            }
+            if value >= 0 {
+                layer.maskCorners(value)
+            }
+        }
+    }
+}

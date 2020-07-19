@@ -11,7 +11,22 @@ import ReactorKit
 import RxSwift
 import RxCocoa
 
+enum ActivityStatus: Equatable {
+    case create
+    case start
+    case running
+    case completed
+}
+
 class ActivityDetailReactor: Reactor {
+    
+    enum ToolbarAction: String {
+        case setTime
+        case availabilityConfirm
+        case availabilityCancel
+        case goingConfirm
+        case goingCancel
+    }
     
     enum Action {
         
@@ -22,7 +37,7 @@ class ActivityDetailReactor: Reactor {
     }
     
     struct State {
-        
+        var activityStatus: ActivityStatus = .create
     }
     
     var initialState: State

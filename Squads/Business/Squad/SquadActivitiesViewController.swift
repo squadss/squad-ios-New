@@ -86,8 +86,9 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
     
     @objc
     private func rightBarItemDidTapped() {
-        let reactor = SquadCalendarReactor()
-        let vc = SquadCalendarViewController(reactor: reactor)
+        let reactor = CreateEventReactor()
+        let vc = CreateEventViewController(reactor: reactor)
+        vc.title = "Create Event"
         let nav = BaseNavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .fullScreen
         present(nav, animated: true)

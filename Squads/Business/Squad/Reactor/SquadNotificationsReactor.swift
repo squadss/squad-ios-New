@@ -14,7 +14,7 @@ import RxCocoa
 class SquadNotificationsReactor: Reactor {
     
     enum Action {
-        
+        case updateSwitch(indexPath: IndexPath, isOn: Bool)
     }
     
     enum Mutation {
@@ -22,17 +22,18 @@ class SquadNotificationsReactor: Reactor {
     }
     
     struct State {
-        let repos: Array<String>
+        let repos: Array<[(String, Bool)]>
     }
     
     var initialState: State
     
     init() {
-        initialState = State(repos: ["MEMBERS", "NOTIFICATIONS", "CUSTOMIZE THEME", "INVITH NEW"])
+        initialState = State(repos: [[("Do Not Disturb", true)], [("Flicks", true), ("Activities", true), ("Channels", true)]])
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
-        
+        //TODO: 
+        return .never()
     }
     
     func reduce(state: State, mutation: Mutation) -> State {

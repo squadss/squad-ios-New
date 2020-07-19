@@ -197,8 +197,9 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         let index = sender.tag - 200
         switch index {
         case 0: //Calendar
-            let reactor = SquadCalendarReactor()
-            let vc = SquadCalendarViewController(reactor: reactor)
+            let reactor = CreateEventReactor()
+            let vc = CreateEventViewController(reactor: reactor)
+            vc.title = "Create Event"
             let nav = BaseNavigationController(rootViewController: vc)
             nav.modalPresentationStyle = .fullScreen
             present(nav, animated: true)

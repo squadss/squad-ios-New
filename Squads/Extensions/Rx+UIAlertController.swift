@@ -82,7 +82,7 @@ public struct RxAlertAction {
 }
 
 extension ObservableType {
-    func trackAlert(title: String?, message: String? = nil, cancel cancelTitle: String = "取消", default defaultTitle: String = "确定", target: UIViewController) -> Observable<Element> {
+    func trackAlert(title: String?, message: String? = nil, cancel cancelTitle: String = "Cancel", default defaultTitle: String = "Confirm", target: UIViewController) -> Observable<Element> {
         return flatMap{ [weak target] element -> Observable<(Int, Element)> in
         
             let actionSheet = UIAlertController(title: title, message: message, preferredStyle: .alert)

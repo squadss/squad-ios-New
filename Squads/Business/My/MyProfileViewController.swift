@@ -32,8 +32,9 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     
     override func initData() {
         
-        headerView.applyLab.isHidden = false
-        headerView.applyLab.text = "2 Requests"
+        headerView.applyBtn.isHidden = false
+        headerView.applyBtn.setTitle("2 Requests", for: .normal)
+        headerView.applyBtn.addTarget(self, action: #selector(applyBtnDidTapped), for: .touchUpInside)
         headerView.contentLab.text = "@username"
         headerView.nicknameLab.text = "Name"
         headerView.avatarView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"))
@@ -111,6 +112,14 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
         let nav = BaseNavigationController(rootViewController: preViewController)
         nav.modalPresentationStyle = .fullScreen
         self.present(nav, animated: true)
+    }
+    
+    @objc
+    private func applyBtnDidTapped() {
+        let reactor = ApplyListReactor()
+        let applyListViewController = ApplyListViewController(reactor: reactor)
+        applyListViewController.title = "Requests"
+        navigationController?.pushViewController(applyListViewController, animated: true)
     }
     
     override func addTouchAction() {

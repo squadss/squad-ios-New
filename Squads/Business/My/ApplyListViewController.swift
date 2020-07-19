@@ -1,16 +1,17 @@
 //
-//  SquadMembersViewController.swift
+//  ApplyListViewController.swift
 //  Squads
 //
-//  Created by 武飞跃 on 2020/7/7.
+//  Created by 武飞跃 on 2020/7/18.
 //  Copyright © 2020 Squads. All rights reserved.
 //
 
 import UIKit
 import RxDataSources
+//import HGPlaceholders
 
-class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
-
+class ApplyListViewController: ReactorViewController<ApplyListReactor>, UITableViewDelegate {
+    
     var tableView = UITableView()
 
     override func viewDidLoad() {
@@ -21,13 +22,21 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
     
     override func setupView() {
         
-        //自定义右导航按钮
-        let rightBtn = UIButton()
-        rightBtn.setTitle("Add", for: .normal)
-        rightBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        rightBtn.setTitleColor(UIColor(red: 0.925, green: 0.384, blue: 0.337, alpha: 1), for: .normal)
-        rightBtn.addTarget(self, action: #selector(rightBtnBtnDidTapped), for: .touchUpInside)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: rightBtn)
+//        var defaultProvider: PlaceholdersProvider {
+//            let style = PlaceholderStyle()
+//
+//            let loading = Placeholder(data: .loading, style: style, key: .loadingKey)
+//            let error = Placeholder(data: .error, style: style, key: .errorKey)
+//
+//            var noResultsStyle = PlaceholderData()
+//            noResultsStyle.title = "You have no requests at this time"
+//
+//            let noResults = Placeholder(data: noResultsStyle, style: style, key: .noResultsKey)
+//            let noConnection = Placeholder(data: .noConnection, style: style, key: .noConnectionKey)
+//
+//            let placeholdersProvider = PlaceholdersProvider(loading: loading, error: error, noResults: noResults, noConnection: noConnection)
+//            return placeholdersProvider
+//        }
         
         tableView.rowHeight = 70
         tableView.register(Reusable.applyListViewCell)
@@ -35,6 +44,8 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 18, bottom: 0, right: 34)
         tableView.tableFooterView = UIView()
         tableView.tableHeaderView = UIView()
+//        tableView.delegate = self
+//        tableView.placeholdersProvider = defaultProvider
         view.addSubview(tableView)
     }
     
@@ -42,14 +53,8 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
         tableView.snp.safeFull(parent: self)
     }
     
-    @objc
-    private func rightBtnBtnDidTapped() {
-        let invithNewReactor = SquadInvithNewReactor()
-        let vc = SquadInvithNewViewController(reactor: invithNewReactor)
-        self.navigationController?.pushViewController(vc, animated: true)
-    }
 
-    override func bind(reactor: SquadMembersReactor) {
+    override func bind(reactor: ApplyListReactor) {
         
         let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: {data,tableView, indexPath, model in
             
@@ -69,5 +74,21 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
+        tableView.rx.itemDeleted
+            .subscribe(onNext: {
+                print($0)
+            })
+            .disposed(by: disposeBag)
+        
+//        tableView.rx.actionButtonTapped
+//            .subscribe(onNext: {
+//                print($0)
+//            })
+//            .disposed(by: rx.disposeBag)
     }
+    
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        return .delete
+    }
+    
 }
