@@ -1,8 +1,8 @@
 //
-//  SquadCalendarReactor.swift
+//  ApplyListReactor.swift
 //  Squads
 //
-//  Created by 武飞跃 on 2020/7/5.
+//  Created by 武飞跃 on 2020/7/18.
 //  Copyright © 2020 Squads. All rights reserved.
 //
 
@@ -11,7 +11,7 @@ import ReactorKit
 import RxSwift
 import RxCocoa
 
-class SquadCalendarReactor: Reactor {
+class ApplyListReactor: Reactor {
     
     enum Action {
         
@@ -22,13 +22,13 @@ class SquadCalendarReactor: Reactor {
     }
     
     struct State {
-        
+        var repos: Array<String>
     }
     
     var initialState: State
     
     init() {
-        initialState = State()
+        initialState = State(repos: ["1", "1", "1", "1", "1", "1", "1", "1", "1"])
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -39,4 +39,3 @@ class SquadCalendarReactor: Reactor {
         
     }
 }
-
