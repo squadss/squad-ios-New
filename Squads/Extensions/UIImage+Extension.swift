@@ -259,12 +259,11 @@ extension CALayer {
             cornerRadius = radius
             maskedCorners = corner.cornerMask
         } else {
-            let maskLayer = CAShapeLayer()
-            let size = CGSize(width: radius, height: radius)
-            let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corner.rectCorner, cornerRadii: size)
-            maskLayer.path = path.cgPath
-            maskLayer.frame = rect
-            mask = maskLayer
+            if mask == nil {
+                mask = CAShapeLayer()
+            }
+            mask?.frame = rect
+            (mask as? CAShapeLayer)?.path = UIBezierPath(roundedRect: rect, byRoundingCorners: corner.rectCorner, cornerRadii: CGSize(width: radius, height: radius)).cgPath
         }
     }
     

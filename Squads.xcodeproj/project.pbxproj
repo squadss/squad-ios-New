@@ -16,6 +16,7 @@
 		170A484B24C08B36009BFDEA /* SingleChooseTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170A484A24C08B36009BFDEA /* SingleChooseTimeView.swift */; };
 		170A484D24C09220009BFDEA /* MembersGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170A484C24C09220009BFDEA /* MembersGroupView.swift */; };
 		170A484F24C09587009BFDEA /* AvtivityTimeSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170A484E24C09587009BFDEA /* AvtivityTimeSettingView.swift */; };
+		1716C16C24C499A000AD2899 /* FlicksSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1716C16B24C499A000AD2899 /* FlicksSearchViewController.swift */; };
 		171B0F3624C298030020DF15 /* AvtivityTimeSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171B0F3524C298030020DF15 /* AvtivityTimeSettingViewController.swift */; };
 		171B0F3824C299A30020DF15 /* OverlayPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171B0F3724C299A30020DF15 /* OverlayPresentationController.swift */; };
 		171B0F3A24C2A4B50020DF15 /* MultipleChooseTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171B0F3924C2A4B50020DF15 /* MultipleChooseTimeView.swift */; };
@@ -23,6 +24,10 @@
 		171B0F3E24C2EA200020DF15 /* ActivityDetailInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171B0F3D24C2EA200020DF15 /* ActivityDetailInfoView.swift */; };
 		171E07B424B31E4200603F76 /* SquadMembersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E07B324B31E4200603F76 /* SquadMembersView.swift */; };
 		171E07B824B31E7800603F76 /* ActivityShadowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E07B724B31E7800603F76 /* ActivityShadowView.swift */; };
+		171E47DE24C3F2B800100DFD /* SquadInvithNewHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E47DD24C3F2B800100DFD /* SquadInvithNewHeaderView.swift */; };
+		171E47E024C4212A00100DFD /* UIViewController+CustomTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E47DF24C4212A00100DFD /* UIViewController+CustomTitleView.swift */; };
+		171E47E224C4243A00100DFD /* SquadInvithNewMemberCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E47E124C4243A00100DFD /* SquadInvithNewMemberCell.swift */; };
+		171E47E424C44AD800100DFD /* SquadInvithNewSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E47E324C44AD800100DFD /* SquadInvithNewSearchViewController.swift */; };
 		171F957124B356D600BD229F /* ActivityCalendarCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F957024B356D600BD229F /* ActivityCalendarCell.swift */; };
 		171F957324B35B0000BD229F /* ActivityCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F957224B35B0000BD229F /* ActivityCalendarView.swift */; };
 		1724412924B2067200666135 /* SquadActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412824B2067200666135 /* SquadActivitiesViewController.swift */; };
@@ -31,6 +36,11 @@
 		172A4B8B24B6A06400A69803 /* VerificationCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */; };
 		172A4B8D24B6BC6000A69803 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8C24B6BC6000A69803 /* WelcomeViewController.swift */; };
 		172A4B9124B6D36300A69803 /* EditableAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B9024B6D36300A69803 /* EditableAvatarView.swift */; };
+		172E8E5624C52C09002F9181 /* CreateFlickViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5524C52C09002F9181 /* CreateFlickViewController.swift */; };
+		172E8E5824C52E89002F9181 /* CreateFlickReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5724C52E89002F9181 /* CreateFlickReactor.swift */; };
+		172E8E5A24C5370C002F9181 /* CreateFlickInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5924C5370C002F9181 /* CreateFlickInputView.swift */; };
+		172E8E5C24C53767002F9181 /* CreateFlickContentViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5B24C53767002F9181 /* CreateFlickContentViewCell.swift */; };
+		172E8E5E24C53773002F9181 /* CreateFlickPhotoViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5D24C53773002F9181 /* CreateFlickPhotoViewCell.swift */; };
 		174F6C1524B70FD200E5A1C6 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1424B70FD200E5A1C6 /* SessionManager.swift */; };
 		174F6C1B24B7291F00E5A1C6 /* ChatSoundRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */; };
 		174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */; };
@@ -67,16 +77,16 @@
 		179C04FF24B1AE5E00A669FA /* SquadPlaceholderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C04FE24B1AE5E00A669FA /* SquadPlaceholderCell.swift */; };
 		179C050124B1BFD100A669FA /* SquadSectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050024B1BFD100A669FA /* SquadSectionTitleView.swift */; };
 		179C050324B1C5E800A669FA /* SquadSqrollViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050224B1C5E800A669FA /* SquadSqrollViewCell.swift */; };
-		179C050724B1C74A00A669FA /* SquadNewMemoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050624B1C74A00A669FA /* SquadNewMemoryViewController.swift */; };
 		179C050924B1C75900A669FA /* SquadGameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050824B1C75900A669FA /* SquadGameViewController.swift */; };
 		179C050B24B1C76A00A669FA /* SquadPhoneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050A24B1C76A00A669FA /* SquadPhoneViewController.swift */; };
 		179C050D24B1C77B00A669FA /* SquadPhoneReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050C24B1C77B00A669FA /* SquadPhoneReactor.swift */; };
 		179C050F24B1C78B00A669FA /* SquadGameReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C050E24B1C78B00A669FA /* SquadGameReactor.swift */; };
-		179C051324B1C7A700A669FA /* SquadNewMemoryReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051224B1C7A700A669FA /* SquadNewMemoryReactor.swift */; };
 		179C051524B1DD2900A669FA /* PaddingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051424B1DD2900A669FA /* PaddingLabel.swift */; };
 		179C051724B1E15F00A669FA /* SquadSqrollCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051624B1E15F00A669FA /* SquadSqrollCollectionCell.swift */; };
 		179C051F24B1FCC400A669FA /* FlicksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C051E24B1FCC400A669FA /* FlicksViewController.swift */; };
 		179C052124B1FCD800A669FA /* FlicksReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179C052024B1FCD800A669FA /* FlicksReactor.swift */; };
+		179DB09224C4674900F828E1 /* SquadInvithNewContactCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179DB09124C4674900F828E1 /* SquadInvithNewContactCell.swift */; };
+		179DB09424C47D2800F828E1 /* FlicksListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179DB09324C47D2800F828E1 /* FlicksListViewCell.swift */; };
 		179E373124B8A403000DD595 /* MessagesContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179E373024B8A403000DD595 /* MessagesContentView.swift */; };
 		179E373324B8A41D000DD595 /* MessagesContentView+Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179E373224B8A41D000DD595 /* MessagesContentView+Keyboard.swift */; };
 		17B89B8624B0486300E6AE78 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B89B8524B0486300E6AE78 /* User.swift */; };
@@ -155,6 +165,7 @@
 		170A484A24C08B36009BFDEA /* SingleChooseTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleChooseTimeView.swift; sourceTree = "<group>"; };
 		170A484C24C09220009BFDEA /* MembersGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersGroupView.swift; sourceTree = "<group>"; };
 		170A484E24C09587009BFDEA /* AvtivityTimeSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvtivityTimeSettingView.swift; sourceTree = "<group>"; };
+		1716C16B24C499A000AD2899 /* FlicksSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksSearchViewController.swift; sourceTree = "<group>"; };
 		171B0F3524C298030020DF15 /* AvtivityTimeSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvtivityTimeSettingViewController.swift; sourceTree = "<group>"; };
 		171B0F3724C299A30020DF15 /* OverlayPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPresentationController.swift; sourceTree = "<group>"; };
 		171B0F3924C2A4B50020DF15 /* MultipleChooseTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleChooseTimeView.swift; sourceTree = "<group>"; };
@@ -162,6 +173,10 @@
 		171B0F3D24C2EA200020DF15 /* ActivityDetailInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDetailInfoView.swift; sourceTree = "<group>"; };
 		171E07B324B31E4200603F76 /* SquadMembersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadMembersView.swift; sourceTree = "<group>"; };
 		171E07B724B31E7800603F76 /* ActivityShadowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityShadowView.swift; sourceTree = "<group>"; };
+		171E47DD24C3F2B800100DFD /* SquadInvithNewHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadInvithNewHeaderView.swift; sourceTree = "<group>"; };
+		171E47DF24C4212A00100DFD /* UIViewController+CustomTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+CustomTitleView.swift"; sourceTree = "<group>"; };
+		171E47E124C4243A00100DFD /* SquadInvithNewMemberCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadInvithNewMemberCell.swift; sourceTree = "<group>"; };
+		171E47E324C44AD800100DFD /* SquadInvithNewSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadInvithNewSearchViewController.swift; sourceTree = "<group>"; };
 		171F957024B356D600BD229F /* ActivityCalendarCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityCalendarCell.swift; sourceTree = "<group>"; };
 		171F957224B35B0000BD229F /* ActivityCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityCalendarView.swift; sourceTree = "<group>"; };
 		1724412824B2067200666135 /* SquadActivitiesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivitiesViewController.swift; sourceTree = "<group>"; };
@@ -170,6 +185,11 @@
 		172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationCodeViewController.swift; sourceTree = "<group>"; };
 		172A4B8C24B6BC6000A69803 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
 		172A4B9024B6D36300A69803 /* EditableAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableAvatarView.swift; sourceTree = "<group>"; };
+		172E8E5524C52C09002F9181 /* CreateFlickViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickViewController.swift; sourceTree = "<group>"; };
+		172E8E5724C52E89002F9181 /* CreateFlickReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickReactor.swift; sourceTree = "<group>"; };
+		172E8E5924C5370C002F9181 /* CreateFlickInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickInputView.swift; sourceTree = "<group>"; };
+		172E8E5B24C53767002F9181 /* CreateFlickContentViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickContentViewCell.swift; sourceTree = "<group>"; };
+		172E8E5D24C53773002F9181 /* CreateFlickPhotoViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickPhotoViewCell.swift; sourceTree = "<group>"; };
 		174F6C1424B70FD200E5A1C6 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSoundRecorder.swift; sourceTree = "<group>"; };
 		174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helper.swift"; sourceTree = "<group>"; };
@@ -206,16 +226,16 @@
 		179C04FE24B1AE5E00A669FA /* SquadPlaceholderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPlaceholderCell.swift; sourceTree = "<group>"; };
 		179C050024B1BFD100A669FA /* SquadSectionTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadSectionTitleView.swift; sourceTree = "<group>"; };
 		179C050224B1C5E800A669FA /* SquadSqrollViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadSqrollViewCell.swift; sourceTree = "<group>"; };
-		179C050624B1C74A00A669FA /* SquadNewMemoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadNewMemoryViewController.swift; sourceTree = "<group>"; };
 		179C050824B1C75900A669FA /* SquadGameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadGameViewController.swift; sourceTree = "<group>"; };
 		179C050A24B1C76A00A669FA /* SquadPhoneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPhoneViewController.swift; sourceTree = "<group>"; };
 		179C050C24B1C77B00A669FA /* SquadPhoneReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPhoneReactor.swift; sourceTree = "<group>"; };
 		179C050E24B1C78B00A669FA /* SquadGameReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadGameReactor.swift; sourceTree = "<group>"; };
-		179C051224B1C7A700A669FA /* SquadNewMemoryReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadNewMemoryReactor.swift; sourceTree = "<group>"; };
 		179C051424B1DD2900A669FA /* PaddingLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddingLabel.swift; sourceTree = "<group>"; };
 		179C051624B1E15F00A669FA /* SquadSqrollCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadSqrollCollectionCell.swift; sourceTree = "<group>"; };
 		179C051E24B1FCC400A669FA /* FlicksViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksViewController.swift; sourceTree = "<group>"; };
 		179C052024B1FCD800A669FA /* FlicksReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksReactor.swift; sourceTree = "<group>"; };
+		179DB09124C4674900F828E1 /* SquadInvithNewContactCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadInvithNewContactCell.swift; sourceTree = "<group>"; };
+		179DB09324C47D2800F828E1 /* FlicksListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksListViewCell.swift; sourceTree = "<group>"; };
 		179E373024B8A403000DD595 /* MessagesContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesContentView.swift; sourceTree = "<group>"; };
 		179E373224B8A41D000DD595 /* MessagesContentView+Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MessagesContentView+Keyboard.swift"; sourceTree = "<group>"; };
 		17B89B8524B0486300E6AE78 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -417,7 +437,6 @@
 				179536A724B181F600FE1185 /* View */,
 				179536A524B181E400FE1185 /* SquadViewController.swift */,
 				17E5FA5B24B41FD600E8B819 /* SquadPreViewController.swift */,
-				179C050624B1C74A00A669FA /* SquadNewMemoryViewController.swift */,
 				179C050824B1C75900A669FA /* SquadGameViewController.swift */,
 				179C050A24B1C76A00A669FA /* SquadPhoneViewController.swift */,
 				1724412824B2067200666135 /* SquadActivitiesViewController.swift */,
@@ -425,6 +444,7 @@
 				178FCB7724B4771D0054212F /* SquadThemeViewController.swift */,
 				178FCB7924B4773B0054212F /* SquadMembersViewController.swift */,
 				178FCB7B24B4777C0054212F /* SquadInvithNewViewController.swift */,
+				171E47E324C44AD800100DFD /* SquadInvithNewSearchViewController.swift */,
 			);
 			path = Squad;
 			sourceTree = "<group>";
@@ -444,6 +464,9 @@
 				17E5FA6124B44FB300E8B819 /* SquadPreMenuView.swift */,
 				178FCB7124B46F6A0054212F /* SquadPreViewCell.swift */,
 				17C561B024C34AD80016500A /* SquadNotificationsViewCell.swift */,
+				171E47DD24C3F2B800100DFD /* SquadInvithNewHeaderView.swift */,
+				171E47E124C4243A00100DFD /* SquadInvithNewMemberCell.swift */,
+				179DB09124C4674900F828E1 /* SquadInvithNewContactCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -466,7 +489,6 @@
 				179536A824B1820A00FE1185 /* SquadReactor.swift */,
 				179C050C24B1C77B00A669FA /* SquadPhoneReactor.swift */,
 				179C050E24B1C78B00A669FA /* SquadGameReactor.swift */,
-				179C051224B1C7A700A669FA /* SquadNewMemoryReactor.swift */,
 				1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */,
 				17E5FA5D24B41FF900E8B819 /* SquadPreReactor.swift */,
 				178FCB7524B476E40054212F /* SquadNotificationsReactor.swift */,
@@ -496,6 +518,8 @@
 				179C051D24B1FC4500A669FA /* Reactor */,
 				179C051C24B1FC4100A669FA /* View */,
 				179C051E24B1FCC400A669FA /* FlicksViewController.swift */,
+				1716C16B24C499A000AD2899 /* FlicksSearchViewController.swift */,
+				172E8E5524C52C09002F9181 /* CreateFlickViewController.swift */,
 			);
 			path = Flicks;
 			sourceTree = "<group>";
@@ -522,6 +546,10 @@
 		179C051C24B1FC4100A669FA /* View */ = {
 			isa = PBXGroup;
 			children = (
+				179DB09324C47D2800F828E1 /* FlicksListViewCell.swift */,
+				172E8E5D24C53773002F9181 /* CreateFlickPhotoViewCell.swift */,
+				172E8E5B24C53767002F9181 /* CreateFlickContentViewCell.swift */,
+				172E8E5924C5370C002F9181 /* CreateFlickInputView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -530,6 +558,7 @@
 			isa = PBXGroup;
 			children = (
 				179C052024B1FCD800A669FA /* FlicksReactor.swift */,
+				172E8E5724C52E89002F9181 /* CreateFlickReactor.swift */,
 			);
 			path = Reactor;
 			sourceTree = "<group>";
@@ -682,6 +711,7 @@
 				17F39BD624AECE8F00EC90ED /* UINavigationController+Extension.swift */,
 				17F39BD824AECE8F00EC90ED /* UIView+Extension.swift */,
 				17F39BD524AECE8F00EC90ED /* UIViewController+Toast.swift */,
+				171E47DF24C4212A00100DFD /* UIViewController+CustomTitleView.swift */,
 				17F39BE624AECFB800EC90ED /* UIImage+Extension.swift */,
 				17F39BD724AECE8F00EC90ED /* UIWindow+Extension.swift */,
 				179536B324B192BE00FE1185 /* UIButton+Extension.swift */,
@@ -830,7 +860,6 @@
 				179C050124B1BFD100A669FA /* SquadSectionTitleView.swift in Sources */,
 				17F1721E24B96A8E0081E4C0 /* ChattingCardHeaderView.swift in Sources */,
 				17C561B124C34AD80016500A /* SquadNotificationsViewCell.swift in Sources */,
-				179C050724B1C74A00A669FA /* SquadNewMemoryViewController.swift in Sources */,
 				17F39BF324AED11F00EC90ED /* ReactorViewController.swift in Sources */,
 				17F39BE024AECE8F00EC90ED /* UIWindow+Extension.swift in Sources */,
 				174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */,
@@ -849,10 +878,14 @@
 				17F355E924AEDD2500AE00EC /* RxMediaPicker.swift in Sources */,
 				178FCB7624B476E40054212F /* SquadNotificationsReactor.swift in Sources */,
 				178FCB8824B49ED70054212F /* FriendProfileViewCell.swift in Sources */,
+				171E47E424C44AD800100DFD /* SquadInvithNewSearchViewController.swift in Sources */,
 				179E373324B8A41D000DD595 /* MessagesContentView+Keyboard.swift in Sources */,
 				178FCB9324B4AEC90054212F /* ActivityDetailReactor.swift in Sources */,
 				1724412924B2067200666135 /* SquadActivitiesViewController.swift in Sources */,
+				171E47E024C4212A00100DFD /* UIViewController+CustomTitleView.swift in Sources */,
+				172E8E5824C52E89002F9181 /* CreateFlickReactor.swift in Sources */,
 				170A484F24C09587009BFDEA /* AvtivityTimeSettingView.swift in Sources */,
+				179DB09224C4674900F828E1 /* SquadInvithNewContactCell.swift in Sources */,
 				17F39BE924AED04B00EC90ED /* BaseViewController.swift in Sources */,
 				17BF5CBB24AECA0800D5D8D8 /* UIColor+Squads.swift in Sources */,
 				179536AB24B18B4C00FE1185 /* LoginViewController.swift in Sources */,
@@ -870,7 +903,7 @@
 				17F1722624B9A76F0081E4C0 /* CreateEventLabelsCell.swift in Sources */,
 				17D9AF5324B0297000FEF4DA /* NetworkLogger.swift in Sources */,
 				17BF5CB024AEC7E000D5D8D8 /* XAppToken.swift in Sources */,
-				179C051324B1C7A700A669FA /* SquadNewMemoryReactor.swift in Sources */,
+				172E8E5624C52C09002F9181 /* CreateFlickViewController.swift in Sources */,
 				17F355E724AEDB9000AE00EC /* Rx+UIAlertController.swift in Sources */,
 				17F39BE724AECFB800EC90ED /* UIImage+Extension.swift in Sources */,
 				172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */,
@@ -914,12 +947,16 @@
 				17F39BE124AECE8F00EC90ED /* UIView+Extension.swift in Sources */,
 				17F355E524AEDACC00AE00EC /* Rx+Kingfisher.swift in Sources */,
 				174F6C1B24B7291F00E5A1C6 /* ChatSoundRecorder.swift in Sources */,
+				172E8E5C24C53767002F9181 /* CreateFlickContentViewCell.swift in Sources */,
 				179C04FD24B1A83F00A669FA /* SquadChannelsCell.swift in Sources */,
 				17BF5CB224AEC82200D5D8D8 /* UserAPI.swift in Sources */,
 				17F39BCB24AECBD600EC90ED /* Codable+Extension.swift in Sources */,
 				17E5FA6024B4207D00E8B819 /* SquadPreInfoView.swift in Sources */,
+				172E8E5E24C53773002F9181 /* CreateFlickPhotoViewCell.swift in Sources */,
+				179DB09424C47D2800F828E1 /* FlicksListViewCell.swift in Sources */,
 				179C050B24B1C76A00A669FA /* SquadPhoneViewController.swift in Sources */,
 				17F39BE324AECF2A00EC90ED /* NSParagraphStyle+Extension.swift in Sources */,
+				171E47DE24C3F2B800100DFD /* SquadInvithNewHeaderView.swift in Sources */,
 				17F1722424B9A7070081E4C0 /* CreateEventTextEditedCell.swift in Sources */,
 				179536B224B1913200FE1185 /* MyProfileReactor.swift in Sources */,
 				179536AE24B18B7000FE1185 /* LoginReactor.swift in Sources */,
@@ -935,10 +972,12 @@
 				17E5FA5C24B41FD600E8B819 /* SquadPreViewController.swift in Sources */,
 				179536B424B192BE00FE1185 /* UIButton+Extension.swift in Sources */,
 				179C050324B1C5E800A669FA /* SquadSqrollViewCell.swift in Sources */,
+				1716C16C24C499A000AD2899 /* FlicksSearchViewController.swift in Sources */,
 				17D3443924B60E4E00AEB0E5 /* RegisterViewController.swift in Sources */,
 				178FCB7424B476D40054212F /* SquadNotificationsViewController.swift in Sources */,
 				179536B024B1912000FE1185 /* MyProfileViewController.swift in Sources */,
 				178FCB7C24B4777C0054212F /* SquadInvithNewViewController.swift in Sources */,
+				171E47E224C4243A00100DFD /* SquadInvithNewMemberCell.swift in Sources */,
 				170429CE24AEBF4E0046F757 /* SceneDelegate.swift in Sources */,
 				17F39BEF24AED0C800EC90ED /* BaseNavigationController.swift in Sources */,
 				17F39BDE24AECE8F00EC90ED /* UIViewController+Toast.swift in Sources */,
@@ -953,6 +992,7 @@
 				178FCB7824B4771D0054212F /* SquadThemeViewController.swift in Sources */,
 				179536B624B1A5BF00FE1185 /* Reusable.swift in Sources */,
 				179C051724B1E15F00A669FA /* SquadSqrollCollectionCell.swift in Sources */,
+				172E8E5A24C5370C002F9181 /* CreateFlickInputView.swift in Sources */,
 				17F39BED24AED08F00EC90ED /* BaseTableViewCell.swift in Sources */,
 				17F39BDA24AECE8F00EC90ED /* NSAttributedString+Extension.swift in Sources */,
 				179C052124B1FCD800A669FA /* FlicksReactor.swift in Sources */,
