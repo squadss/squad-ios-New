@@ -132,8 +132,8 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
         guard chattingView == nil else { return }
         chattingView = ChattingCardView.hero()
         chattingView?.headerView.switchBtn.rx.tap.subscribe(onNext: { [unowned self] in
-            let reactor = ChattingReactor()
-            let chattingVC = ChattingViewController(reactor: reactor)
+            let reactor = ChattingPreviewReactor()
+            let chattingVC = ChattingPreviewViewController(reactor: reactor)
             let nav = BaseNavigationController(rootViewController: chattingVC)
             nav.hero.isEnabled = true
             nav.hero.modalAnimationType = .selectBy(presenting: .fade, dismissing: .fade)

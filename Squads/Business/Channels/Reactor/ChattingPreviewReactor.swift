@@ -1,8 +1,8 @@
 //
-//  ChattingReactor.swift
+//  ChattingPreviewReactor.swift
 //  Squads
 //
-//  Created by 武飞跃 on 2020/7/7.
+//  Created by 武飞跃 on 2020/7/20.
 //  Copyright © 2020 Squads. All rights reserved.
 //
 
@@ -11,7 +11,7 @@ import ReactorKit
 import RxSwift
 import RxCocoa
 
-class ChattingReactor: Reactor {
+class ChattingPreviewReactor: Reactor {
     
     enum Action {
         
@@ -24,15 +24,11 @@ class ChattingReactor: Reactor {
     struct State {
         
     }
-    let needCreateSession: Bool
+    
     var initialState: State
     
-    
-    /// 构造方法
-    /// - Parameter needCreateSession: 是否需要创建会话
-    init(needCreateSession: Bool = false) {
+    init() {
         initialState = State()
-        self.needCreateSession = needCreateSession
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
