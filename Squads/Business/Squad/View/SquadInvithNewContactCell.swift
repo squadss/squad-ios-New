@@ -1,15 +1,15 @@
 //
-//  ApplyListTableViewCell.swift
+//  SquadInvithNewContactCell.swift
 //  Squads
 //
-//  Created by 武飞跃 on 2020/7/18.
+//  Created by 武飞跃 on 2020/7/19.
 //  Copyright © 2020 Squads. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import RxSwift
 
-class ApplyListViewCell: BaseTableViewCell {
+class SquadInvithNewContactCell: BaseTableViewCell {
     
     var avatarView = UIButton()
     var nicknameLab = UILabel()
@@ -32,8 +32,8 @@ class ApplyListViewCell: BaseTableViewCell {
         contentLab.theme.textColor = UIColor.textGray
         contentLab.numberOfLines = 1
         
-        actionBtn.setBackgroundImage(UIImage(color: UIColor(red: 0.769, green: 0.769, blue: 0.769, alpha: 1)), for: .normal)
-        actionBtn.setBackgroundImage(UIImage(color: UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)), for: .selected)
+        actionBtn.setBackgroundImage(UIImage(color: UIColor(red: 0.769, green: 0.769, blue: 0.769, alpha: 1)), for: .selected)
+        actionBtn.setBackgroundImage(UIImage(color: UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)), for: .normal)
         actionBtn.setTitleColor(.white, for: .normal)
         actionBtn.titleLabel?.font = UIFont.systemFont(ofSize: 10, weight: .semibold)
         actionBtn.layer.maskCorners(3, rect: CGRect(x: 0, y: 0, width: 37, height: 21))
@@ -47,7 +47,7 @@ class ApplyListViewCell: BaseTableViewCell {
         }
         actionBtn.snp.makeConstraints { (maker) in
             maker.trailing.equalTo(-34)
-            maker.size.equalTo(CGSize(width: 37, height: 21))
+            maker.size.equalTo(CGSize(width: 50, height: 21))
             maker.centerY.equalToSuperview()
         }
         nicknameLab.snp.makeConstraints { (maker) in
