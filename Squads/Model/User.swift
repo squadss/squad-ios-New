@@ -20,14 +20,13 @@ struct User: Codable {
         sex = try decoder.decodeIfPresent("sex")
         date = try decoder.decode("date", using: DateFormatter())
     }
-
-    init() {
-        username = ""
-        sex = nil
-        date = Date()
+    
+    init(username: String = "") {
+        self.username = username
+        self.sex = nil
+        self.date = Date()
     }
 
-    
 }
 
 extension User: Hashable {
@@ -40,7 +39,7 @@ extension User: Hashable {
         hasher.combine(username.hashValue)
     }
     
-    static func ==(lhs: User, rhs: User) -> Bool {
+    static func == (lhs: User, rhs: User) -> Bool {
         return lhs.username == rhs.username
     }
 }

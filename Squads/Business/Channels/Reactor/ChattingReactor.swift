@@ -24,11 +24,15 @@ class ChattingReactor: Reactor {
     struct State {
         
     }
-    
+    let needCreateSession: Bool
     var initialState: State
     
-    init() {
+    
+    /// 构造方法
+    /// - Parameter needCreateSession: 是否需要创建会话
+    init(needCreateSession: Bool = false) {
         initialState = State()
+        self.needCreateSession = needCreateSession
     }
     
     func mutate(action: Action) -> Observable<Mutation> {

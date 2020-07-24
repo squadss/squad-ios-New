@@ -101,6 +101,13 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
                     let invithNewReactor = SquadInvithNewReactor()
                     let vc = SquadInvithNewViewController(reactor: invithNewReactor)
                     self.navigationController?.pushViewController(vc, animated: true)
+                case 4: // Leave Squad
+                    let alert = UIAlertController(title: "Make sure to leave Squad?", message: nil, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
+                    alert.addAction(UIAlertAction(title: "Yes", style: .cancel, handler: { _ in
+                        self.showToast(message: "Leave the success!")
+                    }))
+                    self.present(alert, animated: true)
                 default:
                     fatalError("未配置")
                 }

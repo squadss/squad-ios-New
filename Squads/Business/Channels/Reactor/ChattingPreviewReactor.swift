@@ -1,8 +1,8 @@
 //
-//  SquadNewMemoryReactor.swift
+//  ChattingPreviewReactor.swift
 //  Squads
 //
-//  Created by 武飞跃 on 2020/7/5.
+//  Created by 武飞跃 on 2020/7/20.
 //  Copyright © 2020 Squads. All rights reserved.
 //
 
@@ -11,7 +11,7 @@ import ReactorKit
 import RxSwift
 import RxCocoa
 
-class SquadNewMemoryReactor: Reactor {
+class ChattingPreviewReactor: Reactor {
     
     enum Action {
         
@@ -22,8 +22,7 @@ class SquadNewMemoryReactor: Reactor {
     }
     
     struct State {
-        // 发布成功
-        var postSuccess: Bool?
+        
     }
     
     var initialState: State
@@ -40,4 +39,3 @@ class SquadNewMemoryReactor: Reactor {
         
     }
 }
-

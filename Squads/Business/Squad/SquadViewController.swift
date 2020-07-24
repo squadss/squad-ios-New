@@ -40,6 +40,13 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         menu.presentationStyle = style
         sideMenuManager.leftMenuNavigationController = menu
+        
+        let titleView = NavigationBarTitleView()
+        titleView.button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        titleView.button.setTitle("Squad Page", for: .normal)
+        titleView.button.theme.titleColor(from: UIColor.text, for: .normal)
+        titleView.button.addTarget(self, action: #selector(titleBtnDidTapped), for: .touchUpInside)
+        addToTitleView(titleView)
     }
     
     override func setupView() {
@@ -204,8 +211,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             nav.modalPresentationStyle = .fullScreen
             present(nav, animated: true)
         case 1: // New Memory
-            let reactor = SquadNewMemoryReactor()
-            let vc = SquadNewMemoryViewController(reactor: reactor)
+            let reactor = CreateFlickReactor()
+            let vc = CreateFlickViewController(reactor: reactor)
             let nav = BaseNavigationController(rootViewController: vc)
             nav.modalPresentationStyle = .fullScreen
             present(nav, animated: true)
@@ -230,7 +237,14 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         }
     }
 
-    
+    @objc
+    private func titleBtnDidTapped() {
+        let preReactor = SquadPreReactor()
+        let preViewController = SquadPreViewController(reactor: preReactor)
+        let nav = BaseNavigationController(rootViewController: preViewController)
+        nav.modalPresentationStyle = .fullScreen
+        self.present(nav, animated: true)
+    }
     
     @objc
     private func leftBtnDidTapped() {
