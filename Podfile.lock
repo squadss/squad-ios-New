@@ -95,6 +95,7 @@ SPEC REPOS:
     - RxDataSources
     - RxRelay
     - RxTheme
+    - SideMenu
     - SnapKit
     - SwiftDate
     - SwiftyUserDefaults
@@ -108,8 +109,6 @@ EXTERNAL SOURCES:
     :git: https://github.com/ReactiveX/RxSwift.git
   RxSwift:
     :git: https://github.com/ReactiveX/RxSwift.git
-  SideMenu:
-    :git: https://github.com/jonkykong/SideMenu.git
 
 CHECKOUT OPTIONS:
   JXPhotoBrowser:
@@ -121,9 +120,6 @@ CHECKOUT OPTIONS:
   RxSwift:
     :commit: a580d07ed002217fd91d8446c3a852486e9beefa
     :git: https://github.com/ReactiveX/RxSwift.git
-  SideMenu:
-    :commit: 138103093176154f84ae9a2a63e58b9ae78bc6d7
-    :git: https://github.com/jonkykong/SideMenu.git
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
