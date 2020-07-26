@@ -104,7 +104,7 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
                 case 4: // Leave Squad
                     let alert = UIAlertController(title: "Make sure to leave Squad?", message: nil, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
-                    alert.addAction(UIAlertAction(title: "Yes", style: .cancel, handler: { _ in
+                    alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { _ in
                         self.showToast(message: "Leave the success!")
                     }))
                     self.present(alert, animated: true)

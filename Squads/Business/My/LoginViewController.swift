@@ -7,17 +7,14 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 import HGPlaceholders
 import RxDataSources
 import ETNavBarTransparent
 
-class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldStyle {
+class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldStyle, UIGestureRecognizerDelegate {
 
-//    var provider = OnlineProvider<UserAPI>()
-        
-//    let layout = UICollectionViewFlowLayout()
-//    lazy var collection = CollectionView(frame: CGRect(x: 0, y: 100, width: view.bounds.width, height: view.bounds.height - 100), collectionViewLayout: layout)
-    
     private var usernameField = UITextField()
     private var passwordField = UITextField()
     private var confirmBtn = UIButton()
@@ -31,39 +28,10 @@ class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldS
         
         self.navBarBgAlpha = 0.0
         self.navBarTintColor = .clear
-        
-//        collection.backgroundColor = .white
-//        view.addSubview(collection)
-//
-//        let dataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: { (data, collectionView, indexPath, model) -> UICollectionViewCell in
-//
-//            let cell = UICollectionViewCell()
-//            return cell
-//        })
-        
-//        Observable<Array<String>>.just(["1"])
-//            .map{ [SectionModel(model: "", items: $0)] }
-//            .bind(to: collection.rx.items(dataSource: dataSource))
-//            .disposed(by: rx.disposeBag)
-        
-//        collection.rx.actionButtonTapped
-//            .subscribe(onNext: {
-//                print($0)
-//            })
-//            .disposed(by: rx.disposeBag)
-//
-//        provider
-//            .request(target: .signUp(username: "123", password: "123", rePassword: "123", inviteCode: "123"),
-//                     model: String.self,
-//                     atKeyPath: .data)
-//            .asObservable()
-//            .debug()
-//            .compactMap{ $0.error }
-//            .bind(to: collection.rx.placeholder)
-//            .disposed(by: rx.disposeBag)
     }
     
     override func setupView() {
+        
         
         view.addSubview(backgroundView)
         
@@ -71,7 +39,6 @@ class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldS
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         confirmBtn.setTitle("Sign In", for: .normal)
-        confirmBtn.addTarget(self, action: #selector(confirmBtnDidTapped), for: .touchUpInside)
         
         configInputField(usernameField, placeholder: "Username")
         configInputField(passwordField, placeholder: "Password")
@@ -103,6 +70,10 @@ class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldS
         signUpLab.textAlignment = .center
         signUpLab.attributedText = attr
         backgroundView.addSubview(signUpLab)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(signupDidTapped(_:)))
+        backgroundView.tap.require(toFail: tap)
+        signUpLab.addGestureRecognizer(tap)
+        signUpLab.isUserInteractionEnabled = true
     }
     
     override func setupConstraints() {
@@ -132,9 +103,56 @@ class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldS
         }
     }
     
+    override func bind(reactor: LoginReactor) {
+        
+        confirmBtn.rx.tap
+            .map{ [unowned self] in
+                let username = self.usernameField.text!
+                let password = self.passwordField.text!
+                return Reactor.Action.login(username: username, password: password)
+            }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        Observable.combineLatest(usernameField.rx.text.orEmpty, passwordField.rx.text.orEmpty) { !($0.isEmpty || $1.isEmpty) }
+            .bind(to: confirmBtn.rx.isEnabled)
+            .disposed(by: disposeBag)
+                
+        reactor.state
+            .compactMap{ $0.loading }
+            .bind(to: rx.loading)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.success }
+            .delay(RxTimeInterval.seconds(1), scheduler: MainScheduler.instance)
+            .subscribe(onNext: { model in
+                model.loginAccountVo.save()
+                AuthManager.setToken(.normal(token: model.token))
+                Application.shared.presentInitialScreent()
+            })
+            .disposed(by: disposeBag)
+    }
+    
     @objc
-    private func confirmBtnDidTapped() {
-        let vc = RegisterViewController()
-        navigationController?.pushViewController(vc, animated: true)
+    private func signupDidTapped(_ sender: UITapGestureRecognizer) {
+        guard sender.state == .ended else { return }
+        let point = sender.location(in: signUpLab)
+        let min = view.bounds.width * 0.6
+        let max = view.bounds.width * 0.81
+        if point.x >= min && point.x <= max {
+            //在可点击区间内, 跳转页面
+            let registerVC = RegisterViewController()
+            navigationController?.pushViewController(registerVC, animated: true)
+        }
+    }
+    
+    deinit {
+        print("Login Deinit")
     }
 }

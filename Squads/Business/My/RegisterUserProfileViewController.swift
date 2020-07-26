@@ -1,0 +1,157 @@
+//
+//  RegisterUserProfileViewController.swift
+//  Squads
+//
+//  Created by 武飞跃 on 2020/7/24.
+//  Copyright © 2020 Squads. All rights reserved.
+//
+
+import UIKit
+import RxSwift
+
+class RegisterUserProfileViewController: RegisterGeneralViewController {
+
+    private let picker = AvatarPicker()
+    private var disposeBag = DisposeBag()
+    private var descriptionLab = UILabel()
+    private var avatarView = EditableAvatarView()
+    private var nicknameField = UITextField()
+    private var confirmBtn = UIButton()
+    private var stackView: UIStackView!
+    private var backgroundView = LoginBackgroundView()
+    private var provider = OnlineProvider<UserAPI>()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.navBarBgAlpha = 0.0
+        self.navBarTintColor = .clear
+    }
+    
+    override func setupView() {
+        
+        view.addSubview(backgroundView)
+        
+        descriptionLab.text = "Complete your profile!"
+        descriptionLab.textColor = .white
+        descriptionLab.font = UIFont.systemFont(ofSize: 16)
+        descriptionLab.textAlignment = .center
+        backgroundView.addSubview(descriptionLab)
+        
+        avatarView.canEdit = true
+        avatarView.imageSize = CGSize(width: 107, height: 107)
+        avatarView.imageURL = URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")
+        backgroundView.addSubview(avatarView)
+        
+        configInputField(nicknameField, placeholder: "Phone Number")
+        
+        confirmBtn.backgroundColor = UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)
+        confirmBtn.setTitleColor(.white, for: .normal)
+        confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+        confirmBtn.setTitle("Send Me a Code", for: .normal)
+        
+        stackView = UIStackView(arrangedSubviews: [nicknameField, confirmBtn])
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        stackView.alignment = .fill
+        stackView.spacing = 20
+        backgroundView.addSubview(stackView)
+        
+        userTDO.username = "eppeo1"
+        userTDO.password = "w12345678"
+        userTDO.inviteCode = "111"
+        userTDO.nationCode = "+86"
+        userTDO.phoneNumber = "+8617771865608"
+        userTDO.purePhoneNumber = "17771865608"
+    }
+    
+    override func setupConstraints() {
+        
+        backgroundView.snp.makeConstraints { (maker) in
+            maker.edges.equalToSuperview()
+        }
+
+        descriptionLab.snp.makeConstraints { (maker) in
+            maker.leading.trailing.equalToSuperview()
+            maker.top.equalTo(backgroundView.imageView.snp.bottom).offset(30)
+        }
+        
+        avatarView.snp.makeConstraints { (maker) in
+            maker.size.equalTo(CGSize(width: 107, height: 107))
+            maker.centerX.equalToSuperview()
+            maker.top.equalTo(descriptionLab.snp.bottom).offset(30)
+        }
+        
+        stackView.snp.makeConstraints { (maker) in
+            let count = Int(stackView.arrangedSubviews.count)
+            maker.height.equalTo(count * 50 + (count - 1) * 20)
+            maker.leading.trailing.equalToSuperview().inset(47)
+            maker.top.equalTo(avatarView.snp.bottom).offset(34)
+        }
+    }
+    
+    override func addTouchAction() {
+        
+        avatarView.canEditTap
+            .flatMap { [unowned self] in
+                self.picker.image(optionSet: [.camera, .photo], delegate: self)
+            }
+            .map{
+                if let image = $0.1 { return image }
+                return $0.0
+            }
+            .do(onNext: { [unowned self] image in
+                self.userTDO.avatar = image.pngData()
+            })
+            .bind(to: avatarView.imageBtn.rx.image(for: .normal))
+            .disposed(by: rx.disposeBag)
+        
+        nicknameField.rx.text.orEmpty
+            .do(onNext: { [unowned self] text in
+                self.userTDO.nickname = text
+            })
+            .map{ !$0.isEmpty }
+            .bind(to: confirmBtn.rx.isEnabled)
+            .disposed(by: rx.disposeBag)
+        
+        let tapObservable = confirmBtn.rx.tap
+    
+        tapObservable
+            .subscribe(onNext: { [unowned self] in
+                self.confirmBtn.isEnabled = false
+                self.showLoading(offsetY: 0)
+            })
+            .disposed(by: disposeBag)
+        
+        tapObservable
+            .map{ [unowned self] in self.checkoutParams(properties: [.username, .password, .phoneNumber, .nickname, .avatar]) }
+            .flatMap{ [unowned self] result -> Observable<Result<GeneralModel.Plain, GeneralError>> in
+                switch result {
+                case .success(let model):
+                    return self.provider.request(target: .signUp(username: model.username!,
+                                                                 password: model.password!,
+                                                                 inviteCode: model.inviteCode!,
+                                                                 nationCode: model.nationCode!,
+                                                                 phoneNumber: model.phoneNumber!,
+                                                                 purePhoneNumber: model.purePhoneNumber!,
+                                                                 nickname: model.nickname!,
+                                                                 avatar: model.avatar!),
+                                                 model: GeneralModel.Plain.self).asObservable()
+                case .failure(let error):
+                    return Observable.just(.failure(error))
+                }
+            }
+            .subscribe(onNext: { [unowned self] result in
+                
+                self.hideLoading()
+                self.confirmBtn.isEnabled = true
+                
+                switch result {
+                case .success(let model):
+                    self.showToast(message: model.message)
+                    self.navigationController?.popToRootViewController(animated: true)
+                case .failure(let error):
+                    self.showToast(message: error.message)
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+}

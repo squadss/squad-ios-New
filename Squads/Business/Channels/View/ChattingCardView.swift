@@ -35,7 +35,7 @@ class ChattingCardView: BaseView {
 //            let count = UserDefaults.standard.mockMessagesCount()
 //            SampleData.shared.getMessages(count: count) { messages in
 //                DispatchQueue.main.async {
-        self.messageList = [MockMessage(sender: MockUser(senderId: "2", displayName: "小丽"), messageId: "1", sentDate: Date(), kind: .text("你好")), MockMessage(sender: MockUser(senderId: "2", displayName: "小丽"), messageId: "2", sentDate: Date(), kind: .text("你你好你好你好你好好")), MockMessage(sender: MockUser(senderId: "2", displayName: "小丽"), messageId: "3", sentDate: Date(), kind: .text("你好你好你好你好你好你好"))]
+        self.messageList = [MockMessage(sender: MockUser(senderId: "1", displayName: "Tom"), messageId: "1", sentDate: Date(), kind: .text("Hello!")), MockMessage(sender: MockUser(senderId: "2", displayName: "小丽"), messageId: "2", sentDate: Date(), kind: .text("你好啊")), MockMessage(sender: MockUser(senderId: "1", displayName: "Tom"), messageId: "3", sentDate: Date(), kind: .text("Good morning!"))]
         self.contentView.messagesCollectionView.reloadData()
         self.contentView.messagesCollectionView.scrollToBottom()
 //                }
@@ -86,7 +86,7 @@ extension ChattingCardView: MessageCellDelegate, MessagesDataSource, MessagesLay
     }
     
     func currentSender() -> SenderType {
-        return MockUser(senderId: "1", displayName: "哈哈哈")
+        return MockUser(senderId: "1", displayName: "Tom")
     }
     
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {

@@ -10,6 +10,7 @@ import UIKit
 
 class LoginBackgroundView: BaseView {
     
+    var tap = UITapGestureRecognizer()
     var imageView = UIImageView()
     private var gradientLayer: CAGradientLayer!
     override func setupView() {
@@ -31,7 +32,7 @@ class LoginBackgroundView: BaseView {
             maker.top.equalTo(141)
         }
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(tapGesure(_:)))
+        tap.addTarget(self, action: #selector(tapGesure(_:)))
         addGestureRecognizer(tap)
     }
     

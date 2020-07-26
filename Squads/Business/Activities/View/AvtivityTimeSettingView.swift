@@ -25,10 +25,10 @@ class AvtivityTimeSettingView: CornersView {
     }
     
     // 时间刻度数据源
-    var dataSource: SlidableTimeSectionModel? {
+    var axisXDates: ActivityTimeLineAxisXDate! {
         didSet {
-            guard let unwrappedDataSource = dataSource else { return }
-            timeView.contentView.dataSource = [unwrappedDataSource]
+            guard let unwrappedDataSource = axisXDates else { return }
+            chooseTimeView.contentView.axisXDates = unwrappedDataSource
         }
     }
     
@@ -41,7 +41,7 @@ class AvtivityTimeSettingView: CornersView {
         return Observable.from(list).merge()
     }
     
-    private var timeView = SingleChooseTimeView()
+    private var chooseTimeView = SingleChooseTimeView()
     private var membersView = MembersGroupView()
     private let hLine = CALayer()
     private let vLine = UIView()
@@ -52,6 +52,10 @@ class AvtivityTimeSettingView: CornersView {
         
         membersView.topTitle = "RESPONDED"
         membersView.bottomTitle = "WAITING"
+        
+        let drawView = TimeLineDrawPageView()
+        chooseTimeView.contentView.set(drawView)
+        chooseTimeView.contentView.title = "Choose consecutive times"
         
         vLine.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25)
         hLine.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25).cgColor
@@ -76,13 +80,13 @@ class AvtivityTimeSettingView: CornersView {
         stackView.alignment = .fill
         
         layer.addSublayer(hLine)
-        addSubviews(timeView, membersView, stackView, vLine)
+        addSubviews(chooseTimeView, membersView, stackView, vLine)
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        timeView.frame = CGRect(x: 10, y: 30, width: bounds.width - 56, height: 320)
-        membersView.frame = CGRect(x: 14, y: timeView.frame.maxY, width: 300, height: 150)
+        chooseTimeView.frame = CGRect(x: 10, y: 30, width: bounds.width - 56, height: 320)
+        membersView.frame = CGRect(x: 14, y: chooseTimeView.frame.maxY, width: 300, height: 150)
         stackView.frame = CGRect(x: 0, y: bounds.height - 56, width: bounds.width, height: 56)
         hLine.frame = CGRect(x: 0, y: stackView.frame.minY - 0.5, width: bounds.width, height: 0.5)
         vLine.frame = CGRect(x: bounds.midX, y: hLine.frame.minY, width: 0.5, height: 56)

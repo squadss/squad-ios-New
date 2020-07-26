@@ -69,7 +69,15 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     func request<T: Decodable>(target: Target, model: T.Type = T.self, atKeyPath: String? = nil) -> Single<Swift.Result<T, GeneralError>> {
         return request(target: target)
             .map{ try model.decodeJSON(from: $0, designatedPath: atKeyPath) }
-            .map{ .success($0) }
+            .map{ object in
+                if object is GeneralModel.Plain {
+                    let plain = (object as! GeneralModel.Plain)
+                    if !plain.success {
+                        return .failure(.newwork(code: plain.code, message: plain.message))
+                    }
+                }
+                return .success(object)
+            }
             .catchError({ (error)  in
                 guard let moyaError = error as? MoyaError else {
                     return .never()

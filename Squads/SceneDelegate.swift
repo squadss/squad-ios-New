@@ -55,18 +55,18 @@ final class Application: NSObject {
             self.window = unwrappedWindow
         }
         
-//        if authManager.hasValidToken {
+        if authManager.hasValidToken {
             let reactor = SquadReactor()
             let squadVC = SquadViewController(reactor: reactor)
             squadVC.title = "Squad Page"
             let nav = BaseNavigationController(rootViewController: squadVC)
             self.window?.rootViewController = nav
-//        } else {
-//            let reactor = LoginReactor()
-//            let loginVC = LoginViewController(reactor: reactor)
-//            let nav = UINavigationController(rootViewController: loginVC)
-//            self.window?.rootViewController = nav
-//        }
+        } else {
+            let reactor = LoginReactor()
+            let loginVC = LoginViewController(reactor: reactor)
+            let nav = UINavigationController(rootViewController: loginVC)
+            self.window?.rootViewController = nav
+        }
     }
 }
 

@@ -86,7 +86,13 @@ extension GeneralError {
                 return .unknown
             }
         case let .statusCode(response):
-            return .mapping("请求错误：\(response.statusCode), 描述：" + response.description)
+            do {
+                //{"code":401,"message":"非法访问","success":false,"time":"2020-07-24 21:56:51"}
+                let plain = try response.map(GeneralModel.Plain.self)
+                return .mapping(plain.message)
+            } catch {
+                return .mapping("请求错误：\(response.statusCode), 描述：" + response.description)
+            }
         case let .stringMapping(response):
             return .mapping("解析字符串错误：\(String(describing: try? response.mapString()))")
         case let .underlying(error, _):

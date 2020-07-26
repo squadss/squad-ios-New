@@ -73,6 +73,6 @@ class ChattingPreviewViewController: ReactorViewController<ChattingPreviewReacto
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        chattingView.frame = CGRect(x: 0, y: 100, width: view.bounds.width, height: view.bounds.height - 100)
+        chattingView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height)
     }
 }

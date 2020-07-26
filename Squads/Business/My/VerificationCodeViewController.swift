@@ -8,13 +8,14 @@
 
 import UIKit
 
-class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
+class VerificationCodeViewController: RegisterGeneralViewController {
 
     private var sendBtn = UIButton()
     private var codeField = UITextField()
     private var confirmBtn = UIButton()
     private var stackView: UIStackView!
     private var backgroundView = LoginBackgroundView()
+    private var provider = OnlineProvider<UserAPI>()
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navBarBgAlpha = 0.0
@@ -34,6 +35,7 @@ class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         confirmBtn.setTitle("Get Started!", for: .normal)
+        confirmBtn.addTarget(self, action: #selector(confirmBtnDidTapped), for: .touchUpInside)
         
         configInputField(codeField, placeholder: "Enter Code")
         
@@ -60,6 +62,19 @@ class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
             maker.height.equalTo(120)
             maker.leading.trailing.equalToSuperview().inset(47)
             maker.top.equalTo(sendBtn.snp.bottom).offset(15)
+        }
+    }
+    
+    @objc
+    private func confirmBtnDidTapped() {
+        userTDO.verificationcode = codeField.text
+        let result = checkoutParams(properties: [.verificationcode])
+        switch result {
+        case .success:
+            let profileVC = RegisterUserProfileViewController()
+            navigationController?.pushViewController(profileVC, animated: true)
+        case .failure(let error):
+            showToast(message: error.message)
         }
     }
 }

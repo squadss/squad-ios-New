@@ -106,28 +106,26 @@ struct RequestLogger: CustomDebugStringConvertible {
         var description: String {
             switch self {
             case .header(let v):
-                return "\n🥊  Header: \(v)"
+                return "\n    Header: \(v)"
             case .body(let v):
-                return "\n🥊    Body: \(v)"
+                return "\n      Body: \(v)"
             case .method(let v):
-                return "\n🥊  Method: \(v)"
-            case .responseSuccess(let v):
-                return "\n✅        : \(v)"
-            case .responseFailure(let v):
-                return "\n❌        : \(v)"
+                return "\n    Method: \(v)"
+            case .responseSuccess(let v), .responseFailure(let v):
+                return "\n  Response: \(v)"
             case .url(let v):
-                return "\n🥊     URL: \(v)"
+                return "\n       URL: \(v)"
             }
         }
         
         var index: Int {
             switch self {
-            case .header: return 0
+            case .header: return 1
             case .method: return 10
             case .body: return 20
             case .responseSuccess: return 30
             case .responseFailure: return 31
-            case .url: return 1
+            case .url: return 0
             }
         }
         
@@ -143,8 +141,8 @@ struct RequestLogger: CustomDebugStringConvertible {
     }
     
     mutating func addHeader(_ dict: [String: String]) {
-        let str = dict.reduce("\n") { (total, arg1) -> String in
-            return total + arg1.key + ":" + arg1.value + "\n"
+        let str = dict.reduce("") { (total, arg1) -> String in
+            return total + arg1.key + ":" + arg1.value + "  "
         }
         list.append(.header(str))
     }
@@ -152,7 +150,7 @@ struct RequestLogger: CustomDebugStringConvertible {
     mutating func addBody(_ task: Moya.Task) {
         var params: String {
             if case .requestParameters(let params, _) = task {
-                if let data = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted) {
+                if let data = try? JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed) {
                     if let str = String(data: data, encoding: String.Encoding.utf8) {
                         return str
                     }
@@ -175,16 +173,16 @@ struct RequestLogger: CustomDebugStringConvertible {
         switch result {
         case .success(let response):
             let dataString = String(data: response.data, encoding: .utf8) ?? ""
-            list.append(.responseSuccess("状态: \(response.statusCode) \n" + "数据: \n" + dataString))
+            list.append(.responseSuccess(dataString))
         case .failure(let error):
-            list.append(.responseFailure("错误:" + GeneralError.from(error: error).message))
+            list.append(.responseFailure(GeneralError.from(error: error).message))
         }
     }
     
     var debugDescription: String {
-        return list.sorted().reduce("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>start", { (total, component) -> String in
+        return list.sorted().reduce("\n----------------start----------------", { (total, component) -> String in
             total + component.description
-        })
+        }) + "\n----------------end------------------"
     }
 }
 

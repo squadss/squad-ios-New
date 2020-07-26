@@ -9,6 +9,7 @@
 import UIKit
 import SideMenu
 import SnapKit
+import RxSwift
 import RxDataSources
 import JXPhotoBrowser
 
@@ -66,9 +67,10 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         //自定义底部menu
         let menuList: Array<UIImage?> = [
             UIImage(named: "Calendar Icon"),
-            UIImage(named: "New Memory Icon"),
-            UIImage(named: "Game Icon"),
-            UIImage(named: "Phone Icon"),
+            UIImage(named: "New Memory Icon")
+//            ,
+//            UIImage(named: "Game Icon"),
+//            UIImage(named: "Phone Icon"),
         ]
         let menuViews: Array<UIView> = menuList.enumerated().map{ (index, image) in
             let btn = UIButton()
@@ -108,8 +110,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                     let activityDetailVC = ActivityDetailViewController(reactor: activityReactor)
                     self.navigationController?.pushViewController(activityDetailVC, animated: true)
                 } else if indexPath.section == 2 {
-                    let chattingReactor = ChattingReactor()
-                    let chattingVC = ChattingViewController(reactor: chattingReactor)
+                    let model = self.dataSource[indexPath] as! SquadChannel
+                    let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId))
                     self.navigationController?.pushViewController(chattingVC, animated: true)
                 }
             })
@@ -194,8 +196,27 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         })
         
         reactor.state
+            .filter{ $0.loginStateDidExpired }
+            .subscribe(onNext: { _ in
+                User.removeCurrentUser()
+                AuthManager.removeToken()
+                Application.shared.presentInitialScreent()
+            })
+            .disposed(by: disposeBag)
+        
+        reactor.state
             .map{ $0.repos.map{ SectionModel(model: "", items: $0)} }
             .bind(to: tableView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+        
+        rx.viewWillAppear
+            .map{ Reactor.Action.refreshChannels }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        Observable
+            .just(Reactor.Action.initialSDK)
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
     
@@ -270,6 +291,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     @objc
     private func channelBtnDidTapped() {
         //创建一个Channel
+        let chattingVC = ChattingViewController(action: .create)
+        self.navigationController?.pushViewController(chattingVC, animated: false)
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {

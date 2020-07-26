@@ -87,14 +87,16 @@ enum CreateEventTextEditor: CreateEventModelPrimaryKey, Equatable {
 }
 
 struct CreateEventCalendar: CreateEventModelPrimaryKey {
-    // 当前的日期
-    var currentDate: Date
     // 选中的日期
-    var selectedDate = Array<Date>()
+    var selectedDate: Array<Date>
+    
+    init(selectedDate: Array<Date> = []) {
+        self.selectedDate = selectedDate
+    }
 }
 
 struct CreateEventAvailability: CreateEventModelPrimaryKey {
-    
+    var dateList: Array<Date>!
 }
 
 protocol CreateEventModelPrimaryKey { }
@@ -103,10 +105,12 @@ class CreateEventReactor: Reactor {
     
     enum Action {
         case selectCategory(EventCategory)
+        case selectedDates(Array<Date>)
     }
     
     enum Mutation {
         case setCategory(EventCategory)
+        case setDates(Array<Date>)
     }
     
     struct State {
@@ -119,7 +123,7 @@ class CreateEventReactor: Reactor {
         initialState = State(repos: [CreateEventLabels(list: EventCategory.allCases, selected: nil),
                                      CreateEventTextEditor.title(text: ""),
                                      CreateEventTextEditor.location(value: nil, attachImageNamed: "CreateEvent Location"),
-                                     CreateEventCalendar(currentDate: Date()),
+                                     CreateEventCalendar(),
                                      CreateEventAvailability()])
     }
     
@@ -127,6 +131,8 @@ class CreateEventReactor: Reactor {
         switch action {
         case .selectCategory(let category):
             return Observable.just(.setCategory(category))
+        case .selectedDates(let list):
+            return Observable.just(.setDates(list))
         }
     }
     
@@ -137,6 +143,9 @@ class CreateEventReactor: Reactor {
             var labels = state.repos[0] as! CreateEventLabels
             labels.selected = category
             state.repos[0] = labels
+        case .setDates(let listDate):
+            state.repos[3] = CreateEventCalendar(selectedDate: listDate)
+            state.repos[4] = CreateEventAvailability(dateList: listDate)
         }
         return state
     }
