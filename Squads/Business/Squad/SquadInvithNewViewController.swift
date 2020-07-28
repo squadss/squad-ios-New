@@ -7,10 +7,15 @@
 //
 
 import UIKit
+import RxSwift
 import RxDataSources
+import Contacts
 
 class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>, UITableViewDelegate {
 
+    // 是否隐藏导航左侧按钮
+    var isHideBackButtonItem: Bool = false
+    
     private var layout = UICollectionViewFlowLayout()
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
     private var tableView = UITableView(frame: .zero, style: .grouped)
@@ -26,8 +31,15 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         view.theme.backgroundColor = UIColor.background
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if isHideBackButtonItem {
+            navigationItem.leftBarButtonItem = nil
+            navigationItem.backBarButtonItem = nil
+        }
+    }
+    
     override func setupView() {
-        
         headerView = SquadInvithNewHeaderView()
         headerView.contentView = collectionView
         headerView.insertBottom = 30
@@ -92,6 +104,54 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         searchBtn.hero.id = "SearchFieldKey"
         searchBtn.addTarget(self, action: #selector(searchBtnDidTapped), for: .touchUpInside)
         footerView.addSubview(searchBtn)
+    }
+    
+    // 请求访问通讯录 true: 已拥有权限
+    private func requestVisibleContacts() -> Observable<Bool> {
+        return Observable.create { (observer) -> Disposable in
+            let status = CNContactStore.authorizationStatus(for: .contacts)
+            switch status {
+            case .notDetermined:
+                let store = CNContactStore()
+                store.requestAccess(for: .contacts) { (grantes, error) in
+                    observer.onNext(error == nil)
+                    observer.onCompleted()
+                }
+            case .restricted, .denied:
+                observer.onNext(false)
+                observer.onCompleted()
+            case .authorized:
+                observer.onNext(true)
+                observer.onCompleted()
+            @unknown default:
+                observer.onNext(false)
+                observer.onCompleted()
+            }
+            return Disposables.create()
+        }
+    }
+    
+    /// 获取通讯录中所有联系人的手机号
+    private func getContactsPhone() -> Array<String> {
+        var contactList = Array<String>()
+        let contactStore = CNContactStore()
+        let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey].map{ NSString(string: $0) }
+        let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch)
+        try? contactStore.enumerateContacts(with: fetchRequest, usingBlock: { (contact, cPointer) in
+            let phoneNumbers = contact.phoneNumbers
+            for labelValue in phoneNumbers {
+                let phoneNumber = labelValue.value.stringValue
+                var phone = phoneNumber.replacingOccurrences(of: " ", with: "")
+                    .replacingOccurrences(of: "(", with: "")
+                    .replacingOccurrences(of: ")", with: "")
+                phone = String(phone.suffix(11))
+                if phone.count == 11 && phone.hasPrefix("1") {
+                    contactList.append(phone)
+                    break
+                }
+            }
+        })
+        return contactList
     }
     
     override func setupConstraints() {
@@ -160,6 +220,11 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             .disposed(by: disposeBag)
         
         reactor.state
+            .compactMap{ $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
             .map{ $0.members != nil }
             .debug()
             .filter{ $0 }
@@ -204,15 +269,10 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             .bind(to: tableView.rx.items(dataSource: tableDataSource))
             .disposed(by: disposeBag)
         
-        reactor.state.map{
-            if let members = $0.members, members.count > 1 {
-                return true
-            } else {
-                return false
-            }
-        }
-        .bind(to: rightBarButtonItem.rx.isEnabled)
-        .disposed(by: disposeBag)
+        reactor.state
+            .map { $0.members?.isEmpty == false }
+            .bind(to: rightBarButtonItem.rx.isEnabled)
+            .disposed(by: disposeBag)
         
         rightBarButtonItem.rx.tap
             .map{ Reactor.Action.request }
@@ -220,17 +280,28 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             .disposed(by: disposeBag)
         
         reactor.state
-            .compactMap{ $0.requestResult }
-            .subscribe(onNext: { [unowned self] result in
-                switch result {
-                case .success:
+            .filter { $0.inviteSuccess == true }
+            .subscribe(onNext: { [unowned self] _ in
+                var rootViewController = UIApplication.shared.keyWindow?.rootViewController
+                rootViewController = (rootViewController as? UINavigationController)?.viewControllers.first
+                if rootViewController is LoginViewController || rootViewController is CreateSquadViewController {
+                    Application.shared.presentInitialScreent()
+                } else {
                     self.dismiss(animated: true)
-                case .failure(let error):
-                    self.showToast(message: error.message)
                 }
             })
             .disposed(by: disposeBag)
         
+        requestVisibleContacts()
+            .takeUntil(rx.viewDidLoad)
+            .subscribeOn(MainScheduler.instance)
+            .map { [unowned self] status in
+                var list = Array<String>()
+                if status { list = self.getContactsPhone() }
+                return Reactor.Action.visibleContacts(phoneList: list, isDenied: !status)
+            }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
     }
     
     @objc

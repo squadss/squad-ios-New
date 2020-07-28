@@ -43,12 +43,13 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     
     init(endpointClosure: @escaping MoyaProvider<Target>.EndpointClosure = MoyaProvider.defaultEndpointMapping,
          requestClosure: @escaping MoyaProvider<Target>.RequestClosure = MoyaProvider<Target>.defaultRequestMapping,
+         stubClosure: @escaping MoyaProvider<Target>.StubClosure = OnlineProvider.neverStub,
          plugins: [PluginType] = OnlineProvider.plugins,
          trackInflights: Bool = false) {
         
         self.provider = MoyaProvider(endpointClosure: endpointClosure,
                                      requestClosure: requestClosure,
-                                     stubClosure: MoyaProvider.neverStub,
+                                     stubClosure: stubClosure,
                                      callbackQueue: nil,
                                      manager: MoyaProvider<Target>.defaultAlamofireManager(),
                                      plugins: plugins,
@@ -97,6 +98,10 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     //还未实现
     func requestPlain(target: Target) -> Single<GeneralModel.Plain> {
         return .never()
+    }
+    
+    final class func neverStub(_: Target) -> Moya.StubBehavior {
+        return .never
     }
 }
 

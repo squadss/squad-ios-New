@@ -7,19 +7,34 @@
 //
 
 import UIKit
+import RxSwift
 
-class VerificationCodeViewController: RegisterGeneralViewController {
+class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
 
+    private var disposeBag = DisposeBag()
+    private var provider = OnlineProvider<UserAPI>()
+    
     private var sendBtn = UIButton()
     private var codeField = UITextField()
     private var confirmBtn = UIButton()
     private var stackView: UIStackView!
     private var backgroundView = LoginBackgroundView()
-    private var provider = OnlineProvider<UserAPI>()
+    
+    private static var lastUnreadDate: Date?
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navBarBgAlpha = 0.0
         self.navBarTintColor = .clear
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        backgroundView.addListener()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        backgroundView.removeListener()
     }
     
     override func setupView() {
@@ -35,7 +50,6 @@ class VerificationCodeViewController: RegisterGeneralViewController {
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         confirmBtn.setTitle("Get Started!", for: .normal)
-        confirmBtn.addTarget(self, action: #selector(confirmBtnDidTapped), for: .touchUpInside)
         
         configInputField(codeField, placeholder: "Enter Code")
         
@@ -45,6 +59,7 @@ class VerificationCodeViewController: RegisterGeneralViewController {
         stackView.alignment = .fill
         stackView.spacing = 20
         backgroundView.addSubview(stackView)
+        backgroundView.offsetY = 70
     }
     
     override func setupConstraints() {
@@ -65,16 +80,138 @@ class VerificationCodeViewController: RegisterGeneralViewController {
         }
     }
     
-    @objc
-    private func confirmBtnDidTapped() {
-        userTDO.verificationcode = codeField.text
-        let result = checkoutParams(properties: [.verificationcode])
-        switch result {
-        case .success:
-            let profileVC = RegisterUserProfileViewController()
-            navigationController?.pushViewController(profileVC, animated: true)
-        case .failure(let error):
-            showToast(message: error.message)
+    override func addTouchAction() {
+        
+        let totalSeconds: Int = 59
+        
+        // 启动器事件
+        let timer = Observable
+            .merge(sendBtn.rx.tap.map{ true }.startWith(false),
+                   UIApplication.shared.rx.applicationWillEnterForeground.map{ _ in false })
+            .flatMap { isTap -> Observable<Int> in
+                
+                var duration: Int = 0
+                var isBusy: Bool = false
+                if let lastDate = VerificationCodeViewController.lastUnreadDate {
+                    let distance = abs(Int(lastDate.timeIntervalSinceNow))
+                    isBusy = totalSeconds > distance
+                }
+            
+                //按钮点击
+                if isTap {
+                    duration = totalSeconds
+                    VerificationCodeViewController.lastUnreadDate = Date()
+                } else if isBusy {
+                    if let lastDate = VerificationCodeViewController.lastUnreadDate {
+                        let distance = min(abs(Int(lastDate.timeIntervalSinceNow)), totalSeconds)
+                        duration = distance == totalSeconds ? totalSeconds : totalSeconds - distance
+                    } else {
+                        duration = totalSeconds
+                    }
+                } else {
+//                    return Observable.just(totalSeconds)
+                    duration = totalSeconds
+                }
+                
+                return Observable<Int>
+                    .timer(duration: duration, interval: 1)
+                    .takeUntil(UIApplication.shared.rx.applicationDidEnterBackground)
+            }
+            .share()
+        
+        timer
+            .map{ $0 <= 0 }
+            .distinctUntilChanged()
+            .bind(to: sendBtn.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
+        timer
+            .debug()
+            .filter{ $0 == totalSeconds }
+            .flatMap { [unowned self] _ -> Observable<Result<String, GeneralError>> in
+                guard
+                    let nationCode = UserTDO.instance.nationCode,
+                    let phoneNumer = UserTDO.instance.phoneNumber,
+                    let purePhoneNumber = UserTDO.instance.purePhoneNumber else {
+                        return .just(.failure(.custom("The cell phone number is empty!")))
+                }
+                return self.provider.request(target: .getverificationcode(nationCode: nationCode,
+                                                                          phoneNumber: phoneNumer,
+                                                                          purePhoneNumber: purePhoneNumber,
+                                                                          code: "888888"),
+                                             model: String.self, atKeyPath: .data).asObservable()
+            }
+            .subscribe(onNext: { [unowned self] result in
+                switch result {
+                case .success(let message):
+                    self.showToast(message: message)
+                case .failure(let error):
+                    self.showToast(message: error.message)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+//        timer
+//            .map{ "重新获取(\($0.formatString))s" }
+//            .bind(to: sendBtn.rx.title(for: .disabled))
+//            .disposed(by: disposeBag)
+        
+        let tap = confirmBtn.rx.tap
+        
+        tap.subscribe(onNext: { [unowned self] in
+            self.showLoading(offsetY: 0)
+        })
+        .disposed(by: disposeBag)
+        
+        tap.flatMap{ [unowned self] _ -> Observable<Result<GeneralModel.Plain, GeneralError>> in
+                
+                guard
+                    let nationCode = UserTDO.instance.nationCode,
+                    let phoneNumer = UserTDO.instance.phoneNumber,
+                    let purePhoneNumber = UserTDO.instance.purePhoneNumber else {
+                        return .just(.failure(.custom("The cell phone number is empty!")))
+                }
+                
+                let code = self.codeField.text
+                UserTDO.instance.verificationcode = code
+                let result = UserTDO.instance.checkout(properties: [.verificationcode])
+                if case let .failure(error) = result {
+                    return .just(.failure(error))
+                }
+                
+                return self.provider.request(target: .verificationcode(nationCode: nationCode,
+                                                                       phoneNumber: phoneNumer,
+                                                                       purePhoneNumber: purePhoneNumber,
+                                                                       code: code!),
+                                             model: GeneralModel.Plain.self).asObservable()
+            }
+            .subscribe(onNext: { [unowned self] result in
+                switch result {
+                case .success:
+                    self.hideLoading()
+                    let profileVC = RegisterUserProfileViewController()
+                    self.navigationController?.pushViewController(profileVC, animated: true)
+                case .failure(let error):
+                    self.hideLoading()
+                    self.showToast(message: error.message)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        codeField.rx.text.orEmpty
+            .map{ !$0.isEmpty }
+            .bind(to: confirmBtn.rx.isEnabled)
+            .disposed(by: disposeBag)
+    }
+}
+
+extension Int {
+    fileprivate var formatString: String {
+        if self > 9 {
+            return "\(self)"
+        }
+        else {
+            return "0\(self)"
         }
     }
 }

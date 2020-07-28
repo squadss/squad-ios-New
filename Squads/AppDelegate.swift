@@ -33,9 +33,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // 配置IM
         let config = TIMSdkConfig()
-        config.sdkAppId = 1400144517
+        config.sdkAppId = App.Account.TIMAppKey
         config.disableLogPrint = false //禁止在控制台打印
         TIMManager.sharedInstance()?.initSdk(config)
+        
+        // 配置UMeng统计
+        UMConfigure.initWithAppkey(App.Account.UMengAppKey, channel: "App Store")
         
         //注册远程推送
         registerNotification(launchOptions)

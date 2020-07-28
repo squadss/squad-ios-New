@@ -14,9 +14,16 @@ import ImSDK
 
 class LoginReactor: Reactor {
     
+    struct TimVo: Codable {
+        let userId: String
+        let sdkappid: Int
+        let userSig: String
+    }
+    
     struct Model: Codable {
         let loginAccountVo: User
         let token: String
+        let timVo: TimVo
     }
     
     enum Action {
@@ -51,9 +58,9 @@ class LoginReactor: Reactor {
                     switch result {
                     case .success(let model):
                         let param = TIMLoginParam()
-                        param.appidAt3rd = "1400144517"
-                        param.identifier = "eppeo1"
-                        param.userSig = "eJxlz1FPgzAQwPF3PgXhdca0HcVh4gNDkjEkIdMSs5cG18KOKe1oUafxuxtxiSTe6**fu9yn47qu93B3f1ntdmroLLcnLT332vWQd-GHWoPgleXzXvxD*a6hl7yqrexHxJRSgtC0ASE7CzWcC6m1VHjiRhz4eOR3gY8Q9n2Kr6YJNCPmCYvTZan3hSkWJnuK2V6EW4UbUbb9bCsbErHjBiXLrI3NCg4RJJFlgS5Ky8R6eMuOESWPG-vclvj2lObmY*YP67ZapXUXqvxmctLCizx-FNKABmRBJvoqewOqGwOCMMVkjn7Gc76cb79fXgI_"
+                        param.appidAt3rd = "\(model.timVo.sdkappid)"
+                        param.identifier = model.timVo.userId
+                        param.userSig = model.timVo.userSig
                         return self.loaginTIM(param: param).map { (subResult)  in
                             switch subResult {
                             case .success:
@@ -82,6 +89,7 @@ class LoginReactor: Reactor {
         var state = state
         switch mutation {
         case .setLoading(let s):
+            state.toast = nil
             state.loading = s
         case .setSuccess(let s):
             state.loading = false

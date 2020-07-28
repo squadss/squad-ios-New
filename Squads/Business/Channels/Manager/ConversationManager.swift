@@ -38,6 +38,15 @@ public final class MessageElem {
     public init(message: TIMMessage) {
         self.message = message
     }
+    
+    // 将当前消息转为文本描述
+    var description: String {
+        return "哈喽"
+    }
+    
+    var dateString: String {
+        return "just"
+    }
 }
 
 protocol ConversationDelegate: class {

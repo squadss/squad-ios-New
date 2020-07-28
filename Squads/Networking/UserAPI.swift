@@ -65,17 +65,17 @@ extension UserAPI: TargetType {
         case .signIn:
             return "user/signin"
         case .getAccountInfo:
-            return "getAccountInfo"
+            return "user/getLoginUserInfo"
         case .account(let id):
-            return "account/" + id
+            return "user/account/" + id
         case .update:
-            return "update"
+            return "user/update"
         case .verificationcode:
-            return "verificationcode"
+            return "user/verificationcode"
         case .getverificationcode:
-            return "getverificationcode"
+            return "user/getVerificationCode"
         case .logout:
-            return "logout"
+            return "user/logout"
         }
     }
     

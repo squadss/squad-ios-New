@@ -8,7 +8,7 @@
 
 import UIKit
 
-class RegisterViewController: RegisterGeneralViewController {
+class RegisterViewController: BaseViewController, BrickInputFieldStyle {
 
     private var usernameField = UITextField()
     private var passwordField = UITextField()
@@ -22,6 +22,19 @@ class RegisterViewController: RegisterGeneralViewController {
         self.navBarTintColor = .clear
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        backgroundView.addListener()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        backgroundView.removeListener()
+        usernameField.resignFirstResponder()
+        passwordField.resignFirstResponder()
+        confirmPasswordField.resignFirstResponder()
+    }
+    
     override func setupView() {
         
         view.addSubview(backgroundView)
@@ -32,6 +45,8 @@ class RegisterViewController: RegisterGeneralViewController {
         confirmBtn.setTitle("Send Me a Code", for: .normal)
         confirmBtn.addTarget(self, action: #selector(confirmBtnDidTapped), for: .touchUpInside)
         
+        passwordField.isSecureTextEntry = true
+        confirmPasswordField.isSecureTextEntry = true
         configInputField(usernameField, placeholder: "Username")
         configInputField(passwordField, placeholder: "Password")
         configInputField(confirmPasswordField, placeholder: "Confirm Password")
@@ -42,6 +57,7 @@ class RegisterViewController: RegisterGeneralViewController {
         stackView.alignment = .fill
         stackView.spacing = 20
         backgroundView.addSubview(stackView)
+        backgroundView.offsetY = 130
     }
     
     override func setupConstraints() {
@@ -59,10 +75,10 @@ class RegisterViewController: RegisterGeneralViewController {
     
     @objc
     private func confirmBtnDidTapped() {
-        userTDO.username = usernameField.text
-        userTDO.password = passwordField.text
-        userTDO.rePassword = confirmPasswordField.text
-        let result = checkoutParams(properties: [.username, .password, .rePassword])
+        UserTDO.instance.username = usernameField.text
+        UserTDO.instance.password = passwordField.text
+        UserTDO.instance.rePassword = confirmPasswordField.text
+        let result = UserTDO.instance.checkout(properties: [.username, .password, .rePassword])
         switch result {
         case .success:
             let vc = RegisterPhoneNumberViewController()
@@ -71,4 +87,5 @@ class RegisterViewController: RegisterGeneralViewController {
             showToast(message: error.message)
         }
     }
+    
 }

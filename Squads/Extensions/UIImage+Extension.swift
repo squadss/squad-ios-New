@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 extension UIImage {
     /**
@@ -271,6 +273,18 @@ extension CALayer {
         maskCorners(radius, rect: bounds)
     }
        
+}
+
+extension Reactive where Base : UIImageView {
+    
+    /// 绑定为视图为高亮状态显示的图片
+    /// - Parameter normalSelected: 是否将图片置为高亮状态 默认是
+    public func setHighlightedImage(normalSelected: Bool = true) -> Binder<UIImage?> {
+        return Binder(base) { (view, image) in
+            view.isHighlighted = normalSelected
+            view.highlightedImage = image
+        }
+    }
 }
 
 class CornersImageView: UIImageView {

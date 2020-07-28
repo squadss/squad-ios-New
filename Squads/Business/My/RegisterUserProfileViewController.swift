@@ -9,7 +9,7 @@
 import UIKit
 import RxSwift
 
-class RegisterUserProfileViewController: RegisterGeneralViewController {
+class RegisterUserProfileViewController: BaseViewController, BrickInputFieldStyle {
 
     private let picker = AvatarPicker()
     private var disposeBag = DisposeBag()
@@ -26,6 +26,17 @@ class RegisterUserProfileViewController: RegisterGeneralViewController {
         self.navBarTintColor = .clear
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        backgroundView.addListener()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        backgroundView.removeListener()
+        nicknameField.resignFirstResponder()
+    }
+    
     override func setupView() {
         
         view.addSubview(backgroundView)
@@ -40,6 +51,7 @@ class RegisterUserProfileViewController: RegisterGeneralViewController {
         avatarView.imageSize = CGSize(width: 107, height: 107)
         avatarView.imageURL = URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")
         backgroundView.addSubview(avatarView)
+        backgroundView.offsetY = 150
         
         configInputField(nicknameField, placeholder: "Phone Number")
         
@@ -54,13 +66,6 @@ class RegisterUserProfileViewController: RegisterGeneralViewController {
         stackView.alignment = .fill
         stackView.spacing = 20
         backgroundView.addSubview(stackView)
-        
-        userTDO.username = "eppeo1"
-        userTDO.password = "w12345678"
-        userTDO.inviteCode = "111"
-        userTDO.nationCode = "+86"
-        userTDO.phoneNumber = "+8617771865608"
-        userTDO.purePhoneNumber = "17771865608"
     }
     
     override func setupConstraints() {
@@ -98,15 +103,15 @@ class RegisterUserProfileViewController: RegisterGeneralViewController {
                 if let image = $0.1 { return image }
                 return $0.0
             }
-            .do(onNext: { [unowned self] image in
-                self.userTDO.avatar = image.pngData()
+            .do(onNext: { image in
+                UserTDO.instance.avatar = image.pngData()
             })
             .bind(to: avatarView.imageBtn.rx.image(for: .normal))
             .disposed(by: rx.disposeBag)
         
         nicknameField.rx.text.orEmpty
-            .do(onNext: { [unowned self] text in
-                self.userTDO.nickname = text
+            .do(onNext: { text in
+                UserTDO.instance.nickname = text
             })
             .map{ !$0.isEmpty }
             .bind(to: confirmBtn.rx.isEnabled)
@@ -122,13 +127,13 @@ class RegisterUserProfileViewController: RegisterGeneralViewController {
             .disposed(by: disposeBag)
         
         tapObservable
-            .map{ [unowned self] in self.checkoutParams(properties: [.username, .password, .phoneNumber, .nickname, .avatar]) }
-            .flatMap{ [unowned self] result -> Observable<Result<GeneralModel.Plain, GeneralError>> in
+            .flatMap{ [unowned self] _ -> Observable<Result<GeneralModel.Plain, GeneralError>> in
+                let result = UserTDO.instance.checkout(properties: [.username, .password, .phoneNumber, .nickname, .avatar])
                 switch result {
                 case .success(let model):
                     return self.provider.request(target: .signUp(username: model.username!,
                                                                  password: model.password!,
-                                                                 inviteCode: model.inviteCode!,
+                                                                 inviteCode: "",
                                                                  nationCode: model.nationCode!,
                                                                  phoneNumber: model.phoneNumber!,
                                                                  purePhoneNumber: model.purePhoneNumber!,

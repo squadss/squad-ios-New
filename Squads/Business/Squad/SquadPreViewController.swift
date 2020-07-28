@@ -83,7 +83,7 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
             .subscribe(onNext: { [unowned self] indexPath in
                 switch indexPath.row {
                 case 0: //Members
-                    let membersReactor = SquadMembersReactor()
+                    let membersReactor = SquadMembersReactor(squadId: reactor.squadId)
                     let vc = SquadMembersViewController(reactor: membersReactor)
                     vc.title = "Members"
                     self.navigationController?.pushViewController(vc, animated: true)
@@ -98,7 +98,7 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
                     vc.title = "Theme"
                     self.navigationController?.pushViewController(vc, animated: true)
                 case 3: // Invith New
-                    let invithNewReactor = SquadInvithNewReactor()
+                    let invithNewReactor = SquadInvithNewReactor(squadId: reactor.squadId)
                     let vc = SquadInvithNewViewController(reactor: invithNewReactor)
                     self.navigationController?.pushViewController(vc, animated: true)
                 case 4: // Leave Squad
@@ -117,7 +117,7 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
     
     @objc
     private func leftBarItemDidTapped() {
-        
+        self.dismiss(animated: true)
     }
     
     @objc

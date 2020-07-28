@@ -30,6 +30,18 @@ class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldS
         self.navBarTintColor = .clear
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        backgroundView.addListener()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        backgroundView.removeListener()
+        usernameField.resignFirstResponder()
+        passwordField.resignFirstResponder()
+    }
+    
     override func setupView() {
         
         
@@ -49,6 +61,7 @@ class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldS
         stackView.alignment = .fill
         stackView.spacing = 20
         backgroundView.addSubview(stackView)
+        backgroundView.offsetY = 100
         
         forgetBtn = UIButton()
         forgetBtn.setTitle("Forgot Password?", for: .normal)

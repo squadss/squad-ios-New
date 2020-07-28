@@ -25,8 +25,20 @@ enum SquadAPI {
     /// 删除小组
 //    case removeSquad()
     
-    /// 小组详情
-//    case querySquad()
+    /// 获取小组详情
+    case querySquad(id: String, setTop: Bool)
+    
+    /// 获取当前置顶的squad
+    case quardTopSquad
+    
+    /// 批量通过手机号查询用户是否已被注册
+    case isAlreadyRegistered(phoneList: Array<String>)
+    
+    /// 查询全部的好友
+    case queryAllFriends
+    
+    /// 批量邀请好友加入squad
+    case inviteFriends(squadId: String, userIds: Array<String>)
     
     /// 修改小组信息
 //    case updateSquad()
@@ -55,7 +67,7 @@ extension SquadAPI: TargetType {
         switch self {
         case .createSquad:
             return "add"
-        case .createChannel:
+        case .createChannel, .querySquad, .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends:
             return ""
         }
     }
@@ -66,11 +78,96 @@ extension SquadAPI: TargetType {
             return .post
         case .createChannel:
             return .post
+        //FIXME: - 测试接口
+        case .querySquad, .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends: return .get
         }
     }
     
     var sampleData: Data {
-        return Data()
+        switch self {
+        case .querySquad(let id):
+        return """
+            {
+                "code": 200,
+                "message": "",
+                "data": {
+                        "id": \(id),
+                        "squadName": "测试小组",
+                        "logoPath": "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg",
+                        "createRemark": ""
+                        }
+            }
+            """.data(using: .utf8)!
+        case .quardTopSquad:
+        return """
+            {
+                "code": 200,
+                "message": "",
+                "data": {
+                        "id": 1,
+                        "squadName": "测试小组",
+                        "logoPath": "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg",
+                        "createRemark": ""
+                        }
+            }
+            """.data(using: .utf8)!
+        case .isAlreadyRegistered:
+            return """
+                {
+                    "code": 200,
+                    "message": "",
+                    "data": [
+                                {
+                                    "id": 122,
+                                    "nickname": "小张",
+                                    "avatar": "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg",
+                                    "gender": "F"
+                                    "username": "xiaozhagn"
+                                },
+                                {
+                                    "id": 123,
+                                    "nickname": "小李",
+                                    "avatar": "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg",
+                                    "gender": "F"
+                                    "username": "xiaozhagn"
+                                }
+                            ]
+                }
+                """.data(using: .utf8)!
+        case .queryAllFriends:
+            return """
+                {
+                    "code": 200,
+                    "message": "",
+                    "data": [
+                                {
+                                    "id": 122,
+                                    "nickname": "小张",
+                                    "avatar": "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg",
+                                    "gender": "F"
+                                    "username": "xiaozhagn"
+                                },
+                                {
+                                    "id": 123,
+                                    "nickname": "小李",
+                                    "avatar": "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg",
+                                    "gender": "F"
+                                    "username": "xiaozhagn"
+                                }
+                            ]
+                }
+                """.data(using: .utf8)!
+        case .inviteFriends:
+            return """
+            {
+            "code": 200,
+            "message": "邀请成功",
+            "data": null
+            }
+            """.data(using: .utf8)!
+        default:
+            return Data()
+        }
     }
     
     var task: Task {
@@ -78,7 +175,8 @@ extension SquadAPI: TargetType {
         case let .createSquad(name, avator, remark):
             let params = ["squadName": name, "logoImgBase64": avator.base64EncodedString(options: .lineLength64Characters), "createRemark": remark]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
-        case .createChannel:
+        //FIXME: - 测试接口
+        case .createChannel, .querySquad, .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends:
             return .requestPlain
         }
     }

@@ -19,6 +19,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     private var separatorLine = SeparatorLine()
     private var tableView = UITableView(frame: .zero, style: .grouped)
     private var sideMenuManager = SideMenuManager()
+    private var titleBarView = NavigationBarTitleView()
     
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadPrimaryKey>>!
     override var allowedCustomBackBarItem: Bool {
@@ -27,27 +28,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        var setting = SideMenuSettings()
-        setting.statusBarEndAlpha = 0
-        setting.menuWidth = view.bounds.width * 0.8
-        
-        let reactor = MyProfileReactor()
-        let rootVC = MyProfileViewController(reactor: reactor)
-        let menu = CustomSideMenuNavigationController(rootViewController: rootVC, settings: setting)
-        
-        let style = SideMenuPresentationStyle.menuSlideIn
-        style.presentingEndAlpha = 0.6
-        
-        menu.presentationStyle = style
-        sideMenuManager.leftMenuNavigationController = menu
-        
-        let titleView = NavigationBarTitleView()
-        titleView.button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-        titleView.button.setTitle("Squad Page", for: .normal)
-        titleView.button.theme.titleColor(from: UIColor.text, for: .normal)
-        titleView.button.addTarget(self, action: #selector(titleBtnDidTapped), for: .touchUpInside)
-        addToTitleView(titleView)
+        view.theme.backgroundColor = UIColor.background
     }
     
     override func setupView() {
@@ -99,7 +80,39 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0.001))
         
         view.addSubview(tableView)
-        view.backgroundColor = .white
+        
+        setupSideMenu()
+        setupTitleView()
+    }
+    
+    private func setupSideMenu() {
+        
+        let profileReactor = MyProfileReactor()
+        let rootVC = MyProfileViewController(reactor: profileReactor)
+        rootVC.itemSelected
+            .map{ Reactor.Action.requestSquad(id: $0) }
+            .bind(to: reactor!.action)
+            .disposed(by: disposeBag)
+        
+        var setting = SideMenuSettings()
+        setting.statusBarEndAlpha = 0
+        setting.menuWidth = view.bounds.width * 0.8
+        setting.dismissDuration = 0.5
+        setting.completionCurve = .linear
+        
+        let menu = CustomSideMenuNavigationController(rootViewController: rootVC, settings: setting)
+        let style = SideMenuPresentationStyle.menuSlideIn
+        style.presentingEndAlpha = 0.6
+        menu.presentationStyle = style
+        sideMenuManager.leftMenuNavigationController = menu
+    }
+    
+    private func setupTitleView() {
+        titleBarView.button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        titleBarView.button.setTitle("Squad Page", for: .normal)
+        titleBarView.button.theme.titleColor(from: UIColor.text, for: .normal)
+        titleBarView.button.addTarget(self, action: #selector(titleBtnDidTapped), for: .touchUpInside)
+        addToTitleView(titleBarView)
     }
     
     override func addTouchAction() {
@@ -209,6 +222,11 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
+        reactor.state
+            .compactMap{ $0.isLoading }
+            .bind(to: titleBarView.button.rx.loading)
+            .disposed(by: disposeBag)
+        
         rx.viewWillAppear
             .map{ Reactor.Action.refreshChannels }
             .bind(to: reactor.action)
@@ -260,7 +278,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
 
     @objc
     private func titleBtnDidTapped() {
-        let preReactor = SquadPreReactor()
+        //FIXME: - SquadId暂时为空
+        let preReactor = SquadPreReactor(squadId: "")
         let preViewController = SquadPreViewController(reactor: preReactor)
         let nav = BaseNavigationController(rootViewController: preViewController)
         nav.modalPresentationStyle = .fullScreen

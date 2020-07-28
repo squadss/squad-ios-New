@@ -7,12 +7,25 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 import RxDataSources
 import ETNavBarTransparent
 
 class MyProfileViewController: ReactorViewController<MyProfileReactor> {
 
-    var tableView = UITableView()
+    var itemSelected: Observable<String> {
+        return tableView.rx.itemSelected.map{ [unowned self] in
+            return self.dataSource[$0]
+        }
+        .do(onNext: { [unowned self] _ in
+            self.dismiss(animated: true)
+        })
+    }
+    
+    private var tableView = UITableView()
+    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, String>>!
+    
     var headerView = MyProfileHeaderView()
     var footerView = MyProfileFooterView()
     
@@ -82,7 +95,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     }
     
     override func bind(reactor: MyProfileReactor) {
-        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
+        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
             let cell = tableView.dequeue(Reusable.mySquadsViewCell)!
             cell.pritureView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"))
             cell.titleLab.text = "Camp life"
@@ -106,15 +119,6 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     }
     
     @objc
-    private func didTapped() {
-        let preReactor = SquadPreReactor()
-        let preViewController = SquadPreViewController(reactor: preReactor)
-        let nav = BaseNavigationController(rootViewController: preViewController)
-        nav.modalPresentationStyle = .fullScreen
-        self.present(nav, animated: true)
-    }
-    
-    @objc
     private func applyBtnDidTapped() {
         let reactor = ApplyListReactor()
         let applyListViewController = ApplyListViewController(reactor: reactor)
@@ -123,13 +127,26 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     }
     
     override func addTouchAction() {
+        
+        footerView.addTapped
+            .subscribe(onNext: { [unowned self] in
+                let createVC = CreateSquadViewController()
+                let nav = BaseNavigationController(rootViewController: createVC)
+                nav.modalPresentationStyle = .fullScreen
+                self.present(nav, animated: true)
+            })
+            .disposed(by: disposeBag)
+        
         footerView.itemSelected
             .subscribe(onNext: { [unowned self] flag in
                 switch flag {
                 case "profile":
-                    let preReactor = SquadPreReactor()
+                    //FIXME: - 暂时为空
+                    let preReactor = SquadPreReactor(squadId: "")
                     let preViewController = SquadPreViewController(reactor: preReactor)
-                    self.navigationController?.pushViewController(preViewController, animated: true)
+                    let nav = BaseNavigationController(rootViewController: preViewController)
+                    nav.modalPresentationStyle = .fullScreen
+                    self.present(nav, animated: true)
                 case "notifications":
                     break
                 case "inviteFrients":
@@ -137,7 +154,18 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
                 case "help":
                     break
                 case "logOut":
-                    break
+                    let alert = UIAlertController(title: "Make sure to leave Squad?", message: nil, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
+                    alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { _ in
+                        self.showToast(message: "Exit the success!")
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            User.removeCurrentUser()
+                            AuthManager.removeToken()
+                            Application.shared.presentInitialScreent()
+                        }
+                    }))
+                    self.present(alert, animated: true)
                 default:
                     break
                 }

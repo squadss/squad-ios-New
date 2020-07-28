@@ -56,7 +56,7 @@ extension Reactive where Base: ReactivePlaceholder {
                 view.showErrorPlaceholder()
             case .noConnection:
                 view.showNoConnectionPlaceholder()
-            case .custom:
+            case .custom, .loginStatusDidExpired:
                 view.showDefault()
             }
         }

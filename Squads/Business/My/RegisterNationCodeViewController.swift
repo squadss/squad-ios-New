@@ -16,9 +16,9 @@ class ZonesResultsController: BaseViewController {
     weak var searchBar: UISearchBar!
     private var tableView = UITableView()
     private var disposeBag = DisposeBag()
-    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, ZonesViewController.CellItemModelType>>!
+    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, RegisterNationCodeViewController.CellItemModelType>>!
     
-    var dataListSubject = BehaviorRelay<[SectionModel<String, ZonesViewController.CellItemModelType>]>(value: [])
+    var dataListSubject = BehaviorRelay<[SectionModel<String, RegisterNationCodeViewController.CellItemModelType>]>(value: [])
     
     var didSelectedItemObservable: Observable<String> {
         return tableView.rx.itemSelected.map{ [unowned self] in self.dataSource[$0].content }
@@ -26,7 +26,7 @@ class ZonesResultsController: BaseViewController {
     
     override func initData() {
         
-        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, ZonesViewController.CellItemModelType>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
+        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, RegisterNationCodeViewController.CellItemModelType>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
             let cell = tableView.dequeueReusableCell(withIdentifier: "UserInfoCellKey") as! UserInfoCell
             cell.titleLab.text = model.title
             cell.contentLab.isHidden = false
@@ -37,10 +37,10 @@ class ZonesResultsController: BaseViewController {
         
         searchBar.rx.text.orEmpty
             .filter{ $0.isEmpty == false }
-            .map{  text -> [SectionModel<String, ZonesViewController.CellItemModelType>] in
+            .map{  text -> [SectionModel<String, RegisterNationCodeViewController.CellItemModelType>] in
                 let list = self.dataListSubject.value
                
-                var tempList = [SectionModel<String, ZonesViewController.CellItemModelType>]()
+                var tempList = [SectionModel<String, RegisterNationCodeViewController.CellItemModelType>]()
                 
                 for section in list {
                     
@@ -73,7 +73,7 @@ class ZonesResultsController: BaseViewController {
     }
 }
 
-class ZonesViewController: BaseViewController  {
+class RegisterNationCodeViewController: BaseViewController  {
 
     typealias CellItemModelType = (title: String, content: String)
     
