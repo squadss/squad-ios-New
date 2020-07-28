@@ -15,10 +15,17 @@ extension UserDefaults {
         case userToken       //用户的token
         case tokenExpiry     //token过期时间
         case isDarkKey       //是否为黑主题
+        case topSquadKey      //是否存在置顶的squad
     }
 }
 
 extension UserDefaults {
+    
+    /// 是否存在置顶的squad
+    var topSquad: String? {
+        set { UserDefaults.Defaults.topSquadKey.store(value: newValue) }
+        get { return UserDefaults.Defaults.topSquadKey.storedString }
+    }
     
     /// 用户的token
     var token: String? {

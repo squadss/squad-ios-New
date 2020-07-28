@@ -8,36 +8,63 @@
 
 import UIKit
 import RxSwift
+import ISEmojiView
 
 class CreateChannelsView: BaseView {
     
-    // 可编辑按钮
-    private var canEditView = UIButton()
-    // 头像
-    private var imageBtn = CornersButton()
-    // 标题
-    private var tipLab = UILabel()
-    // 输入框
-    private var textField = UITextField()
-    // 错误提示lab
-    private var toastLab = UILabel()
     // 创建按钮
     var confirmBtn = UIButton()
     // 关闭pop的按钮
     var closeBtn = UIButton()
+    // 头像
+    var imageTextView = UITextView()
+    // 输入框
+    var textField = UITextField()
+    // 标题
+    private var tipLab = UILabel()
+    // 错误提示lab
+    private var toastLab = UILabel()
+    // 可编辑按钮
+    private var canEditView = UIButton()
     
     private var gradientLayer: CAGradientLayer!
+    private var disposeBag = DisposeBag()
     
     override func setupView() {
         
-        imageBtn.setImage(UIImage(named: "Channels Placeholder"), for: .normal)
-        imageBtn.layer.cornerRadius = 39
-        imageBtn.layer.masksToBounds = true
+        setupImageTextView()
+        setupBackgroundLayer()
+        setupInoutField()
+        setupCommonView()
         
-        tipLab.text = "NAME"
-        tipLab.theme.textColor = UIColor.textGray
-        tipLab.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        addSubviews(imageTextView, canEditView, tipLab, textField, toastLab, confirmBtn, closeBtn)
         
+        Observable
+            .combineLatest(textField.rx.text.orEmpty, imageTextView.rx.text.orEmpty) {
+                return !($0.isEmpty || $1.isEmpty)
+            }
+            .bind(to: confirmBtn.rx.isEnabled)
+            .disposed(by: disposeBag)
+    }
+    
+    private func setupImageTextView() {
+        imageTextView.layer.cornerRadius = 39
+        imageTextView.layer.masksToBounds = true
+        imageTextView.font = UIFont.systemFont(ofSize: 60)
+        imageTextView.tintColor = UIColor.clear
+        imageTextView.backgroundColor = .lightGray
+        imageTextView.textContainerInset = UIEdgeInsets(top: 3, left: 2, bottom: 0, right: 0)
+        imageTextView.setInputAccessoryView(target: self, selector: #selector(imageCompletedBtnDidTapped))
+        
+        let setting = KeyboardSettings(bottomType: .categories)
+        setting.countOfRecentsEmojis = 0
+        let emojiView = EmojiView(keyboardSettings: setting)
+        emojiView.translatesAutoresizingMaskIntoConstraints = false
+        emojiView.delegate = self
+        imageTextView.inputView = emojiView
+    }
+    
+    private func setupBackgroundLayer() {
         gradientLayer = CAGradientLayer()
         gradientLayer.colors = [UIColor(hexString: "#F7BDB7").cgColor,
                                 UIColor(hexString: "#FDDEC8").cgColor]
@@ -47,10 +74,19 @@ class CreateChannelsView: BaseView {
         gradientLayer.locations = [0, 1]
         gradientLayer.cornerRadius = 10
         layer.addSublayer(gradientLayer)
-        
+    }
+    
+    private func setupInoutField() {
         textField.borderStyle = .none
         textField.backgroundColor = .white
         textField.layer.cornerRadius = 8
+        textField.setInputAccessoryView(target: self, selector: #selector(textCompletedBtnDidTapped))
+    }
+    
+    private func setupCommonView() {
+        tipLab.text = "NAME"
+        tipLab.theme.textColor = UIColor.textGray
+        tipLab.font = UIFont.systemFont(ofSize: 12, weight: .bold)
         
         toastLab.textAlignment = .center
         toastLab.theme.textColor = UIColor.textGray
@@ -66,17 +102,25 @@ class CreateChannelsView: BaseView {
         
         closeBtn.imageView?.contentMode = .center
         closeBtn.setImage(UIImage(named: "Channels Close"), for: .normal)
-        
-        addSubviews(imageBtn, canEditView, tipLab, textField, toastLab, confirmBtn, closeBtn)
+    }
+    
+    @objc
+    private func imageCompletedBtnDidTapped() {
+        imageTextView.resignFirstResponder()
+    }
+    
+    @objc
+    private func textCompletedBtnDidTapped() {
+        textField.resignFirstResponder()
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        imageBtn.frame = CGRect(x: (bounds.width - 78)/2, y: 56, width: 78, height: 78)
-        canEditView.frame = CGRect(x: imageBtn.frame.maxX - 25, y: imageBtn.frame.maxY - 25, width: 29, height: 29)
+        imageTextView.frame = CGRect(x: (bounds.width - 78)/2, y: 56, width: 78, height: 78)
+        canEditView.frame = CGRect(x: imageTextView.frame.maxX - 25, y: imageTextView.frame.maxY - 25, width: 29, height: 29)
         
-        tipLab.frame = CGRect(x: 36, y: imageBtn.frame.maxY + 29, width: bounds.width - 2 * 36, height: 14)
+        tipLab.frame = CGRect(x: 36, y: imageTextView.frame.maxY + 29, width: bounds.width - 2 * 36, height: 14)
         
         gradientLayer.frame = CGRect(x: tipLab.frame.minX, y: tipLab.frame.maxY + 8, width: bounds.width - 2 * tipLab.frame.minX, height: 44)
         textField.frame = CGRect(x: tipLab.frame.minX + 3, y: tipLab.frame.maxY + 8 + 3, width: bounds.width - 2 * tipLab.frame.minX - 6, height: 44 - 6)
@@ -85,5 +129,27 @@ class CreateChannelsView: BaseView {
         
         confirmBtn.frame = CGRect(x: (bounds.width - 106)/2, y: bounds.height - 31 - 45, width: 106, height: 31)
         closeBtn.frame = CGRect(x: bounds.width - 60, y: 10, width: 44, height: 44)
+    }
+}
+
+extension CreateChannelsView: EmojiViewDelegate {
+    
+    func emojiViewDidSelectEmoji(_ emoji: String, emojiView: EmojiView) {
+        imageTextView.deleteBackward()
+        imageTextView.insertText(emoji)
+    }
+    
+    func emojiViewDidPressChangeKeyboardButton(_ emojiView: EmojiView) {
+        imageTextView.inputView = nil
+        imageTextView.keyboardType = .default
+        imageTextView.reloadInputViews()
+    }
+    
+    func emojiViewDidPressDeleteBackwardButton(_ emojiView: EmojiView) {
+        imageTextView.deleteBackward()
+    }
+    
+    func emojiViewDidPressDismissKeyboardButton(_ emojiView: EmojiView) {
+        imageTextView.resignFirstResponder()
     }
 }

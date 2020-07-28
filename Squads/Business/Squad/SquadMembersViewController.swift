@@ -44,9 +44,11 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
     
     @objc
     private func rightBtnBtnDidTapped() {
-        let invithNewReactor = SquadInvithNewReactor()
+        let invithNewReactor = SquadInvithNewReactor(squadId: reactor!.squadId)
         let vc = SquadInvithNewViewController(reactor: invithNewReactor)
-        self.navigationController?.pushViewController(vc, animated: true)
+        let nav = BaseNavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .fullScreen
+        self.present(nav, animated: true)
     }
 
     override func bind(reactor: SquadMembersReactor) {

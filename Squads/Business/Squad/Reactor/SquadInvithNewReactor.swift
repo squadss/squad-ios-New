@@ -28,34 +28,36 @@ class SquadInvithNewReactor: Reactor {
         case deleteSelectedMember(Member)
         case addSelectedMember(Member)
         case request
+        // 获取通讯录中联系人手机号
+        case visibleContacts(phoneList: Array<String>, isDenied: Bool)
     }
     
     enum Mutation {
         case setDeleteMember(Member)
         case setAddMember(Member)
-        case setRequestResult(Result<Void, GeneralError>)
+        case setInviteSuccess
+        case setMembers(members: Array<Member>, isDenied: Bool?)
+        case setToast(String)
     }
     
     struct State {
         var repos: Array<[Member]>
         var members: Array<Member>?
-        var requestResult: Result<Void, GeneralError>?
+        // 邀请成功
+        var inviteSuccess: Bool?
+        // 是否拒绝访问通讯录
+        var isDeniedVisibleContacts: Bool?
+        // toast
+        var toast: String?
     }
     
     var initialState: State
+    var provider = OnlineProvider<SquadAPI>()
     
-    init() {
-        initialState = State(repos: [
-                [
-                    Member(user: User(username: "1"), isAdded: false, isColsable: true),
-                    Member(user: User(username: "2"), isAdded: false, isColsable: true)
-                ],
-                [
-                    Member(user: User(username: "3"), isAdded: false, isColsable: true),
-                    Member(user: User(username: "4"), isAdded: false, isColsable: true)
-                ]
-            ]
-        )
+    let squadId: String
+    init(squadId: String) {
+        self.squadId = squadId
+        initialState = State(repos: [[], []])
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -65,7 +67,26 @@ class SquadInvithNewReactor: Reactor {
         case .addSelectedMember(let member):
             return Observable.just(.setAddMember(member))
         case .request:
-            return Observable.just(.setRequestResult(.success(())))
+            let userIds = currentState.members?.map{ $0.user.username } ?? []
+            return provider.request(target: .inviteFriends(squadId: squadId, userIds: userIds), model: GeneralModel.Plain.self).asObservable().map { result in
+                switch result {
+                case .success:
+                    return .setInviteSuccess
+                case .failure(let error):
+                    return .setToast(error.message)
+                }
+            }
+        case let .visibleContacts(phoneList, isDenied):
+            return provider.request(target: .isAlreadyRegistered(phoneList: phoneList),
+                                    model: Array<User>.self,
+                                    atKeyPath: .data).asObservable().map { result in
+                switch result {
+                case .success(let list):
+                    return .setMembers(members: list.map{ Member(user: $0, isAdded: false, isColsable: true) }, isDenied: isDenied)
+                case .failure(let error):
+                    return .setToast(error.message)
+                }
+            }
         }
     }
     
@@ -106,8 +127,19 @@ class SquadInvithNewReactor: Reactor {
                     }
                 }
             }
-        case .setRequestResult(let result):
-            state.requestResult = result
+        case .setInviteSuccess:
+            state.inviteSuccess = true
+        case .setToast(let s):
+            state.toast = s
+        case let .setMembers(members, isDenied):
+            if isDenied != nil {
+                // 更新的通讯录列表
+                state.repos[1] = members
+                state.isDeniedVisibleContacts = isDenied
+            } else {
+                // 更新的好友列表
+                state.repos[0] = members
+            }
         }
         return state
     }

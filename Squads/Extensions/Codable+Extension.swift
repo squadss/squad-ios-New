@@ -103,6 +103,17 @@ extension Decodable {
                 break keyPathCheck
             }
             
+            if jsonObject is NSNull {
+                do {
+                    if let data = try serializeToData(json) {
+                        let message = try decoder.decode(GeneralModel.Plain.self, from: data).message
+                        throw MoyaError.requestMapping(message)
+                    }
+                } catch let error {
+                    throw MoyaError.objectMapping(error, response)
+                }
+            }
+            
             if let data = try serializeToData(jsonObject) {
                 jsonData = data
             } else {

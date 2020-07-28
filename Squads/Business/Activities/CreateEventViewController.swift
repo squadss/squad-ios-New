@@ -78,9 +78,15 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
             case is CreateEventCalendar:
                 let cell = tableView.dequeue(Reusable.createEventCalendarCell)!
                 cell.selectionStyle = .none
+                cell.selectDates(dates: (model as! CreateEventCalendar).selectedDate)
+                cell.didSelectedDateObservable
+                    .map{ Reactor.Action.selectedDates($0) }
+                    .bind(to: reactor.action)
+                    .disposed(by: cell.disposeBag)
                 return cell
             case is CreateEventAvailability:
                 let cell = tableView.dequeue(Reusable.createEventAvailabilityCell)!
+                cell.dateList = (model as? CreateEventAvailability)?.dateList
                 cell.selectionStyle = .none
                 return cell
             default:

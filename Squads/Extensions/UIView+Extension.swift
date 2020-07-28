@@ -12,4 +12,16 @@ extension UIView {
     func addSubviews(_ views: UIView...) {
         views.forEach{ addSubview($0) }
     }
+    
+    /// 获取屏幕快照
+    func snapshot() -> UIImage? {
+        UIGraphicsBeginImageContext(bounds.size)
+        defer { UIGraphicsEndImageContext() }
+        
+        if let ctx = UIGraphicsGetCurrentContext() {
+            layer.render(in: ctx)
+        }
+        
+        return UIGraphicsGetImageFromCurrentImageContext()
+    }
 }

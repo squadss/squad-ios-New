@@ -26,8 +26,9 @@ class SquadMembersReactor: Reactor {
     }
     
     var initialState: State
-    
-    init() {
+    let squadId: String
+    init(squadId: String) {
+        self.squadId = squadId
         initialState = State(repos: ["MEMBERS", "NOTIFICATIONS", "CUSTOMIZE THEME", "INVITH NEW"])
     }
     

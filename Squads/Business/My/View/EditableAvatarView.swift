@@ -12,18 +12,20 @@ import RxCocoa
 
 class EditableAvatarView: BaseView {
     
-    var imageTap: Observable<Void> {
-        return imageBtn.rx.tap.asObservable()
-    }
-    
+    private var canEditSubject = PublishSubject<Void>()
     var canEditTap: Observable<Void> {
         return canEditSubject.asObservable()
     }
     
+    var placeholderImage = UIImage(named: "Avatar Placeholder")
+    var placeholderColor: UIColor = .white {
+        didSet { placeholderImage = placeholderImage?.drawColor(placeholderColor) }
+    }
+    
+    var imageSize = CGSize(width: 80, height: 80)
+    
     var imageURL: URL? {
-        didSet {
-            imageBtn.kf.setImage(with: imageURL, for: .normal, placeholder: placeholderImage)
-        }
+        didSet { imageBtn.kf.setImage(with: imageURL, for: .normal, placeholder: placeholderImage) }
     }
     
     var canEdit: Bool = false {
@@ -39,27 +41,11 @@ class EditableAvatarView: BaseView {
         }
     }
     
-    var placeholderColor: UIColor = .white {
-        didSet {
-            placeholderImage = placeholderImage?.drawColor(placeholderColor)
-        }
-    }
-    
-    var imageSize = CGSize(width: 80, height: 80)
-    
-    override var frame: CGRect {
-        didSet {
-            imageBtn.frame = CGRect(x: (bounds.width - imageSize.width)/2, y: 0, width: imageSize.width, height: imageSize.height)
-            canEditView?.frame = CGRect(x: imageBtn.frame.maxX - 32, y: imageBtn.frame.maxY - 29, width: 29, height: 29)
-        }
-    }
-    
+    var imageBtn = CornersButton()
     private var canEditView: UIButton?
-    private var imageBtn = CornersButton()
-    private var placeholderImage = UIImage(named: "Avatar Placeholder")
-    private var canEditSubject = PublishSubject<Void>()
     
     override func setupView() {
+        imageBtn.clipsToBounds = true
         addSubviews(imageBtn)
     }
     
@@ -75,4 +61,9 @@ class EditableAvatarView: BaseView {
         canEditSubject.onNext(())
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        imageBtn.frame = CGRect(x: (bounds.width - imageSize.width)/2, y: 0, width: imageSize.width, height: imageSize.height)
+        canEditView?.frame = CGRect(x: imageBtn.frame.maxX - 32, y: imageBtn.frame.maxY - 29, width: 29, height: 29)
+    }
 }

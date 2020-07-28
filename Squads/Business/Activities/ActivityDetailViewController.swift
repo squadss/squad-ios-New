@@ -69,9 +69,6 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
                 let settingViewController = AvtivityTimeSettingViewController()
                 self.transitionPresent(settingViewController, animated: true)
                 
-                let items = [SlidableTimeItem(color: .red, start: 1000, end: 2000)]
-                settingViewController.contentView.dataSource = SlidableTimeSectionModel(headTitle: "Choose consecutive times", footTitle : "THU 4/2", items: items)
-
                 settingViewController.contentView.respondedMembers = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
 
                 settingViewController.contentView.waitingMembers = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
@@ -115,7 +112,16 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
     
     private func setupChooseTimeView(reactor: ActivityDetailReactor) {
         guard chooseTimeView == nil else { return }
+        
         chooseTimeView = MultipleChooseTimeView()
+        
+        let leftView = TimeLineDrawTapView()
+        chooseTimeView?.leftView.set(leftView)
+        chooseTimeView?.leftView.title = "SQUAD AVAILABILIT"
+        
+        let rightView = TimeLineDrawPageView()
+        chooseTimeView?.rightView.set(rightView)
+        chooseTimeView?.rightView.title = "CLICK YOUR TIME"
     }
     
     private func setupMapView(reactor: ActivityDetailReactor) {
@@ -208,8 +214,9 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
         membersView?.bottomTitle = "WAITING"
         membersView?.bottomList = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
         
-        let items = [SlidableTimeItem(color: .red, start: 1000, end: 2000)]
-        chooseTimeView?.contentView.dataSource = [SlidableTimeSectionModel(headTitle: "SQUAD AVAILABILITY", footTitle : "THURS 4/2", items: items), SlidableTimeSectionModel(headTitle: "CLICK YOUR TIME", footTitle : "THU 4/2", items: items)]
+//        chooseTimeView?.rightView.axisXDates = []
+//
+//        chooseTimeView?.leftView.axisXDates = []
     }
     
     override func bind(reactor: ActivityDetailReactor) {
@@ -243,5 +250,53 @@ extension RxSwift.Reactive where Base: UIViewController {
         return methodInvoked(#selector(UIViewController.viewDidLoad))
             .map { _ in return }
     }
+    
+    public var viewWillAppear: Observable<Void> {
+        return methodInvoked(#selector(UIViewController.viewWillAppear))
+            .map { _ in return }
+    }
 }
 
+extension RxSwift.Reactive where Base: UIApplication {
+    
+    public var delegate: DelegateProxy<UIApplication, UIApplicationDelegate> {
+        return RxApplicationDelegateProxy.proxy(for: base)
+    }
+    
+    public var applicationWillEnterForeground: Observable<Void> {
+        return delegate.methodInvoked(#selector(UIApplicationDelegate.applicationWillEnterForeground(_:))).map{ _ in () }
+    }
+    
+    public var applicationDidEnterBackground: Observable<Void> {
+        return delegate.methodInvoked(#selector(UIApplicationDelegate.applicationDidEnterBackground(_:)))
+            .map { _ in () }
+    }
+}
+
+open class RxApplicationDelegateProxy: DelegateProxy<UIApplication, UIApplicationDelegate>, DelegateProxyType, UIApplicationDelegate {
+    
+    // Typed parent object.
+    public weak private(set) var application: UIApplication?
+    
+    init(application: ParentObject) {
+        self.application = application
+        super.init(parentObject: application, delegateProxy: RxApplicationDelegateProxy.self)
+    }
+    
+    public static func registerKnownImplementations() {
+        self.register { RxApplicationDelegateProxy(application: $0) }
+    }
+    
+    public static func currentDelegate(for object: UIApplication) -> UIApplicationDelegate? {
+        return object.delegate
+    }
+    
+    public static func setCurrentDelegate(_ delegate: UIApplicationDelegate?, to object: UIApplication) {
+        object.delegate = delegate
+    }
+    
+    override open func setForwardToDelegate(_ forwardToDelegate: UIApplicationDelegate?, retainDelegate: Bool) {
+        super.setForwardToDelegate(forwardToDelegate, retainDelegate: true)
+    }
+    
+}

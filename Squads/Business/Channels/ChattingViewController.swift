@@ -8,27 +8,51 @@
 
 import UIKit
 import Hero
+import RxSwift
+import RxCocoa
+import ImSDK
 import MessageKit
 import InputBarAccessoryView
 
-class ChattingViewController: ReactorViewController<ChattingReactor> {
+enum ConversationAction: Equatable {
+    case create
+    case load(groupId: String)
     
-    var contentView = MessagesContentView()
-    var messageList: [MockMessage] = []
+    static func == (lhs: ConversationAction, rhs: ConversationAction) -> Bool {
+        switch (lhs, rhs) {
+        case (.create, .create): return true
+        case (.load(let l_id), .load(let r_id)): return l_id == r_id
+        default: return false
+        }
+    }
+}
+
+final class ChattingViewController: InputBarViewController {
     
-    open override var canBecomeFirstResponder: Bool {
-        return true
+    private var contentView = MessagesContentView()
+    private var createChannelsView: CreateChannelsView?
+    
+    private var messageList: [MessageElem] = []
+    private var conversation: Conversation?
+    
+    private var provider = OnlineProvider<SquadAPI>()
+    private var disposeBag = DisposeBag()
+    private var conversationActionRelay: BehaviorRelay<ConversationAction>!
+    
+    init(action: ConversationAction) {
+        super.init(nibName: nil, bundle: nil)
+        conversationActionRelay = BehaviorRelay<ConversationAction>(value: action)
     }
     
-    open lazy var messageInputBar = InputBarAccessoryView()
-
-    open override var inputAccessoryView: UIView? {
-        return messageInputBar
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.theme.backgroundColor = UIColor.background
+        setupView()
+        addTouchAction()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -39,15 +63,14 @@ class ChattingViewController: ReactorViewController<ChattingReactor> {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         contentView.isMessagesControllerBeingDismissed = false
-        
-        //FIXME: - 它不属于这, 放着只是为了测试使用
-        setupCreateChannelsView()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         contentView.removeKeyboardObservers()
         contentView.isMessagesControllerBeingDismissed = true
+        // 移除消息监听, 释放资源
+        conversation?.free()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -55,41 +78,103 @@ class ChattingViewController: ReactorViewController<ChattingReactor> {
         contentView.isMessagesControllerBeingDismissed = false
     }
     
-    override func setupView() {
+    private func setupView() {
         contentView.messagesCollectionView.messageCellDelegate = self
-        contentView.messagesCollectionView.messagesDataSource = self
         contentView.messagesCollectionView.messagesLayoutDelegate = self
         contentView.messagesCollectionView.messagesDisplayDelegate = self
         contentView.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
         contentView.refreshControl.addTarget(self, action: #selector(loadMoreMessages), for: .valueChanged)
         view.addSubviews(contentView)
-    }
-    
-    override func setupConstraints() {
         contentView.snp.safeFull(parent: self)
     }
     
-    override func bind(reactor: ChattingReactor) {
-        
+    private func addTouchAction() {
+        conversationActionRelay
+            .distinctUntilChanged()
+            .subscribe(onNext: { [unowned self] action in
+                switch action {
+                case .create:
+                    // 将底部InputBar隐藏掉
+                    self.isInputBarHidden = true
+                    // 构建创建squad视图
+                    self.setupCreateChannelsView()
+                case .load(let groupId):
+                    // 将底部InputBar显示出来
+                    self.isInputBarHidden = false
+                    // 移除创建squad视图
+                    self.removeCreateChannelsView()
+                    // 创建会话, 加载消息
+                    self.loadMessages(groupId: groupId)
+                }
+            })
+            .disposed(by: disposeBag)
     }
 
-    @objc
-    private func loadMoreMessages() {
+    private func loadMessages(groupId: String) {
+        
+        conversation = ConversationManager.shared.holdChat(with: .GROUP, id: groupId)
+        
+        // 监听消息
+        conversation?.listenerNewMessage(completion: { [unowned self] list in
+            self.messageList = list + self.messageList
+            self.contentView.messagesCollectionView.reloadData()
+        })
+        
         loadFirstMessages()
     }
     
-    func loadFirstMessages() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.messageList = [MockMessage(sender: MockUser(senderId: "2", displayName: "小丽"), messageId: "1", sentDate: Date(), kind: .text("你好")), MockMessage(sender: MockUser(senderId: "2", displayName: "小丽"), messageId: "2", sentDate: Date(), kind: .text("你你好你好你好你好好")), MockMessage(sender: MockUser(senderId: "2", displayName: "小丽"), messageId: "3", sentDate: Date(), kind: .text("你好你好你好你好你好你好"))]
-            self.contentView.messagesCollectionView.reloadData()
-            self.contentView.messagesCollectionView.scrollToBottom()
-            self.contentView.refreshControl.endRefreshing()
-        }
+    @objc
+    private func loadMoreMessages() {
+        // 加载消息
+        conversation?.loadRecentMessages(count: 20, completion: { [unowned self] result in
+            switch result {
+            case .success(let list):
+                self.messageList = list + self.messageList
+                self.contentView.messagesCollectionView.reloadData()
+                self.contentView.refreshControl.endRefreshing()
+            case .failure(let error):
+                self.showToast(message: error.message)
+            }
+        })
     }
     
+    // 第一次加载消息
+    private func loadFirstMessages() {
+        conversation?.loadRecentMessages(count: 20, completion: { [unowned self] result in
+            switch result {
+            case .success(let list):
+                self.messageList = list
+                self.contentView.messagesCollectionView.reloadData()
+                self.contentView.messagesCollectionView.scrollToBottom()
+            case .failure(let error):
+                self.showToast(message: error.message)
+            }
+        })
+    }
+    
+    // 发送一条消息
+    private func sendMessage(message: MessageElem) {
+        conversation?.send(message: message, result: { [unowned self](result) in
+            switch result {
+            case .success:
+                self.messageList.append(message)
+                self.contentView.messagesCollectionView.reloadData()
+                self.contentView.messagesCollectionView.scrollToBottom()
+            case .failure(let error):
+                self.showToast(message: error.message)
+            }
+        })
+    }
+}
+
+//MARK: - Create Channel
+extension ChattingViewController {
+    
+    // 构建创建Channel的视图
     private func setupCreateChannelsView() {
         
-        guard let navView = navigationController?.view else { return }
+        guard let navView = navigationController?.view, !navView.subviews.contains(where: { $0 is CreateChannelsView }) else { return
+        }
         
         let createView = CreateChannelsView()
         createView.bounds = CGRect(x: 0, y: 0, width: navView.bounds.width - 32, height: 357)
@@ -100,26 +185,113 @@ class ChattingViewController: ReactorViewController<ChattingReactor> {
         createView.layer.shadowRadius = 20
         createView.layer.shadowOffset = CGSize(width: 0, height: 2)
         createView.layer.shadowColor = UIColor(red: 0.148, green: 0.141, blue: 0.512, alpha: 0.25).cgColor
+        self.createChannelsView = createView
         
-        let tempView = UIView(frame: navView.bounds)
-        tempView.addSubview(createView)
-        tempView.backgroundColor = UIColor.white.withAlphaComponent(0.4)
-        navView.addSubview(tempView)
+        let blurEffect = UIBlurEffect(style: .extraLight)
+        let effectView = UIVisualEffectView(effect: blurEffect)
+        effectView.frame = navView.bounds
+        effectView.contentView.addSubview(createView)
+        navView.addSubview(effectView)
         
-        createView.closeBtn.rx.tap
-            .subscribe(onNext: {
-                UIView.animate(withDuration: 0.25, animations: {
-                    createView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-                    tempView.alpha = 0
-                }, completion: { _ in
-                    tempView.removeFromSuperview()
-                })
+        createView.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+        UIView.animate(withDuration: 0.25, animations: {
+            createView.transform = CGAffineTransform.identity
+        })
+        
+        createView.confirmBtn.addTarget(self, action: #selector(createChannelConfirmBtnDidTapped), for: .touchUpInside)
+        createView.closeBtn.addTarget(self, action: #selector(createChannelCloseBtnDidTapped), for: .touchUpInside)
+    }
+    
+    // 移除channel视图
+    private func removeCreateChannelsView() {
+        let effectView = navigationController?.view.subviews.first(where: { $0 is UIVisualEffectView })
+        UIView.animate(withDuration: 0.25, animations: {
+            effectView?.alpha = 0
+        }, completion: { _ in
+            effectView?.removeFromSuperview()
+        })
+    }
+    
+    @objc
+    private func createChannelCloseBtnDidTapped() {
+        let effectView = navigationController?.view.subviews.first(where: { $0 is UIVisualEffectView })
+        self.navigationController?.popViewController(animated: false)
+        UIView.animate(withDuration: 0.25, animations: {
+            effectView?.alpha = 0
+        }, completion: { _ in
+            effectView?.removeFromSuperview()
+        })
+    }
+    
+    @objc
+    private func createChannelConfirmBtnDidTapped() {
+        guard
+            let groupName = createChannelsView?.textField.text,
+            let avatarData = createChannelsView?.imageTextView.snapshot()?.pngData() else {
+            return
+        }
+        // 拿到groupName, avatarData后准备发起请求去创建该channel
+        provider.request(target: .createChannel(name: groupName, avatar: avatarData), model: String.self, atKeyPath: .data)
+            .asObservable()
+            .flatMap { [unowned self]result -> Observable<Result<String, GeneralError>> in
+                switch result {
+                case .success(let model):
+                    return self.createGroupsFromTIM(groupId: "", groupName: "", faceURL: "", inviteMembers: [])
+                case .failure(let error):
+                    return Observable.just(.failure(error))
+                }
+            }
+            .subscribe(onNext: { [unowned self] result in
+                switch result {
+                case .success(let groupId):
+                    self.conversationActionRelay.accept(.load(groupId: groupId))
+                case .failure(let error):
+                    self.showToast(message: error.message)
+                }
             })
             .disposed(by: disposeBag)
     }
+    
+    /// 从TIM中创建一个群
+    /// - Parameter groupId: 自定义群组id
+    /// - Parameter groupName: 群名称
+    /// - Parameter faceURL: 群头像
+    /// - Parameter inviteMembers: 准备受邀加入的成员列表
+    private func createGroupsFromTIM(groupId: String,
+                                     groupName: String,
+                                     faceURL: String,
+                                     inviteMembers: Array<String> = []) -> Observable<Result<String, GeneralError>> {
+        return Observable.create { (observer) -> Disposable in
+            
+            let groupManager = TIMManager.sharedInstance()?.groupManager()
+            
+            let info = TIMCreateGroupInfo()
+            info.groupType = "Public"
+            info.addOpt = TIMGroupAddOpt.GROUP_ADD_ANY
+            info.group = groupId
+            info.faceURL = faceURL
+            info.groupName = groupName
+            info.membersInfo = inviteMembers.map {
+                let memberInfo = TIMCreateGroupMemberInfo()
+                memberInfo.role = .GROUP_MEMBER_ROLE_MEMBER
+                memberInfo.member = $0
+                return memberInfo
+            }
+            
+            groupManager?.createGroup(info, succ: { (id) in
+                observer.onNext(.success(id!))
+                observer.onCompleted()
+            }, fail: { (code, message) in
+                observer.onNext(.failure(.custom(message ?? "未知错误")))
+                observer.onCompleted()
+            })
+            
+            return Disposables.create()
+        }
+    }
 }
 
-extension ChattingViewController: MessageCellDelegate, MessagesDataSource, MessagesLayoutDelegate, MessagesDisplayDelegate {
+extension ChattingViewController: MessageCellDelegate, MessagesLayoutDelegate, MessagesDisplayDelegate {
     
     func didTapBackground(in cell: MessageCollectionViewCell) {
         contentView.messageInputBar.inputTextView?.resignFirstResponder()
@@ -131,16 +303,58 @@ extension ChattingViewController: MessageCellDelegate, MessagesDataSource, Messa
         navigationController?.pushViewController(friendVC, animated: true)
     }
     
+}
+
+import RxSwift
+
+extension Reactive where Base: MessagesCollectionView {
+    
+    func dataSource(isScrollToBottom: Bool = false, ownerSender: SenderType) -> Binder<Array<MessageType>> {
+        return Binder(self.base) { collectionView, list in
+            
+            let proxy = RxMessagesDataSourceProxy.proxy(for: self.base)
+            proxy.ownerSender = ownerSender
+            proxy.messageList = list
+            
+            collectionView.reloadData()
+            if isScrollToBottom {
+                collectionView.scrollToBottom()
+            }
+        }
+    }
+}
+
+class RxMessagesDataSourceProxy: DelegateProxy<MessagesCollectionView, MessagesDataSource>, MessagesDataSource, DelegateProxyType {
+    
+    static func setCurrentDelegate(_ delegate: MessagesDataSource?, to object: MessagesCollectionView) {
+        object.messagesDataSource = delegate
+    }
+    
+    var ownerSender: SenderType!
+    var messageList: [MessageType]!
+    
+    init(collectionView: MessagesCollectionView) {
+        super.init(parentObject: collectionView, delegateProxy: RxMessagesDataSourceProxy.self)
+    }
+    
     func currentSender() -> SenderType {
-        return MockUser(senderId: "1", displayName: "哈哈哈")
+        return ownerSender
     }
     
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-        return messageList[indexPath.section]
+         return messageList[indexPath.section]
     }
     
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
         return messageList.count
+    }
+    
+    static func registerKnownImplementations() {
+        self.register{ RxMessagesDataSourceProxy(collectionView: $0) }
+    }
+    
+    static func currentDelegate(for object: MessagesCollectionView) -> MessagesDataSource? {
+        return object.messagesDataSource
     }
     
 }
