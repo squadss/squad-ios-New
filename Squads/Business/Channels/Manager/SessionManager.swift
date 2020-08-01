@@ -23,16 +23,13 @@ final class SessionManager {
         
         let sdkConfig = TIMSdkConfig()
         sdkConfig.sdkAppId = appidAt3rd
-        sdkConfig.disableLogPrint = true //禁止在控制台打印
+        sdkConfig.disableLogPrint = false //禁止在控制台打印
         TIMManager.sharedInstance().initSdk(sdkConfig)
         
         let userConfig = TIMUserConfig()
-        userConfig.enableReadReceipt = true //开启已读回执
-//        userConfig.disableRecnetContact = true //不开启最近联系人
         TIMManager.sharedInstance().setUserConfig(userConfig)
         
         onResponseNotification(completion: completion)
-        
     }
     
     //开启消息监听, 避免消息监听遗漏, 要放在登录方法调用之前

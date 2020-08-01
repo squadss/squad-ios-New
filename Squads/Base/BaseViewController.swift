@@ -10,7 +10,13 @@ import UIKit
 
 class BaseViewController: UIViewController, CustomNavigationBarItem {
 
+    // 创建自定义返回按钮
     var allowedCustomBackBarItem: Bool {
+        return true
+    }
+    
+    // 使用友盟统计
+    var allowedEnableUMCommon: Bool {
         return true
     }
     
@@ -42,6 +48,22 @@ class BaseViewController: UIViewController, CustomNavigationBarItem {
         addTouchAction()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if allowedEnableUMCommon {
+            let stringClass = NSStringFromClass(self.classForCoder)
+            MobClick.beginLogPageView(stringClass)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if allowedEnableUMCommon {
+            let stringClass = NSStringFromClass(self.classForCoder)
+            MobClick.beginLogPageView(stringClass)
+        }
+    }
+    
     func initData() { }
     
     func setupView() { }
@@ -70,10 +92,11 @@ protocol CustomNavigationBarItem: UIViewController {
 extension CustomNavigationBarItem {
     
     func setupBackBarItem() {
-        let backImage = UIImage(named:"navigation_back")?.withRenderingMode(.alwaysOriginal)
-        let backItem = UIBarButtonItem(title: "", style: .done, target: nil, action: nil)
-        navigationController?.navigationBar.backIndicatorImage = backImage
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = backImage
+//        let backImage = UIImage(named:"navigation_back")?.withRenderingMode(.alwaysOriginal)
+        let backItem = UIBarButtonItem(title: "Back", style: .plain, target: nil, action: nil)
+        backItem.theme.tintColor = UIColor.text
+        navigationController?.navigationBar.backIndicatorImage = UIImage()//backImage
+        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage()//backImage
         navigationItem.backBarButtonItem = backItem
     }
 }

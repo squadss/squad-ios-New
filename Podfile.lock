@@ -8,6 +8,8 @@ PODS:
   - Hero (1.5.0)
   - HGPlaceholders (0.4.0)
   - InputBarAccessoryView (4.2.2)
+  - ISEmojiView (0.2.5)
+  - JTAppleCalendar (8.0.3)
   - JXPhotoBrowser (3.1.2)
   - Kingfisher (4.10.1)
   - MessageKit (3.0.0):
@@ -54,6 +56,8 @@ DEPENDENCIES:
   - ETNavBarTransparent (~> 1.1.3)
   - Hero
   - HGPlaceholders
+  - ISEmojiView
+  - JTAppleCalendar
   - JXPhotoBrowser (from `https://github.com/JiongXing/PhotoBrowser.git`)
   - Kingfisher
   - MessageKit
@@ -84,6 +88,8 @@ SPEC REPOS:
     - Hero
     - HGPlaceholders
     - InputBarAccessoryView
+    - ISEmojiView
+    - JTAppleCalendar
     - Kingfisher
     - MessageKit
     - MonkeyKing
@@ -131,6 +137,8 @@ SPEC CHECKSUMS:
   Hero: b7385b75e7259da62f4f85462f59a5082d66b058
   HGPlaceholders: fd580aaf6050782bf2ee51eb62ed499ded6615b7
   InputBarAccessoryView: 2b937602598e2fab3149f37f51dd7ad795653812
+  ISEmojiView: 5a5a41f36a97aa9ad493689be0c2636115490e60
+  JTAppleCalendar: 932cadea40b1051beab10f67843451d48ba16c99
   JXPhotoBrowser: 7f0bc11f02fbc84ae06829f922f32ce822aa9661
   Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
   MessageKit: e892a9ca49ebe6d82684d3a93ad84021fa23e2c6
@@ -152,6 +160,7 @@ SPEC CHECKSUMS:
   Toast-Swift: 9b6a70f28b3bf0b96c40d46c0c4b9d6639846711
   TXIMSDK_iOS: 3e71bcdc7a829437d7b7d11d884293e15be8bedf
 
-PODFILE CHECKSUM: ee9c3407cd5484c2a99bac6cc7ce56fe4d84f927
+
+PODFILE CHECKSUM: b4a2a3628e4e1c2d8ad715ff9b1a3bb0765201f9
 
 COCOAPODS: 1.9.1

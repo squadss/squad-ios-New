@@ -14,4 +14,10 @@ extension NSParagraphStyle {
         style.lineSpacing = value
         return style
     }
+    
+    static func lineHeightMultiple(_ value: CGFloat) -> NSMutableParagraphStyle {
+        let style = NSMutableParagraphStyle()
+        style.lineHeightMultiple = value
+        return style
+    }
 }

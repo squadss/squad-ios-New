@@ -27,6 +27,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>The Squads requires access to your camera for filming or uploading user profiles</string>
+	<key>NSContactsUsageDescription</key>
+	<string>The Squads requires your address book information in order to invite friends to join</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>The Squads requires your location to recommend nearby friends</string>
 	<key>NSMicrophoneUsageDescription</key>

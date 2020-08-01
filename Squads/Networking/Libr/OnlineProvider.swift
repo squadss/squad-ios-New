@@ -43,12 +43,13 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     
     init(endpointClosure: @escaping MoyaProvider<Target>.EndpointClosure = MoyaProvider.defaultEndpointMapping,
          requestClosure: @escaping MoyaProvider<Target>.RequestClosure = MoyaProvider<Target>.defaultRequestMapping,
+         stubClosure: @escaping MoyaProvider<Target>.StubClosure = OnlineProvider.neverStub,
          plugins: [PluginType] = OnlineProvider.plugins,
          trackInflights: Bool = false) {
         
         self.provider = MoyaProvider(endpointClosure: endpointClosure,
                                      requestClosure: requestClosure,
-                                     stubClosure: MoyaProvider.neverStub,
+                                     stubClosure: stubClosure,
                                      callbackQueue: nil,
                                      manager: MoyaProvider<Target>.defaultAlamofireManager(),
                                      plugins: plugins,
@@ -69,7 +70,15 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     func request<T: Decodable>(target: Target, model: T.Type = T.self, atKeyPath: String? = nil) -> Single<Swift.Result<T, GeneralError>> {
         return request(target: target)
             .map{ try model.decodeJSON(from: $0, designatedPath: atKeyPath) }
-            .map{ .success($0) }
+            .map{ object in
+                if object is GeneralModel.Plain {
+                    let plain = (object as! GeneralModel.Plain)
+                    if !plain.success {
+                        return .failure(.newwork(code: plain.code, message: plain.message))
+                    }
+                }
+                return .success(object)
+            }
             .catchError({ (error)  in
                 guard let moyaError = error as? MoyaError else {
                     return .never()
@@ -89,6 +98,10 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     //还未实现
     func requestPlain(target: Target) -> Single<GeneralModel.Plain> {
         return .never()
+    }
+    
+    final class func neverStub(_: Target) -> Moya.StubBehavior {
+        return .never
     }
 }
 

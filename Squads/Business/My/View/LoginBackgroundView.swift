@@ -10,6 +10,10 @@ import UIKit
 
 class LoginBackgroundView: BaseView {
     
+    // 向上偏移量
+    var offsetY: CGFloat = 0
+    
+    var tap = UITapGestureRecognizer()
     var imageView = UIImageView()
     private var gradientLayer: CAGradientLayer!
     override func setupView() {
@@ -31,7 +35,7 @@ class LoginBackgroundView: BaseView {
             maker.top.equalTo(141)
         }
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(tapGesure(_:)))
+        tap.addTarget(self, action: #selector(tapGesure(_:)))
         addGestureRecognizer(tap)
     }
     
@@ -45,6 +49,32 @@ class LoginBackgroundView: BaseView {
                     (itemView as? UITextField)?.resignFirstResponder()
                 }
             }
+        }
+    }
+    
+    func addListener() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShowNotification(sender:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHideNotification(sender:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    func removeListener() {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc
+    private func keyboardWillShowNotification(sender: Notification) {
+        let duration = sender.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double
+        UIView.animate(withDuration: duration ?? 0.25) {
+            self.transform = CGAffineTransform(translationX: 0, y: -self.offsetY)
+        }
+    }
+    
+    @objc
+    private func keyboardWillHideNotification(sender: Notification) {
+        let duration = sender.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double
+        UIView.animate(withDuration: duration ?? 0.25) {
+            self.transform = .identity
         }
     }
     

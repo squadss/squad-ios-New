@@ -43,6 +43,11 @@ target 'Squads' do
   pod 'Hero'
   # 消息库
   pod 'MessageKit'
-  # 浏览器
+  # 图片浏览器
   pod 'JXPhotoBrowser', :git => 'https://github.com/JiongXing/PhotoBrowser.git'
+  # Calendar日历
+  pod 'JTAppleCalendar'
+  # Custom Emoji
+  pod 'ISEmojiView'
+  
 end
