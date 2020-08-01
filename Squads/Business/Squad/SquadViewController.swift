@@ -116,6 +116,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     }
     
     override func addTouchAction() {
+        guard let squadId = reactor?.currentState.currentSquadId else { return }
         tableView.rx.itemSelected
             .subscribe(onNext: { [unowned self] indexPath in
                 if indexPath.section == 1 {
@@ -124,7 +125,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                     self.navigationController?.pushViewController(activityDetailVC, animated: true)
                 } else if indexPath.section == 2 {
                     let model = self.dataSource[indexPath] as! SquadChannel
-                    let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId))
+                    let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId, squadId: squadId))
                     self.navigationController?.pushViewController(chattingVC, animated: true)
                 }
             })
@@ -210,6 +211,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         reactor.state
             .filter{ $0.loginStateDidExpired }
+            .trackAlertJustConfirm(title: "Authentication has expired!", default: "To log in", target: self)
             .subscribe(onNext: { _ in
                 User.removeCurrentUser()
                 AuthManager.removeToken()
@@ -310,7 +312,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     @objc
     private func channelBtnDidTapped() {
         //创建一个Channel
-        let chattingVC = ChattingViewController(action: .create)
+        guard let currentSquadId = reactor?.currentState.currentSquadId else { return }
+        let chattingVC = ChattingViewController(action: .create(squadId: currentSquadId))
         self.navigationController?.pushViewController(chattingVC, animated: false)
     }
     

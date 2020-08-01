@@ -92,11 +92,11 @@ protocol CustomNavigationBarItem: UIViewController {
 extension CustomNavigationBarItem {
     
     func setupBackBarItem() {
-//        let backImage = UIImage(named:"navigation_back")?.withRenderingMode(.alwaysOriginal)
-        let backItem = UIBarButtonItem(title: "Back", style: .plain, target: nil, action: nil)
-        backItem.theme.tintColor = UIColor.text
+        let backItem = UIBarButtonItem()
+        backItem.title = "Back"
+        backItem.style = .plain
+        navigationItem.backBarButtonItem = backItem
         navigationController?.navigationBar.backIndicatorImage = UIImage()//backImage
         navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage()//backImage
-        navigationItem.backBarButtonItem = backItem
     }
 }

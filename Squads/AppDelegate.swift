@@ -43,6 +43,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //注册远程推送
         registerNotification(launchOptions)
         
+        // 配置导航栏样式
+        UIBarButtonItem.appearance().setTitleTextAttributes([.foregroundColor: UIColor.black,
+                                                             .font: UIFont.systemFont(ofSize: 15)], for: .normal)
+        
         return true
     }
 
@@ -59,6 +63,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    }
+    
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb else {
+            return true
+        }
+        
+        if let webpageURL = userActivity.webpageURL {
+            if webpageURL.host == App.AssociatedDomains {
+                //获取邀请码
+                if let code = pathComponentsParse(url: webpageURL, key: "invite") {
+                    let view = UIApplication.shared.keyWindow
+                    view?.showToast(message: "获取到邀请码: \(code)")
+                    
+                    let welcomeVC = WelcomeViewController()
+                    let nav = BaseNavigationController(rootViewController: welcomeVC)
+                    //TODO: 找到当前window显示的viewController, 然后present出一个vc
+                }
+            } else {
+                UIApplication.shared.open(webpageURL, options: .init(), completionHandler: nil)
+            }
+        }
+        return true
+    }
+    
+    private func pathComponentsParse(url: URL, key: String) -> String? {
+        guard url.pathComponents.count == 2 else { return nil }
+        if url.pathComponents.first == key {
+            return url.lastPathComponent
+        }
+        return nil
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {

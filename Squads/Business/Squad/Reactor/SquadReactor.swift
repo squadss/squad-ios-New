@@ -62,18 +62,18 @@ class SquadReactor: Reactor {
         // 错误提示
         var toast: String?
         // 当前置顶的squad的id
-        var currentSquadId: String
+        var currentSquadId: Int
     }
     
     var initialState: State
     var provider = OnlineProvider<SquadAPI>(stubClosure: { (api)  in
         switch api {
-        case .querySquad, .quardTopSquad: return .delayed(seconds: 1)
+        case .quardTopSquad: return .delayed(seconds: 1)
         default: return .never
         }
     })
     
-    init(currentSquadId: String) {
+    init(currentSquadId: Int) {
         initialState = State(currentSquadId: currentSquadId)
         
         initialState.repos[0] = [SquadSqroll(list: ["http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg","http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg", "http://image.biaobaiju.com/uploads/20180803/23/1533309822-GCcDphRmqw.jpg"])]
@@ -116,7 +116,7 @@ class SquadReactor: Reactor {
             guard let user = User.currentUser() else {
                 return .just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
             }
-            return checkoutLoginStatus(userId: user.username)
+            return checkoutLoginStatus(userId: String(user.id))
                 .map { result -> Result<Void, GeneralError> in
                     switch result {
                     case .success: return .success(())
@@ -193,6 +193,7 @@ class SquadReactor: Reactor {
                 for i in 0..<groupList.count {
                     let groupInfo = groupList[i]
                     let conversation = conversationList.first(where: { $0.getReceiver() == groupInfo.group })
+                    if groupInfo.lastMsg == nil { continue }
                     let message = MessageElem(message: groupInfo.lastMsg)
                     let channel = SquadChannel(sessionId: groupInfo.group,
                                                avatar: groupInfo.faceURL,

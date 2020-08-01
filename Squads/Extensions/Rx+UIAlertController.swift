@@ -82,7 +82,13 @@ public struct RxAlertAction {
 }
 
 extension ObservableType {
-    func trackAlert(title: String?, message: String? = nil, cancel cancelTitle: String = "Cancel", default defaultTitle: String = "Confirm", target: UIViewController) -> Observable<Element> {
+    
+    func trackAlert(title: String?,
+                    message: String? = nil,
+                    cancel cancelTitle: String = "Cancel",
+                    default defaultTitle: String = "Confirm",
+                    target: UIViewController) -> Observable<Element> {
+       
         return flatMap{ [weak target] element -> Observable<(Int, Element)> in
         
             let actionSheet = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -98,6 +104,26 @@ extension ObservableType {
                 })
             }
             .filter{ $0.0 == 1 }
+            .map{ $0.1 }
+    }
+    
+    func trackAlertJustConfirm(title: String?,
+                    message: String? = nil,
+                    default defaultTitle: String = "Confirm",
+                    target: UIViewController) -> Observable<Element> {
+       
+        return flatMap{ [weak target] element -> Observable<(Int, Element)> in
+        
+            let actionSheet = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            let confirmAction = RxAlertAction(title: defaultTitle, type: 1, style: .default)
+            
+            return actionSheet
+                .addAction(actions: [confirmAction])
+                .map{ ($0, element) }
+                .do(onSubscribed: {
+                    target?.present(actionSheet, animated: true, completion: nil)
+                })
+            }
             .map{ $0.1 }
     }
     

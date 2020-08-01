@@ -49,6 +49,10 @@ class SquadInvithNewReactor: Reactor {
         var isDeniedVisibleContacts: Bool?
         // toast
         var toast: String?
+        
+        var isEmptyRepos: Bool {
+            return repos[0].isEmpty && repos[1].isEmpty
+        }
     }
     
     var initialState: State
