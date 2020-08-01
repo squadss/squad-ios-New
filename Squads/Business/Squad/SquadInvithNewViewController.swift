@@ -270,13 +270,21 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             .disposed(by: disposeBag)
         
         reactor.state
-            .map { $0.members?.isEmpty == false }
+            .map { $0.isEmptyRepos ? true : $0.members?.isEmpty == false }
             .bind(to: rightBarButtonItem.rx.isEnabled)
             .disposed(by: disposeBag)
         
         rightBarButtonItem.rx.tap
+            .filter{ !reactor.currentState.isEmptyRepos }
             .map{ Reactor.Action.request }
             .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        rightBarButtonItem.rx.tap
+            .filter{ reactor.currentState.isEmptyRepos }
+            .subscribe(onNext: { [unowned self] _ in
+                self.dismiss(animated: true)
+            })
             .disposed(by: disposeBag)
         
         reactor.state

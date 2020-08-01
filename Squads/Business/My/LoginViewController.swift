@@ -143,7 +143,7 @@ class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldS
         
         reactor.state
             .compactMap{ $0.success }
-            .delay(RxTimeInterval.seconds(1), scheduler: MainScheduler.instance)
+            .delay(RxTimeInterval.milliseconds(500), scheduler: MainScheduler.instance)
             .subscribe(onNext: { model in
                 model.loginAccountVo.save()
                 AuthManager.setToken(.normal(token: model.token))

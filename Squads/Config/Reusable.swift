@@ -35,6 +35,7 @@ enum Reusable {
     static let createEventLabelsCell = ReusableCell<CreateEventLabelsCell>()
     static let createEventCalendarCell = ReusableCell<CreateEventCalendarCell>()
     static let createEventAvailabilityCell = ReusableCell<CreateEventAvailabilityCell>()
+    static let createEventLocationCell = ReusableCell<CreateEventLocationCell>()
     
     //MARK: - My
     static let friendProfileViewCell = ReusableCell<FriendProfileViewCell>()

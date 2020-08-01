@@ -17,7 +17,7 @@ struct App {
         
         /// 即时通讯
         static let TIMAppKey: Int32 = 1400168317
-        
     }
     
+    static let AssociatedDomains = "squad.wieed.com"
 }

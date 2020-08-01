@@ -15,16 +15,23 @@ import MessageKit
 import InputBarAccessoryView
 
 enum ConversationAction: Equatable {
-    case create
-    case load(groupId: String)
+    case create(squadId: Int)
+    case load(groupId: String, squadId: Int)
     
     static func == (lhs: ConversationAction, rhs: ConversationAction) -> Bool {
         switch (lhs, rhs) {
-        case (.create, .create): return true
-        case (.load(let l_id), .load(let r_id)): return l_id == r_id
+        case (.create(let l_id), .create(let r_id)): return l_id == r_id
+        case (.load(let l_gid, let l_sid), .load(let r_gid, let r_sid)): return l_gid == r_gid && l_sid == r_sid
         default: return false
         }
     }
+}
+
+struct CreateChannel: Codable {
+    let squadId: String
+    let channelName: String
+    let avatar: String
+    let ownerAccountId: String
 }
 
 final class ChattingViewController: InputBarViewController {
@@ -98,7 +105,7 @@ final class ChattingViewController: InputBarViewController {
                     self.isInputBarHidden = true
                     // 构建创建squad视图
                     self.setupCreateChannelsView()
-                case .load(let groupId):
+                case .load(let groupId, _):
                     // 将底部InputBar显示出来
                     self.isInputBarHidden = false
                     // 移除创建squad视图
@@ -198,7 +205,7 @@ extension ChattingViewController {
             createView.transform = CGAffineTransform.identity
         })
         
-        createView.confirmBtn.addTarget(self, action: #selector(createChannelConfirmBtnDidTapped), for: .touchUpInside)
+        createView.confirmBtn.addTarget(self, action: #selector(createChannelConfirmBtnDidTapped(sender:)), for: .touchUpInside)
         createView.closeBtn.addTarget(self, action: #selector(createChannelCloseBtnDidTapped), for: .touchUpInside)
     }
     
@@ -224,27 +231,45 @@ extension ChattingViewController {
     }
     
     @objc
-    private func createChannelConfirmBtnDidTapped() {
+    private func createChannelConfirmBtnDidTapped(sender: UIButton) {
+        
+        sender.isEnabled = false
+        showLoading(offsetY: 0)
+        
         guard
+            let accountId = User.currentUser()?.id,
             let groupName = createChannelsView?.textField.text,
-            let avatarData = createChannelsView?.imageTextView.snapshot()?.pngData() else {
+            let avatarData = createChannelsView?.imageTextView.snapshot()?.pngData(),
+            case let .create(squadId) = conversationActionRelay.value else {
             return
         }
+        
         // 拿到groupName, avatarData后准备发起请求去创建该channel
-        provider.request(target: .createChannel(name: groupName, avatar: avatarData), model: String.self, atKeyPath: .data)
-            .asObservable()
-            .flatMap { [unowned self]result -> Observable<Result<String, GeneralError>> in
-                switch result {
-                case .success(let model):
-                    return self.createGroupsFromTIM(groupId: "", groupName: "", faceURL: "", inviteMembers: [])
-                case .failure(let error):
-                    return Observable.just(.failure(error))
+        let createChannel: Observable<Result<CreateChannel, GeneralError>> = provider.request(target: .createChannel(squadId: squadId, name: groupName, avatar: avatarData, ownerAccountId: accountId), model: CreateChannel.self, atKeyPath: .data).asObservable()
+        let members: Observable<Result<Array<String>, GeneralError>> = provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<String>.self, atKeyPath: .data).asObservable()
+        
+        Observable
+            .zip(createChannel, members)
+            .flatMap { [unowned self] (channelResult, membersResult) -> Observable<Result<String, GeneralError>> in
+                switch (channelResult, membersResult) {
+                case (.success(let model), .success(let members)):
+                    return self.createGroupsFromTIM(groupId: model.squadId, groupName: model.channelName, faceURL: model.avatar, inviteMembers: members)
+                case (.failure(let channelError), .failure):
+                    return Observable.just(.failure(.custom(channelError.message)))
+                case (.failure(let channelError), .success):
+                    return Observable.just(.failure(.custom(channelError.message)))
+                case (.success(let model), .failure):
+                    return self.createGroupsFromTIM(groupId: model.squadId, groupName: model.channelName, faceURL: model.avatar, inviteMembers: [])
                 }
             }
             .subscribe(onNext: { [unowned self] result in
+                
+                self.hideLoading()
+                sender.isEnabled = true
+                
                 switch result {
                 case .success(let groupId):
-                    self.conversationActionRelay.accept(.load(groupId: groupId))
+                    self.conversationActionRelay.accept(.load(groupId: groupId, squadId: squadId))
                 case .failure(let error):
                     self.showToast(message: error.message)
                 }

@@ -14,6 +14,7 @@ class CreateFlickPhotoViewCell: BaseCollectionViewCell {
     var pirtureView = UIImageView()
     
     override func setupView() {
+        pirtureView.layer.borderWidth = 1
         pirtureView.layer.cornerRadius = 8
         pirtureView.layer.masksToBounds = true
         contentView.addSubview(pirtureView)

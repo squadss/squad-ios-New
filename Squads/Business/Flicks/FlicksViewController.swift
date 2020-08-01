@@ -31,6 +31,7 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
     override func setupView() {
         
         let rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "New Flick"), style: .plain, target: self, action: #selector(rightBarItemDidTapped))
+        rightBarButtonItem.theme.tintColor = UIColor.text
         navigationItem.rightBarButtonItem = rightBarButtonItem
         
         let searchBtn = UIButton()

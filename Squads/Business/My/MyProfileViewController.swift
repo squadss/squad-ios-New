@@ -18,9 +18,9 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
         return tableView.rx.itemSelected.map{ [unowned self] in
             return self.dataSource[$0]
         }
-        .do(onNext: { [unowned self] _ in
-            self.dismiss(animated: true)
-        })
+//        .do(onNext: { [unowned self] _ in
+//            self.dismiss(animated: true)
+//        })
     }
     
     private var tableView = UITableView()

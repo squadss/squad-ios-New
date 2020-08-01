@@ -36,7 +36,6 @@
 		1724412B24B2067F00666135 /* SquadActivitiesReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */; };
 		172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */; };
 		172A4B8B24B6A06400A69803 /* VerificationCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */; };
-		172A4B8D24B6BC6000A69803 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8C24B6BC6000A69803 /* WelcomeViewController.swift */; };
 		172A4B9124B6D36300A69803 /* EditableAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B9024B6D36300A69803 /* EditableAvatarView.swift */; };
 		172E8E5624C52C09002F9181 /* CreateFlickViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5524C52C09002F9181 /* CreateFlickViewController.swift */; };
 		172E8E5824C52E89002F9181 /* CreateFlickReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5724C52E89002F9181 /* CreateFlickReactor.swift */; };
@@ -53,6 +52,7 @@
 		174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */; };
 		174F6C1F24B7297300E5A1C6 /* ProximityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */; };
 		1775D04924C6D798001C94E9 /* UITextField+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775D04824C6D798001C94E9 /* UITextField+Extension.swift */; };
+		17787E2B24D31287002EC196 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17787E2A24D31287002EC196 /* WelcomeViewController.swift */; };
 		177D06AC24C562390023B382 /* CreateChannelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D06AB24C562390023B382 /* CreateChannelsView.swift */; };
 		177D06B324C5CC490023B382 /* TimeLineDrawPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D06B224C5CC490023B382 /* TimeLineDrawPageView.swift */; };
 		177D06B524C5D66C0023B382 /* ReusePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D06B424C5D66C0023B382 /* ReusePool.swift */; };
@@ -108,6 +108,9 @@
 		179DB09424C47D2800F828E1 /* FlicksListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179DB09324C47D2800F828E1 /* FlicksListViewCell.swift */; };
 		179E373124B8A403000DD595 /* MessagesContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179E373024B8A403000DD595 /* MessagesContentView.swift */; };
 		179E373324B8A41D000DD595 /* MessagesContentView+Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179E373224B8A41D000DD595 /* MessagesContentView+Keyboard.swift */; };
+		17A1513F24D3C0F800E441DE /* CreateEventLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1513E24D3C0F800E441DE /* CreateEventLocationViewController.swift */; };
+		17A1514124D3FDEA00E441DE /* CreateEventLocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */; };
+		17A1514324D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1514224D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift */; };
 		17B5ED7A24CECFB4009FA969 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B5ED7924CECFB4009FA969 /* App.swift */; };
 		17B5ED7F24CED77E009FA969 /* UMCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B5ED7E24CED77E009FA969 /* UMCommon.framework */; };
 		17B5ED8124CEF72E009FA969 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B5ED8024CEF72D009FA969 /* CoreTelephony.framework */; };
@@ -217,7 +220,6 @@
 		1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivitiesReactor.swift; sourceTree = "<group>"; };
 		172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrickInputFieldStyle.swift; sourceTree = "<group>"; };
 		172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationCodeViewController.swift; sourceTree = "<group>"; };
-		172A4B8C24B6BC6000A69803 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
 		172A4B9024B6D36300A69803 /* EditableAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableAvatarView.swift; sourceTree = "<group>"; };
 		172E8E5524C52C09002F9181 /* CreateFlickViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickViewController.swift; sourceTree = "<group>"; };
 		172E8E5724C52E89002F9181 /* CreateFlickReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickReactor.swift; sourceTree = "<group>"; };
@@ -234,6 +236,7 @@
 		174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helper.swift"; sourceTree = "<group>"; };
 		174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityManager.swift; sourceTree = "<group>"; };
 		1775D04824C6D798001C94E9 /* UITextField+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+Extension.swift"; sourceTree = "<group>"; };
+		17787E2A24D31287002EC196 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
 		177D06AB24C562390023B382 /* CreateChannelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateChannelsView.swift; sourceTree = "<group>"; };
 		177D06B224C5CC490023B382 /* TimeLineDrawPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeLineDrawPageView.swift; sourceTree = "<group>"; };
 		177D06B424C5D66C0023B382 /* ReusePool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusePool.swift; sourceTree = "<group>"; };
@@ -272,6 +275,7 @@
 		179693D024CD5A5C0023152A /* SquadDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadDetail.swift; sourceTree = "<group>"; };
 		179693D224CD92150023152A /* Rx+TImer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rx+TImer.swift"; sourceTree = "<group>"; };
 		179693D424CDC3D90023152A /* UIButton+Loading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+Loading.swift"; sourceTree = "<group>"; };
+		179B497D24D1BEC9004D0558 /* Squads.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Squads.entitlements; sourceTree = "<group>"; };
 		179C04FA24B1A82D00A669FA /* SquadActivityCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivityCell.swift; sourceTree = "<group>"; };
 		179C04FC24B1A83E00A669FA /* SquadChannelsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadChannelsCell.swift; sourceTree = "<group>"; };
 		179C04FE24B1AE5E00A669FA /* SquadPlaceholderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPlaceholderCell.swift; sourceTree = "<group>"; };
@@ -289,6 +293,9 @@
 		179DB09324C47D2800F828E1 /* FlicksListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksListViewCell.swift; sourceTree = "<group>"; };
 		179E373024B8A403000DD595 /* MessagesContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesContentView.swift; sourceTree = "<group>"; };
 		179E373224B8A41D000DD595 /* MessagesContentView+Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MessagesContentView+Keyboard.swift"; sourceTree = "<group>"; };
+		17A1513E24D3C0F800E441DE /* CreateEventLocationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventLocationViewController.swift; sourceTree = "<group>"; };
+		17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventLocationCell.swift; sourceTree = "<group>"; };
+		17A1514224D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvtivityConfirmScheduledViewController.swift; sourceTree = "<group>"; };
 		17B5ED7524CECEC8009FA969 /* Squads-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Squads-Bridging-Header.h"; sourceTree = "<group>"; };
 		17B5ED7924CECFB4009FA969 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		17B5ED7E24CED77E009FA969 /* UMCommon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = UMCommon.framework; sourceTree = "<group>"; };
@@ -407,6 +414,7 @@
 		170429CA24AEBF4E0046F757 /* Squads */ = {
 			isa = PBXGroup;
 			children = (
+				179B497D24D1BEC9004D0558 /* Squads.entitlements */,
 				17F39BC924AECB8B00EC90ED /* Extensions */,
 				17BF5CAD24AEC77F00D5D8D8 /* Base */,
 				17BF5CAB24AEC76400D5D8D8 /* Networking */,
@@ -434,7 +442,9 @@
 				171E07B624B31E6F00603F76 /* View */,
 				178FCB8F24B4AEAF0054212F /* ActivityDetailViewController.swift */,
 				171B0F3524C298030020DF15 /* AvtivityTimeSettingViewController.swift */,
+				17A1514224D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift */,
 				17F1721F24B9A54E0081E4C0 /* CreateEventViewController.swift */,
+				17A1513E24D3C0F800E441DE /* CreateEventLocationViewController.swift */,
 			);
 			path = Activities;
 			sourceTree = "<group>";
@@ -450,6 +460,7 @@
 				17F1722524B9A76F0081E4C0 /* CreateEventLabelsCell.swift */,
 				17F1722724B9A7B20081E4C0 /* CreateEventCalendarCell.swift */,
 				17F1722924B9A7FE0081E4C0 /* CreateEventAvailabilityCell.swift */,
+				17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */,
 				170A484A24C08B36009BFDEA /* SingleChooseTimeView.swift */,
 				171B0F3924C2A4B50020DF15 /* MultipleChooseTimeView.swift */,
 				170A484C24C09220009BFDEA /* MembersGroupView.swift */,
@@ -537,6 +548,7 @@
 				178FCB7B24B4777C0054212F /* SquadInvithNewViewController.swift */,
 				171E47E324C44AD800100DFD /* SquadInvithNewSearchViewController.swift */,
 				179693CD24CD36040023152A /* CreateSquadViewController.swift */,
+				17787E2A24D31287002EC196 /* WelcomeViewController.swift */,
 			);
 			path = Squad;
 			sourceTree = "<group>";
@@ -687,7 +699,6 @@
 				172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */,
 				179536AF24B1912000FE1185 /* MyProfileViewController.swift */,
 				178FCB8324B49E7A0054212F /* FriendProfileViewController.swift */,
-				172A4B8C24B6BC6000A69803 /* WelcomeViewController.swift */,
 				17C561AA24C32BD40016500A /* ApplyListViewController.swift */,
 			);
 			path = My;
@@ -1065,11 +1076,13 @@
 				179C051524B1DD2900A669FA /* PaddingLabel.swift in Sources */,
 				17F39BDD24AECE8F00EC90ED /* String+Extension.swift in Sources */,
 				17F1722224B9A55E0081E4C0 /* CreateEventReactor.swift in Sources */,
+				17A1514124D3FDEA00E441DE /* CreateEventLocationCell.swift in Sources */,
 				17D9AF5524B03F8B00FEF4DA /* Rx+HGPlaceholders.swift in Sources */,
 				179536B924B1A63B00FE1185 /* SquadFickerCell.swift in Sources */,
 				171B0F3624C298030020DF15 /* AvtivityTimeSettingViewController.swift in Sources */,
 				170429D024AEBF4E0046F757 /* ViewController.swift in Sources */,
 				178FCB7224B46F6A0054212F /* SquadPreViewCell.swift in Sources */,
+				17787E2B24D31287002EC196 /* WelcomeViewController.swift in Sources */,
 				179C04FB24B1A82D00A669FA /* SquadActivityCell.swift in Sources */,
 				179536A924B1820A00FE1185 /* SquadReactor.swift in Sources */,
 				171B0F3E24C2EA200020DF15 /* ActivityDetailInfoView.swift in Sources */,
@@ -1109,7 +1122,6 @@
 				179536AE24B18B7000FE1185 /* LoginReactor.swift in Sources */,
 				17D9AF5124B0294E00FEF4DA /* OnlineProvider.swift in Sources */,
 				1775D04924C6D798001C94E9 /* UITextField+Extension.swift in Sources */,
-				172A4B8D24B6BC6000A69803 /* WelcomeViewController.swift in Sources */,
 				171B0F3A24C2A4B50020DF15 /* MultipleChooseTimeView.swift in Sources */,
 				179C050F24B1C78B00A669FA /* SquadGameReactor.swift in Sources */,
 				178FCB7E24B4778C0054212F /* SquadInvithNewReactor.swift in Sources */,
@@ -1117,10 +1129,12 @@
 				17D9AF4F24AF1ECF00FEF4DA /* BaseTableView.swift in Sources */,
 				17E5FA5E24B41FF900E8B819 /* SquadPreReactor.swift in Sources */,
 				17F1722A24B9A7FE0081E4C0 /* CreateEventAvailabilityCell.swift in Sources */,
+				17A1514324D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift in Sources */,
 				17E5FA5C24B41FD600E8B819 /* SquadPreViewController.swift in Sources */,
 				179536B424B192BE00FE1185 /* UIButton+Extension.swift in Sources */,
 				179C050324B1C5E800A669FA /* SquadSqrollViewCell.swift in Sources */,
 				17F6493D24C825B1008C334D /* ActivityTimeLineView.swift in Sources */,
+				17A1513F24D3C0F800E441DE /* CreateEventLocationViewController.swift in Sources */,
 				1716C16C24C499A000AD2899 /* FlicksSearchViewController.swift in Sources */,
 				17D3443924B60E4E00AEB0E5 /* RegisterViewController.swift in Sources */,
 				178FCB7424B476D40054212F /* SquadNotificationsViewController.swift in Sources */,
@@ -1297,8 +1311,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Squads/Squads.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = HV96E95KH5;
+				DEVELOPMENT_TEAM = X5J2T8L4Z6;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Squads/Libraries",
@@ -1309,7 +1324,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.wufeiyue.squads7;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wieed.squad.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Squads/Squads-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1324,6 +1339,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Squads/Squads.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X5J2T8L4Z6;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1336,8 +1353,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.wufeiyue.squads6;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wieed.squad.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Squads/Squads-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

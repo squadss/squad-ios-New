@@ -52,7 +52,8 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
     
     @objc
     private func rightBtnBtnDidTapped() {
-        
+        let scheduledVC = AvtivityConfirmScheduledViewController()
+        self.transitionPresent(scheduledVC, animated: true)
     }
 
     override func setupView() {

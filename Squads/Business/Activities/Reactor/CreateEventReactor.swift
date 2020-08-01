@@ -41,6 +41,10 @@ enum EventCategory: CaseIterable, Equatable {
         }
     }
     
+    var image: UIImage? {
+        return UIImage(named: "Event " + title)
+    }
+    
     static func == (lhs: EventCategory, rhs: EventCategory) -> Bool {
         return lhs.title == rhs.title
     }
@@ -84,6 +88,13 @@ enum CreateEventTextEditor: CreateEventModelPrimaryKey, Equatable {
         case .location: return "Enter location"
         }
     }
+    
+    var isTitle: Bool {
+        switch self {
+        case .title: return true
+        case .location: return false
+        }
+    }
 }
 
 struct CreateEventCalendar: CreateEventModelPrimaryKey {
@@ -106,11 +117,13 @@ class CreateEventReactor: Reactor {
     enum Action {
         case selectCategory(EventCategory)
         case selectedDates(Array<Date>)
+        case selectedTextEditor(CreateEventTextEditor)
     }
     
     enum Mutation {
         case setCategory(EventCategory)
         case setDates(Array<Date>)
+        case setTextEditor(CreateEventTextEditor)
     }
     
     struct State {
@@ -133,6 +146,8 @@ class CreateEventReactor: Reactor {
             return Observable.just(.setCategory(category))
         case .selectedDates(let list):
             return Observable.just(.setDates(list))
+        case .selectedTextEditor(let model):
+            return Observable.just(.setTextEditor(model))
         }
     }
     
@@ -146,6 +161,13 @@ class CreateEventReactor: Reactor {
         case .setDates(let listDate):
             state.repos[3] = CreateEventCalendar(selectedDate: listDate)
             state.repos[4] = CreateEventAvailability(dateList: listDate)
+        case .setTextEditor(let model):
+            switch model {
+            case let .location(value, attachImageNamed):
+                state.repos[2] = CreateEventTextEditor.location(value: value, attachImageNamed: attachImageNamed)
+            case let .title(text):
+                state.repos[1] = CreateEventTextEditor.title(text: text)
+            }
         }
         return state
     }

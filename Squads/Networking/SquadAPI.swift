@@ -19,67 +19,128 @@ enum SquadAPI {
     /// remark: 备注
     case createSquad(name: String, avator: Data, remark: String)
     
-    /// 创建一个群
-    case createChannel(name: String, avatar: Data)
-    
-    /// 删除小组
-//    case removeSquad()
-    
     /// 获取小组详情
     case querySquad(id: String, setTop: Bool)
+    
+    /// 删除Squad
+    case deleteSquad(id: String)
+    
+    /// 更新Squad
+    case updateSquad(name: String, avator: Data, remark: String)
     
     /// 获取当前置顶的squad
     case quardTopSquad
     
+    /// 加入一个小组
+    case addMember(squadId: Int, accountId: Int)
+    
+    /// 从小组中退出
+    case removeMember(squadId: Int)
+    
+    /// 查询在小组中的用户资料
+    case queryMemberInfo(squadId: Int)
+    
+    /// 修改小组与用户的关系
+    case updateMemberInfo(squadId: Int, accountId: Int)
+    
+    /// 创建一个频道
+    case createChannel(squadId: Int, name: String, avatar: Data, ownerAccountId: Int)
+    
+    /// 删除一个频道
+    case deleteChannel(id: Int)
+    
+    /// 查询一个频道
+    case queryChannel(id: Int)
+    
+    /// 更新一个频道
+    case updateChannel(squadId: Int, name: String, avatar: Data, ownerAccountId: Int)
+    
+    /// 查询指定squad下的所有频道
+    case getSquadChannel(squadId: Int)
+    
     /// 批量通过手机号查询用户是否已被注册
     case isAlreadyRegistered(phoneList: Array<String>)
     
-    /// 查询全部的好友
+    /// 查询当前用户全部的好友
     case queryAllFriends
     
     /// 批量邀请好友加入squad
     case inviteFriends(squadId: String, userIds: Array<String>)
     
-    /// 修改小组信息
-//    case updateSquad()
+    /// 我的邀请记录 需要分页
+//    case myInviteRecords()
     
     /// 加入一个小组
-//    case addMember()
+//    case joinSquad()
     
-    /// 从小组中退出
-//    case removeMember()
+    /// 查询指定squad下的所有成员
+    case getMembersFromSquad(squadId: Int)
     
-    /// 查询在小组中的用户资料
-//    case queryMemberInfo(userId: String)
-    
-    /// 修改小组与用户的关系
-//    case updateMemberInfo()
+    /// 查询我加入的所有的squad
+//    case queryAllSquads()
 }
 
 extension SquadAPI: TargetType {
     
     var baseURL: URL {
         //115.159.208.16:8888/api
-        return URL(string: "http://squad.wieed.com:8888/api/squad")!
+        return URL(string: "http://squad.wieed.com:8888/api/")!
     }
     
     var path: String {
         switch self {
         case .createSquad:
-            return "add"
-        case .createChannel, .querySquad, .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends:
+            return "squad/add"
+        case .deleteSquad(let id):
+            return "squad/delete/\(id)"
+        case .querySquad(let id, _):
+            return "squad/info/\(id)"
+        case .updateSquad:
+            return "squad/update"
+        case .addMember:
+            return "squad/member/add"
+        case .removeMember(let id):
+            return "squad/member/delete/\(id)"
+        case .updateMemberInfo:
+            return "squad/member/update"
+        case .queryMemberInfo(let id):
+            return "squad/member/info/\(id)"
+        case .getSquadChannel:
+            return "channel/getSquadChannel"
+        case .deleteChannel(let id):
+            return "channel/delete/\(id)"
+        case .createChannel:
+            return "channel/add"
+        case .updateChannel:
+            return "channel/update"
+        case .queryChannel(let id):
+            return "channel/info/\(id)"
+            
+        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .getMembersFromSquad:
             return ""
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .createSquad:
+        case .createSquad,
+             .deleteSquad,
+             .updateSquad,
+             .addMember,
+             .removeMember,
+             .updateMemberInfo,
+             .createChannel,
+             .deleteChannel,
+             .updateChannel:
             return .post
-        case .createChannel:
-            return .post
+            
+        case .querySquad,
+             .queryMemberInfo,
+             .getSquadChannel,
+             .queryChannel:
+            return .get
         //FIXME: - 测试接口
-        case .querySquad, .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends: return .get
+        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .getMembersFromSquad: return .get
         }
     }
     
@@ -175,8 +236,47 @@ extension SquadAPI: TargetType {
         case let .createSquad(name, avator, remark):
             let params = ["squadName": name, "logoImgBase64": avator.base64EncodedString(options: .lineLength64Characters), "createRemark": remark]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+        case .deleteSquad, .querySquad:
+            return .requestPlain
+        case let .updateSquad(name, avator, remark):
+            let params = ["squadName": name, "logoImgBase64": avator.base64EncodedString(options: .lineLength64Characters), "createRemark": remark]
+            return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+            
+        case let .addMember(squadId, accountId):
+            return .requestParameters(parameters: [
+                "squadId": squadId,
+                "accountId": accountId
+            ], encoding: JSONEncoding.default)
+        case let .updateMemberInfo(squadId, accountId):
+            return .requestParameters(parameters: [
+                "squadId": squadId,
+                "accountId": accountId
+            ], encoding: JSONEncoding.default)
+        case  .removeMember, .queryMemberInfo:
+            return .requestPlain
+            
+        case let .createChannel(squadId, name, avatar, ownerAccountId):
+            return .requestParameters(parameters: [
+                "squadId": squadId,
+                "ownerAccountId": ownerAccountId,
+                "channelName": name,
+                "headImgUrl": avatar.base64EncodedString(options: .lineLength64Characters)
+            ], encoding: JSONEncoding.default)
+        case let .updateChannel(squadId, name, avatar, ownerAccountId):
+            return .requestParameters(parameters: [
+                "squadId": squadId,
+                "ownerAccountId": ownerAccountId,
+                "channelName": name,
+                "headImgUrl": avatar.base64EncodedString(options: .lineLength64Characters)
+            ], encoding: JSONEncoding.default)
+        case .queryChannel, .deleteChannel:
+            return .requestPlain
+        case .getSquadChannel(let squadId):
+            let params = ["squadId": squadId]
+            return .requestParameters(parameters: params, encoding: URLEncoding.default)
+            
         //FIXME: - 测试接口
-        case .createChannel, .querySquad, .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends:
+        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .getMembersFromSquad:
             return .requestPlain
         }
     }

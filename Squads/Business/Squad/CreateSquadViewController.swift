@@ -125,7 +125,7 @@ class CreateSquadViewController: BaseViewController {
                 
                 self.hideLoading()
                 DataCenter.topSquad = model
-                UserDefaults.standard.topSquad = "\(model.id)"
+                UserDefaults.standard.topSquad = model.id
                 
                 let reactor = SquadInvithNewReactor(squadId: "\(model.id)")
                 let vc = SquadInvithNewViewController(reactor: reactor)
