@@ -51,6 +51,7 @@
 		174F6C1B24B7291F00E5A1C6 /* ChatSoundRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */; };
 		174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */; };
 		174F6C1F24B7297300E5A1C6 /* ProximityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */; };
+		175D1EE724D6DC7500DBC483 /* WelcomeReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175D1EE624D6DC7500DBC483 /* WelcomeReactor.swift */; };
 		1775511324D65043004E54BE /* ActivitiesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775511224D65043004E54BE /* ActivitiesAPI.swift */; };
 		1775511524D650CE004E54BE /* FlicksAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775511424D650CE004E54BE /* FlicksAPI.swift */; };
 		1775D04924C6D798001C94E9 /* UITextField+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775D04824C6D798001C94E9 /* UITextField+Extension.swift */; };
@@ -237,6 +238,7 @@
 		174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSoundRecorder.swift; sourceTree = "<group>"; };
 		174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helper.swift"; sourceTree = "<group>"; };
 		174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityManager.swift; sourceTree = "<group>"; };
+		175D1EE624D6DC7500DBC483 /* WelcomeReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeReactor.swift; sourceTree = "<group>"; };
 		1775511224D65043004E54BE /* ActivitiesAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitiesAPI.swift; sourceTree = "<group>"; };
 		1775511424D650CE004E54BE /* FlicksAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksAPI.swift; sourceTree = "<group>"; };
 		1775D04824C6D798001C94E9 /* UITextField+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+Extension.swift"; sourceTree = "<group>"; };
@@ -603,6 +605,7 @@
 				178FCB7D24B4778C0054212F /* SquadInvithNewReactor.swift */,
 				178FCB7F24B4779B0054212F /* SquadMembersReactor.swift */,
 				178FCB8124B477AA0054212F /* SquadThemeReactor.swift */,
+				175D1EE624D6DC7500DBC483 /* WelcomeReactor.swift */,
 			);
 			path = Reactor;
 			sourceTree = "<group>";
@@ -1138,6 +1141,7 @@
 				17F1722A24B9A7FE0081E4C0 /* CreateEventAvailabilityCell.swift in Sources */,
 				17A1514324D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift in Sources */,
 				17E5FA5C24B41FD600E8B819 /* SquadPreViewController.swift in Sources */,
+				175D1EE724D6DC7500DBC483 /* WelcomeReactor.swift in Sources */,
 				179536B424B192BE00FE1185 /* UIButton+Extension.swift in Sources */,
 				179C050324B1C5E800A669FA /* SquadSqrollViewCell.swift in Sources */,
 				17F6493D24C825B1008C334D /* ActivityTimeLineView.swift in Sources */,

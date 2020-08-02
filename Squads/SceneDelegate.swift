@@ -10,6 +10,7 @@ import UIKit
 import RxSwift
 import RxCocoa
 import RxRelay
+import JXPhotoBrowser
 
 class AuthManager {
     
@@ -120,6 +121,42 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
-
+    // 仅仅支持iOS 13以上的方法, 这里修改完记得修改appdelete中对应的方法
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb else {
+            return
+        }
+        
+        if let webpageURL = userActivity.webpageURL {
+            if webpageURL.host == App.AssociatedDomains {
+                //获取邀请码
+                if let code = pathComponentsParse(url: webpageURL, key: "invite") {
+                    let reactor = WelcomeReactor(inviteCode: code)
+                    let welcomeVC = WelcomeViewController(reactor: reactor)
+                    let nav = BaseNavigationController(rootViewController: welcomeVC)
+                    nav.modalPresentationStyle = .fullScreen
+                    JXPhotoBrowser.topMost?.present(nav, animated: true)
+                } else {
+                    let view = UIApplication.shared.keyWindow
+                    view?.showToast(message: "Your request could not be processed")
+                }
+            } else {
+                UIApplication.shared.open(webpageURL, options: .init(), completionHandler: nil)
+            }
+        }
+    }
+    
+    private func pathComponentsParse(url: URL, key: String) -> String? {
+        let pathComponents = url.pathComponents
+        guard pathComponents.count >= 2 else { return nil }
+        for i in 0..<pathComponents.count {
+            let pathComponent = pathComponents[i]
+            if key == pathComponent && i != pathComponents.count - 1 {
+                return pathComponents[i + 1]
+            }
+        }
+        return nil
+    }
 }
 

@@ -66,20 +66,12 @@ class SquadReactor: Reactor {
     }
     
     var initialState: State
-    var provider = OnlineProvider<SquadAPI>(stubClosure: { (api)  in
-        switch api {
-        case .quardTopSquad: return .delayed(seconds: 1)
-        default: return .never
-        }
-    })
+    var provider = OnlineProvider<SquadAPI>()
     
     init(currentSquadId: Int) {
         initialState = State(currentSquadId: currentSquadId)
-        
         initialState.repos[0] = [SquadSqroll(list: ["http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg","http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg", "http://image.biaobaiju.com/uploads/20180803/23/1533309822-GCcDphRmqw.jpg"])]
         initialState.repos[1] = [SquadActivity(), SquadActivity()]
-        initialState.repos[2] = [SquadChannel(sessionId: "1", avatar: "http://image.biaobaiju.com/uploads/20180803/23/1533309822-GCcDphRmqw.jpg", title: "Main", content: "Danny: Yeah I Know", unreadCount: 1, dateString: "10:10 PM"),
-                                 SquadChannel(sessionId: "1", avatar: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg", title: "Main", content: "Danny: Yeah I Know", unreadCount: 1, dateString: "10:10 PM")]
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -90,11 +82,27 @@ class SquadReactor: Reactor {
         case .requestSquad(let id):
             return provider.request(target: .querySquad(id: id, setTop: true), model: SquadDetail.self, atKeyPath: .data)
                 .asObservable()
+                .flatMap { result -> Observable<Result<SquadDetail, GeneralError>> in
+                    switch result {
+                    case .success(let detail):
+                        return self.provider.request(target: .getSquadChannel(squadId: detail.id), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable().map {
+                            switch $0 {
+                            case .success(let list):
+                                return .success(detail.addChannels(list))
+                            case .failure(let error):
+                                return .failure(error)
+                            }
+                        }
+                    case .failure(let error):
+                        return Observable.just(.failure(error))
+                    }
+                }
                 .flatMap { [unowned self] result -> Observable<Result<Array<SquadChannel>, GeneralError>> in
                     switch result {
                     case .success(let detail):
                         // 通过squad中的列表, 去IM服务器查询这些群的信息
-                        return self.queryGroupsFromTIM(groupIds: ["123", "234"])
+                        let groupIds = detail.channels?.map{ String($0.id) } ?? []
+                        return self.queryGroupsFromTIM(groupIds: groupIds)
                     case .failure(let error):
                         return Observable.just(.failure(error))
                     }
@@ -132,11 +140,27 @@ class SquadReactor: Reactor {
                         return Single.just(.failure(error))
                     }
                 }
+                .flatMap { result -> Observable<Result<SquadDetail, GeneralError>> in
+                    switch result {
+                    case .success(let detail):
+                        return self.provider.request(target: .getSquadChannel(squadId: detail.id), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable().map {
+                            switch $0 {
+                            case .success(let list):
+                                return .success(detail.addChannels(list))
+                            case .failure(let error):
+                                return .failure(error)
+                            }
+                        }
+                    case .failure(let error):
+                        return Observable.just(.failure(error))
+                    }
+                }
                 .flatMap { [unowned self] result -> Observable<Result<Array<SquadChannel>, GeneralError>> in
                     switch result {
                     case .success(let detail):
                         // 通过squad中的列表, 去IM服务器查询这些群的信息
-                        return self.queryGroupsFromTIM(groupIds: ["123", "234"])
+                        let groupIds = detail.channels?.map{ String($0.id) } ?? []
+                        return self.queryGroupsFromTIM(groupIds: groupIds)
                     case .failure(let error):
                         return Observable.just(.failure(error))
                     }
@@ -184,6 +208,12 @@ class SquadReactor: Reactor {
     func queryGroupsFromTIM(groupIds: Array<String>) -> Observable<Result<Array<SquadChannel>, GeneralError>> {
         return Observable.create { (observer) -> Disposable in
             
+            guard !groupIds.isEmpty else {
+                observer.onNext(.success([]))
+                observer.onCompleted()
+                return Disposables.create()
+            }
+            
             let groupManager = TIMManager.sharedInstance()?.groupManager()
             let conversationList = TIMManager.sharedInstance()?.getConversationList() ?? []
             
@@ -193,15 +223,26 @@ class SquadReactor: Reactor {
                 for i in 0..<groupList.count {
                     let groupInfo = groupList[i]
                     let conversation = conversationList.first(where: { $0.getReceiver() == groupInfo.group })
-                    if groupInfo.lastMsg == nil { continue }
-                    let message = MessageElem(message: groupInfo.lastMsg)
-                    let channel = SquadChannel(sessionId: groupInfo.group,
-                                               avatar: groupInfo.faceURL,
-                                               title: groupInfo.groupName,
-                                               content: message.description,
-                                               unreadCount: Int(conversation?.getUnReadMessageNum() ?? 0),
-                                               dateString: message.dateString)
-                    channelsList.append(channel)
+                    if groupInfo.lastMsg != nil {
+                        // 获取本地会话, 将message添加到item中
+                        let message = MessageElem(message: groupInfo.lastMsg)
+                        let channel = SquadChannel(sessionId: groupInfo.group,
+                                                   avatar: groupInfo.faceURL,
+                                                   title: groupInfo.groupName,
+                                                   content: message.description,
+                                                   unreadCount: Int(conversation?.getUnReadMessageNum() ?? 0),
+                                                   dateString: message.dateString)
+                        channelsList.append(channel)
+                    } else {
+                        // 获取群信息
+                        let channel = SquadChannel(sessionId: groupInfo.group,
+                                                   avatar: groupInfo.faceURL,
+                                                   title: groupInfo.groupName,
+                                                   content: "",
+                                                   unreadCount: Int(conversation?.getUnReadMessageNum() ?? 0),
+                                                   dateString: "")
+                        channelsList.append(channel)
+                    }
                 }
                 observer.onNext(.success(channelsList))
                 observer.onCompleted()

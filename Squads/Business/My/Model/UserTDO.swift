@@ -18,13 +18,13 @@ struct UserTDO {
     var inviteCode: String?
     var nationCode: String?
     var verificationcode: String?
-    var purePhoneNumber: String?
+    var phoneNumber: String?
     var nickname: String?
     var avatar: Data?
     
-    var phoneNumber: String? {
-        if let purePhoneNumber = purePhoneNumber, let nationCode = nationCode {
-            return nationCode + purePhoneNumber
+    var purePhoneNumber: String? {
+        if let phoneNumber = phoneNumber, let nationCode = nationCode {
+            return nationCode + phoneNumber
         }
         return nil
     }
@@ -61,7 +61,7 @@ struct UserTDO {
         if properties.contains(.phoneNumber) && (phoneNumber == nil || phoneNumber?.isEmpty == true) {
             return .failure(.custom("The cell phone number cannot be empty"))
         }
-        if properties.contains(.phoneNumber) && (purePhoneNumber?.count != 11) {
+        if properties.contains(.phoneNumber) && (phoneNumber?.count != 11) {
             return .failure(.custom("Incorrect phone number format!"))
         }
         if properties.contains(.verificationcode) && (verificationcode == nil || verificationcode?.isEmpty == true) {

@@ -31,8 +31,8 @@ class SquadPreReactor: Reactor {
     }
     
     var initialState: State
-    let squadId: String
-    init(squadId: String) {
+    let squadId: Int
+    init(squadId: Int) {
         self.squadId = squadId
         initialState = State(repos: [Model(title: "MEMBERS"),
                                      Model(title: "NOTIFICATIONS"),

@@ -142,7 +142,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
                 switch flag {
                 case "profile":
                     //FIXME: - 暂时为空
-                    let preReactor = SquadPreReactor(squadId: "")
+                    let preReactor = SquadPreReactor(squadId: 0)
                     let preViewController = SquadPreViewController(reactor: preReactor)
                     let nav = BaseNavigationController(rootViewController: preViewController)
                     nav.modalPresentationStyle = .fullScreen

@@ -30,6 +30,8 @@ class SquadInvithNewReactor: Reactor {
         case request
         // 获取通讯录中联系人手机号
         case visibleContacts(phoneList: Array<String>, isDenied: Bool)
+        // 邀请好友, 生成邀请链接
+        case createLink
     }
     
     enum Mutation {
@@ -38,6 +40,8 @@ class SquadInvithNewReactor: Reactor {
         case setInviteSuccess
         case setMembers(members: Array<Member>, isDenied: Bool?)
         case setToast(String)
+        case setLinkText(String)
+        case setLoading(Bool)
     }
     
     struct State {
@@ -49,6 +53,10 @@ class SquadInvithNewReactor: Reactor {
         var isDeniedVisibleContacts: Bool?
         // toast
         var toast: String?
+        // loading
+        var isLoading: Bool?
+        // 邀请链接
+        var linkText: String?
         
         var isEmptyRepos: Bool {
             return repos[0].isEmpty && repos[1].isEmpty
@@ -58,8 +66,8 @@ class SquadInvithNewReactor: Reactor {
     var initialState: State
     var provider = OnlineProvider<SquadAPI>()
     
-    let squadId: String
-    init(squadId: String) {
+    let squadId: Int
+    init(squadId: Int) {
         self.squadId = squadId
         initialState = State(repos: [[], []])
     }
@@ -91,11 +99,23 @@ class SquadInvithNewReactor: Reactor {
                     return .setToast(error.message)
                 }
             }
+        case .createLink:
+            return provider.request(target: .createLinkBySquad(squadId: squadId, nationCode: "+86", phoneNumber: 17771865607), model: String.self, atKeyPath: .data).asObservable().map { result in
+                switch result {
+                case .success(let linkString):
+                    return .setLinkText(linkString)
+                case .failure(let error):
+                    return .setToast(error.message)
+                }
+            }.startWith(.setLoading(true))
         }
     }
     
     func reduce(state: State, mutation: Mutation) -> State {
         var state = state
+        //每次进来都需要置空, 因为这个它只被允许订阅一次
+        state.linkText = nil
+        
         switch mutation {
         case .setAddMember(let member):
             
@@ -134,7 +154,11 @@ class SquadInvithNewReactor: Reactor {
         case .setInviteSuccess:
             state.inviteSuccess = true
         case .setToast(let s):
+            state.isLoading = false
             state.toast = s
+        case .setLoading(let s):
+            state.toast = nil
+            state.isLoading = s
         case let .setMembers(members, isDenied):
             if isDenied != nil {
                 // 更新的通讯录列表
@@ -144,6 +168,9 @@ class SquadInvithNewReactor: Reactor {
                 // 更新的好友列表
                 state.repos[0] = members
             }
+        case .setLinkText(let str):
+            state.isLoading = false
+            state.linkText = str
         }
         return state
     }

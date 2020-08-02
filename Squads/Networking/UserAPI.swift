@@ -71,7 +71,7 @@ extension UserAPI: TargetType {
         case .update:
             return "user/update"
         case .verificationcode:
-            return "user/verificationcode"
+            return "user/verificationCode"
         case .getverificationcode:
             return "user/getVerificationCode"
         case .logout:

@@ -28,10 +28,16 @@ enum ConversationAction: Equatable {
 }
 
 struct CreateChannel: Codable {
-    let squadId: String
+    let id: Int
+    let squadId: Int
     let channelName: String
-    let avatar: String
-    let ownerAccountId: String
+    let headImgUrl: String
+    let ownerAccountId: Int
+}
+
+struct SquadMember: Codable {
+    let id: Int
+    let accountId: Int
 }
 
 final class ChattingViewController: InputBarViewController {
@@ -115,6 +121,14 @@ final class ChattingViewController: InputBarViewController {
                 }
             })
             .disposed(by: disposeBag)
+        
+        inputBar.sendButton.onTouchUpInside { [unowned self] (item) in
+            guard let text = self.inputBar.inputTextView.text, let sender = User.currentUser() else {
+                return
+            }
+            let elem = MessageElem(text: text, sender: sender)
+            self.sendMessage(message: elem)
+        }
     }
 
     private func loadMessages(groupId: String) {
@@ -246,20 +260,29 @@ extension ChattingViewController {
         
         // 拿到groupName, avatarData后准备发起请求去创建该channel
         let createChannel: Observable<Result<CreateChannel, GeneralError>> = provider.request(target: .createChannel(squadId: squadId, name: groupName, avatar: avatarData, ownerAccountId: accountId), model: CreateChannel.self, atKeyPath: .data).asObservable()
-        let members: Observable<Result<Array<String>, GeneralError>> = provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<String>.self, atKeyPath: .data).asObservable()
+        let members: Observable<Result<Array<String>, GeneralError>> = provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<SquadMember>.self, atKeyPath: .data).asObservable()
+            .map{
+                switch $0 {
+                case .success(let list):
+                    // 获取squad中的所有成员, 过滤掉自己
+                    return .success(list.filter{ User.currentUser()?.id != $0.accountId }.map{ String($0.accountId) })
+                case .failure(let error):
+                    return .failure(error)
+                }
+            }
         
         Observable
             .zip(createChannel, members)
             .flatMap { [unowned self] (channelResult, membersResult) -> Observable<Result<String, GeneralError>> in
                 switch (channelResult, membersResult) {
                 case (.success(let model), .success(let members)):
-                    return self.createGroupsFromTIM(groupId: model.squadId, groupName: model.channelName, faceURL: model.avatar, inviteMembers: members)
+                    return self.createGroupsFromTIM(groupId: String(model.id), groupName: model.channelName, faceURL: model.headImgUrl, inviteMembers: members)
                 case (.failure(let channelError), .failure):
                     return Observable.just(.failure(.custom(channelError.message)))
                 case (.failure(let channelError), .success):
                     return Observable.just(.failure(.custom(channelError.message)))
                 case (.success(let model), .failure):
-                    return self.createGroupsFromTIM(groupId: model.squadId, groupName: model.channelName, faceURL: model.avatar, inviteMembers: [])
+                    return self.createGroupsFromTIM(groupId: String(model.squadId), groupName: model.channelName, faceURL: model.headImgUrl, inviteMembers: [])
                 }
             }
             .subscribe(onNext: { [unowned self] result in

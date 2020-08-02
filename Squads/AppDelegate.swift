@@ -13,6 +13,7 @@ import RxRelay
 import MonkeyKing
 import ImSDK
 import AVFoundation
+import JXPhotoBrowser
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -65,7 +66,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
     
+    // 仅仅支持iOS 13以下的方法, 这里修改完记得修改sceneDelegate中对应的方法
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        
+        restorationHandler(nil)
+        
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb else {
             return true
         }
@@ -74,17 +79,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if webpageURL.host == App.AssociatedDomains {
                 //获取邀请码
                 if let code = pathComponentsParse(url: webpageURL, key: "invite") {
-                    let view = UIApplication.shared.keyWindow
-                    view?.showToast(message: "获取到邀请码: \(code)")
-                    
-                    let welcomeVC = WelcomeViewController()
+                    let reactor = WelcomeReactor(inviteCode: code)
+                    let welcomeVC = WelcomeViewController(reactor: reactor)
                     let nav = BaseNavigationController(rootViewController: welcomeVC)
-                    //TODO: 找到当前window显示的viewController, 然后present出一个vc
+                    nav.modalPresentationStyle = .fullScreen
+                    JXPhotoBrowser.topMost?.present(nav, animated: true)
+                } else {
+                    let view = UIApplication.shared.keyWindow
+                    view?.showToast(message: "Your request could not be processed")
                 }
             } else {
                 UIApplication.shared.open(webpageURL, options: .init(), completionHandler: nil)
             }
         }
+        
         return true
     }
 
@@ -234,9 +242,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     
     private func pathComponentsParse(url: URL, key: String) -> String? {
-        guard url.pathComponents.count == 2 else { return nil }
-        if url.pathComponents.first == key {
-            return url.lastPathComponent
+        let pathComponents = url.pathComponents
+        guard pathComponents.count >= 2 else { return nil }
+        for i in 0..<pathComponents.count {
+            let pathComponent = pathComponents[i]
+            if key == pathComponent && i != pathComponents.count - 1 {
+                return pathComponents[i + 1]
+            }
         }
         return nil
     }

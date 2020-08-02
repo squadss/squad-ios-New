@@ -114,7 +114,7 @@ class RegisterPhoneNumberViewController: BaseViewController, BrickInputFieldStyl
     
     @objc
     private func confirmBtnDidTapped() {
-        UserTDO.instance.purePhoneNumber = formatPhone
+        UserTDO.instance.phoneNumber = formatPhone
         UserTDO.instance.nationCode = nationCodeBtn.title(for: .normal)
         
         let result = UserTDO.instance.checkout(properties: .phoneNumber)
