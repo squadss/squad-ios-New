@@ -145,6 +145,9 @@ class LoginViewController: ReactorViewController<LoginReactor>, BrickInputFieldS
             .compactMap{ $0.success }
             .delay(RxTimeInterval.milliseconds(500), scheduler: MainScheduler.instance)
             .subscribe(onNext: { model in
+                if let topSquad = model.topSquad {
+                    UserDefaults.standard.topSquad = topSquad
+                }
                 model.loginAccountVo.save()
                 AuthManager.setToken(.normal(token: model.token))
                 Application.shared.presentInitialScreent()

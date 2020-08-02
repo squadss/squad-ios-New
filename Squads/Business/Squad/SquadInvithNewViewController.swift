@@ -10,8 +10,9 @@ import UIKit
 import RxSwift
 import RxDataSources
 import Contacts
+import MessageUI
 
-class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>, UITableViewDelegate {
+class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>, UITableViewDelegate, MFMessageComposeViewControllerDelegate {
 
     // 是否隐藏导航左侧按钮
     var isHideBackButtonItem: Bool = false
@@ -43,7 +44,6 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         headerView = SquadInvithNewHeaderView()
         headerView.contentView = collectionView
         headerView.insertBottom = 30
-        headerView.inviteBtn.addTarget(self, action: #selector(inviteBtnDidTapped), for: .touchUpInside)
         headerView.backgroundColor = UIColor(hexString: "#E5E5E5")
         
         footerView = UIView()
@@ -106,52 +106,11 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         footerView.addSubview(searchBtn)
     }
     
-    // 请求访问通讯录 true: 已拥有权限
-    private func requestVisibleContacts() -> Observable<Bool> {
-        return Observable.create { (observer) -> Disposable in
-            let status = CNContactStore.authorizationStatus(for: .contacts)
-            switch status {
-            case .notDetermined:
-                let store = CNContactStore()
-                store.requestAccess(for: .contacts) { (grantes, error) in
-                    observer.onNext(error == nil)
-                    observer.onCompleted()
-                }
-            case .restricted, .denied:
-                observer.onNext(false)
-                observer.onCompleted()
-            case .authorized:
-                observer.onNext(true)
-                observer.onCompleted()
-            @unknown default:
-                observer.onNext(false)
-                observer.onCompleted()
-            }
-            return Disposables.create()
-        }
-    }
-    
-    /// 获取通讯录中所有联系人的手机号
-    private func getContactsPhone() -> Array<String> {
-        var contactList = Array<String>()
-        let contactStore = CNContactStore()
-        let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey].map{ NSString(string: $0) }
-        let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch)
-        try? contactStore.enumerateContacts(with: fetchRequest, usingBlock: { (contact, cPointer) in
-            let phoneNumbers = contact.phoneNumbers
-            for labelValue in phoneNumbers {
-                let phoneNumber = labelValue.value.stringValue
-                var phone = phoneNumber.replacingOccurrences(of: " ", with: "")
-                    .replacingOccurrences(of: "(", with: "")
-                    .replacingOccurrences(of: ")", with: "")
-                phone = String(phone.suffix(11))
-                if phone.count == 11 && phone.hasPrefix("1") {
-                    contactList.append(phone)
-                    break
-                }
-            }
-        })
-        return contactList
+    override func addTouchAction() {
+        headerView.inviteBtn.rx.tap
+            .map{ Reactor.Action.createLink }
+            .bind(to: reactor!.action)
+            .disposed(by: disposeBag)
     }
     
     override func setupConstraints() {
@@ -225,6 +184,11 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             .disposed(by: disposeBag)
         
         reactor.state
+            .compactMap{ $0.isLoading }
+            .bind(to: rx.loading)
+            .disposed(by: disposeBag)
+        
+        reactor.state
             .map{ $0.members != nil }
             .debug()
             .filter{ $0 }
@@ -238,6 +202,22 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
                     self.view.layoutIfNeeded()
                 }) { _ in
                     self.headerView.contentView.isHidden = false
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.linkText }
+            .subscribe(onNext: { [unowned self] text in
+                if MFMessageComposeViewController.canSendText() {
+                    let messageVC = MFMessageComposeViewController()
+                    messageVC.messageComposeDelegate = self
+                    messageVC.body = text
+                    self.present(messageVC, animated: true)
+                } else {
+                    let alert = UIAlertController(title: "Warning", message: "This feature is not supported on current devices", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: nil))
+                    self.present(alert, animated: true)
                 }
             })
             .disposed(by: disposeBag)
@@ -312,6 +292,54 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             .disposed(by: disposeBag)
     }
     
+    // 请求访问通讯录 true: 已拥有权限
+    private func requestVisibleContacts() -> Observable<Bool> {
+        return Observable.create { (observer) -> Disposable in
+            let status = CNContactStore.authorizationStatus(for: .contacts)
+            switch status {
+            case .notDetermined:
+                let store = CNContactStore()
+                store.requestAccess(for: .contacts) { (grantes, error) in
+                    observer.onNext(error == nil)
+                    observer.onCompleted()
+                }
+            case .restricted, .denied:
+                observer.onNext(false)
+                observer.onCompleted()
+            case .authorized:
+                observer.onNext(true)
+                observer.onCompleted()
+            @unknown default:
+                observer.onNext(false)
+                observer.onCompleted()
+            }
+            return Disposables.create()
+        }
+    }
+    
+    /// 获取通讯录中所有联系人的手机号
+    private func getContactsPhone() -> Array<String> {
+        var contactList = Array<String>()
+        let contactStore = CNContactStore()
+        let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey].map{ NSString(string: $0) }
+        let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch)
+        try? contactStore.enumerateContacts(with: fetchRequest, usingBlock: { (contact, cPointer) in
+            let phoneNumbers = contact.phoneNumbers
+            for labelValue in phoneNumbers {
+                let phoneNumber = labelValue.value.stringValue
+                var phone = phoneNumber.replacingOccurrences(of: " ", with: "")
+                    .replacingOccurrences(of: "(", with: "")
+                    .replacingOccurrences(of: ")", with: "")
+                phone = String(phone.suffix(11))
+                if phone.count == 11 && phone.hasPrefix("1") {
+                    contactList.append(phone)
+                    break
+                }
+            }
+        })
+        return contactList
+    }
+    
     @objc
     private func searchBtnDidTapped() {
         let searchVC = SquadInvithNewSearchViewController()
@@ -319,11 +347,6 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         searchVC.hero.modalAnimationType = .selectBy(presenting: .fade, dismissing: .fade)
         searchVC.modalPresentationStyle = .fullScreen
         self.present(searchVC, animated: true)
-    }
-    
-    @objc
-    private func inviteBtnDidTapped() {
-        
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -348,4 +371,7 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         return tempView
     }
     
+    func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+        dismiss(animated: true)
+    }
 }

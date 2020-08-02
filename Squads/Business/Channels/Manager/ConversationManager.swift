@@ -26,7 +26,7 @@ public final class MessageElem {
     }
     
     public private(set) var message: TIMMessage!
-    public var messageSender: Sender?
+    public var messageSender: SenderType?
     
     /// 时间戳构造方法
     ///
@@ -39,6 +39,43 @@ public final class MessageElem {
         self.message = message
     }
     
+    /// 文本构造方法
+    ///
+    /// - Parameter text: 文本内容
+    public init(text: String, sender: SenderType?) {
+        
+        let textEle = TIMTextElem()
+        textEle.text = text
+        
+        let msgEle = TIMMessage()
+        msgEle.add(textEle)
+        
+        self.message = msgEle
+        self.messageSender = sender
+    }
+    
+    
+    /// 语音构造方法
+    ///
+    /// - Parameters:
+    ///   - data: 音频二进制数据
+    ///   - dur: 音频时长
+    public init(data: Data, dur: Int32, sender: SenderType?) {
+        
+        let soundEle = TIMSoundElem()
+        
+        if let path = saveDataToLocal(with: data) {
+            soundEle.path = path
+            soundEle.second = dur
+        }
+        
+        let msgEle = TIMMessage()
+        msgEle.add(soundEle)
+        
+        self.message = msgEle
+        self.messageSender = sender
+    }
+    
     // 将当前消息转为文本描述
     var description: String {
         return "哈喽"
@@ -48,6 +85,108 @@ public final class MessageElem {
         return "just"
     }
 }
+
+//MARK: - 语音消息
+extension MessageElem {
+    
+    /// 保存数据到本地
+    ///
+    /// - Parameter with: 语音data
+    private func saveDataToLocal(with data: Data) -> String? {
+        
+        guard let loginId = TIMManager.sharedInstance().getLoginUser() else { return nil }
+        
+        let cachePath = PathUtility.getCachePath()
+        
+        let soundSaveDir = "\(cachePath)/\(loginId)/Audio"
+        
+        if PathUtility.isExistFile(path: soundSaveDir) == false {
+            do {
+                try FileManager.default.createDirectory(atPath: soundSaveDir, withIntermediateDirectories: true, attributes: nil)
+            }catch {
+                return nil
+            }
+        }
+        
+        let durationString = String(format:"%llu", Date().timeIntervalSince1970)
+        let soundSavePath = "\(soundSaveDir)/\(durationString)"
+        
+        if PathUtility.isExistFile(path: soundSavePath) == false {
+            let state = FileManager.default.createFile(atPath: soundSavePath, contents: nil, attributes: nil)
+            if !state {
+                return nil
+            }
+        }
+        
+        let isWrite = NSData(data: data).write(toFile: soundSavePath, atomically: true)
+        if isWrite == false {
+            return nil
+        }
+        return soundSavePath
+    }
+    
+    public func getSoundPath(succ: @escaping (URL?) -> Void, fail: @escaping TIMFail) {
+        guard let loginId = TIMManager.sharedInstance().getLoginUser(),
+            let elem = message.getElem(0) as? TIMSoundElem else { return }
+        
+        let cachePath = PathUtility.getCachePath()
+        let audioDir = "\(cachePath)/\(loginId)"
+        var isDir: ObjCBool = false
+        let isDirExist = FileManager.default.fileExists(atPath: audioDir, isDirectory: &isDir)
+        
+        if !(isDir.boolValue && isDirExist) {
+            let isCreateDir = PathUtility.createDirectory(atCache: loginId)
+            if isCreateDir == false {
+                return
+            }
+        }
+        
+        let uuid = elem.uuid ?? ""
+        let path = "\(cachePath)/\(loginId)/" + uuid
+        
+        if PathUtility.isExistFile(path: path) {
+            succ(URL(fileURLWithPath: path))
+        }
+        else {
+            elem.getSound(path, succ: {
+                succ(URL(fileURLWithPath: path))
+            }, fail: fail)
+        }
+        
+    }
+    
+}
+
+public struct PathUtility {
+    public static func getCachePath() -> String {
+        return NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first!
+    }
+    
+    public static func isExistFile(path:String) -> Bool {
+        guard !path.isEmpty else{ return false }
+        return FileManager.default.fileExists(atPath: path)
+    }
+    
+    public static func createDirectory(atCache dirName: String) -> Bool{
+        let dirPath = getFileCachePath(fileName: dirName)
+        if FileManager.default.fileExists(atPath: dirPath) {
+            return true
+        }
+        do {
+         try FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true, attributes: nil)
+        }catch {
+            return false
+        }
+        return true
+    }
+    
+    private static func getFileCachePath(fileName: String) -> String{
+        let path = getCachePath()
+        return NSString(string: path).appendingPathComponent(fileName)
+    }
+    
+}
+
 
 protocol ConversationDelegate: class {
     

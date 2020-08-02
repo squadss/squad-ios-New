@@ -285,8 +285,10 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
 
     @objc
     private func titleBtnDidTapped() {
-        //FIXME: - SquadId暂时为空
-        let preReactor = SquadPreReactor(squadId: "")
+        guard let squadId = reactor?.currentState.currentSquadId else {
+            return
+        }
+        let preReactor = SquadPreReactor(squadId: squadId)
         let preViewController = SquadPreViewController(reactor: preReactor)
         let nav = BaseNavigationController(rootViewController: preViewController)
         nav.modalPresentationStyle = .fullScreen

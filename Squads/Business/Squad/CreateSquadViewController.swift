@@ -127,7 +127,7 @@ class CreateSquadViewController: BaseViewController {
                 DataCenter.topSquad = model
                 UserDefaults.standard.topSquad = model.id
                 
-                let reactor = SquadInvithNewReactor(squadId: "\(model.id)")
+                let reactor = SquadInvithNewReactor(squadId: model.id)
                 let vc = SquadInvithNewViewController(reactor: reactor)
                 vc.isHideBackButtonItem = true
                 self.navigationController?.pushViewController(vc, animated: true)
