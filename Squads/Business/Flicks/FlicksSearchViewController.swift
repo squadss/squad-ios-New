@@ -22,7 +22,12 @@ class FlicksSearchViewController: BaseViewController, UITableViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.theme.backgroundColor = UIColor.background
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        searchField.becomeFirstResponder()
     }
 
     override func setupView() {
@@ -32,6 +37,7 @@ class FlicksSearchViewController: BaseViewController, UITableViewDelegate {
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
         tableView.register(Reusable.flicksListViewCell)
+        tableView.theme.backgroundColor = UIColor.background
         view.addSubview(tableView)
         
         setupCancelBtn()
@@ -88,12 +94,20 @@ class FlicksSearchViewController: BaseViewController, UITableViewDelegate {
         
         searchField.snp.makeConstraints { (maker) in
             maker.leading.equalTo(32)
-            maker.top.equalTo(cancelBtn)
+            maker.top.equalTo(cancelBtn).offset(5)
             maker.trailing.equalTo(cancelBtn.snp.leading).offset(-3)
             maker.height.equalTo(28)
         }
         
-        tableView.snp.safeFull(parent: self)
+        tableView.snp.makeConstraints { (maker) in
+            maker.leading.trailing.equalToSuperview()
+            maker.top.equalTo(searchField.snp.bottom)
+            if #available(iOS 11, *) {
+                maker.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            } else {
+                maker.bottom.equalTo(bottomLayoutGuide.snp.top)
+            }
+        }
     }
     
     func bind(reactor: FlicksReactor) {

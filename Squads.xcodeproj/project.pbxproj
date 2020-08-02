@@ -51,6 +51,8 @@
 		174F6C1B24B7291F00E5A1C6 /* ChatSoundRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */; };
 		174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */; };
 		174F6C1F24B7297300E5A1C6 /* ProximityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */; };
+		1775511324D65043004E54BE /* ActivitiesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775511224D65043004E54BE /* ActivitiesAPI.swift */; };
+		1775511524D650CE004E54BE /* FlicksAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775511424D650CE004E54BE /* FlicksAPI.swift */; };
 		1775D04924C6D798001C94E9 /* UITextField+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775D04824C6D798001C94E9 /* UITextField+Extension.swift */; };
 		17787E2B24D31287002EC196 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17787E2A24D31287002EC196 /* WelcomeViewController.swift */; };
 		177D06AC24C562390023B382 /* CreateChannelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D06AB24C562390023B382 /* CreateChannelsView.swift */; };
@@ -235,6 +237,8 @@
 		174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSoundRecorder.swift; sourceTree = "<group>"; };
 		174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helper.swift"; sourceTree = "<group>"; };
 		174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityManager.swift; sourceTree = "<group>"; };
+		1775511224D65043004E54BE /* ActivitiesAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitiesAPI.swift; sourceTree = "<group>"; };
+		1775511424D650CE004E54BE /* FlicksAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksAPI.swift; sourceTree = "<group>"; };
 		1775D04824C6D798001C94E9 /* UITextField+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+Extension.swift"; sourceTree = "<group>"; };
 		17787E2A24D31287002EC196 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
 		177D06AB24C562390023B382 /* CreateChannelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateChannelsView.swift; sourceTree = "<group>"; };
@@ -416,7 +420,7 @@
 			children = (
 				179B497D24D1BEC9004D0558 /* Squads.entitlements */,
 				17F39BC924AECB8B00EC90ED /* Extensions */,
-				17BF5CAD24AEC77F00D5D8D8 /* Base */,
+				17BF5CAD24AEC77F00D5D8D8 /* Common */,
 				17BF5CAB24AEC76400D5D8D8 /* Networking */,
 				17BF5CAA24AEC74B00D5D8D8 /* Config */,
 				17BF5CA924AEC74200D5D8D8 /* Tool */,
@@ -742,8 +746,6 @@
 				172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */,
 				171B0F3724C299A30020DF15 /* OverlayPresentationController.swift */,
 				177D06B424C5D66C0023B382 /* ReusePool.swift */,
-				17F39BCC24AECC7700EC90ED /* GeneralError.swift */,
-				17F39BCE24AECD5800EC90ED /* GeneralModel.swift */,
 			);
 			path = Tool;
 			sourceTree = "<group>";
@@ -766,6 +768,8 @@
 				17BF5CAE24AEC7B600D5D8D8 /* Libr */,
 				17BF5CB124AEC82200D5D8D8 /* UserAPI.swift */,
 				174A839424CB2B0200ABB76D /* SquadAPI.swift */,
+				1775511224D65043004E54BE /* ActivitiesAPI.swift */,
+				1775511424D650CE004E54BE /* FlicksAPI.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -778,7 +782,7 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		17BF5CAD24AEC77F00D5D8D8 /* Base */ = {
+		17BF5CAD24AEC77F00D5D8D8 /* Common */ = {
 			isa = PBXGroup;
 			children = (
 				17F39BF024AED0D700EC90ED /* BaseView.swift */,
@@ -790,8 +794,10 @@
 				1733564E24CBC8820022D9D5 /* ReactorInputBarViewController.swift */,
 				17D9AF4C24AF1EB800FEF4DA /* BaseCollectionView.swift */,
 				17D9AF4E24AF1ECF00FEF4DA /* BaseTableView.swift */,
+				17F39BCC24AECC7700EC90ED /* GeneralError.swift */,
+				17F39BCE24AECD5800EC90ED /* GeneralModel.swift */,
 			);
-			path = Base;
+			path = Common;
 			sourceTree = "<group>";
 		};
 		17BF5CAE24AEC7B600D5D8D8 /* Libr */ = {
@@ -1007,6 +1013,7 @@
 				17F39BE024AECE8F00EC90ED /* UIWindow+Extension.swift in Sources */,
 				174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */,
 				1795369E24B04D4C00FE1185 /* DataCenter.swift in Sources */,
+				1775511524D650CE004E54BE /* FlicksAPI.swift in Sources */,
 				17F39BCF24AECD5800EC90ED /* GeneralModel.swift in Sources */,
 				174F6C1524B70FD200E5A1C6 /* SessionManager.swift in Sources */,
 				1780D89B24CFFB5D0064DD28 /* UserTDO.swift in Sources */,
@@ -1156,6 +1163,7 @@
 				179693D524CDC3D90023152A /* UIButton+Loading.swift in Sources */,
 				17F355DF24AED9F800AE00EC /* MoyaProvider+Rx.swift in Sources */,
 				171B0F3C24C2A5360020DF15 /* ActivityDetailToolbar.swift in Sources */,
+				1775511324D65043004E54BE /* ActivitiesAPI.swift in Sources */,
 				178FCB7824B4771D0054212F /* SquadThemeViewController.swift in Sources */,
 				179536B624B1A5BF00FE1185 /* Reusable.swift in Sources */,
 				179C051724B1E15F00A669FA /* SquadSqrollCollectionCell.swift in Sources */,

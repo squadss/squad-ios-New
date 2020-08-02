@@ -67,17 +67,17 @@ enum SquadAPI {
     /// 批量邀请好友加入squad
     case inviteFriends(squadId: String, userIds: Array<String>)
     
-    /// 我的邀请记录 需要分页
-//    case myInviteRecords()
+    /// 我的被邀请记录 需要分页
+    case myInviteRecords(page: Int, size: Int)
     
-    /// 加入一个小组
-//    case joinSquad()
+    /// 删除某项记录
+    case deleteInviteRecord(id: Int)
     
     /// 查询指定squad下的所有成员
     case getMembersFromSquad(squadId: Int)
     
     /// 查询我加入的所有的squad
-//    case queryAllSquads()
+    case queryAllSquads
 }
 
 extension SquadAPI: TargetType {
@@ -116,7 +116,7 @@ extension SquadAPI: TargetType {
         case .queryChannel(let id):
             return "channel/info/\(id)"
             
-        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .getMembersFromSquad:
+        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .myInviteRecords, .getMembersFromSquad, .queryAllSquads, .deleteInviteRecord:
             return ""
         }
     }
@@ -140,7 +140,7 @@ extension SquadAPI: TargetType {
              .queryChannel:
             return .get
         //FIXME: - 测试接口
-        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .getMembersFromSquad: return .get
+        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .getMembersFromSquad, .queryAllSquads, .myInviteRecords, .deleteInviteRecord: return .get
         }
     }
     
@@ -226,6 +226,56 @@ extension SquadAPI: TargetType {
             "data": null
             }
             """.data(using: .utf8)!
+        case .myInviteRecords:
+            return """
+            {
+            "code": 200,
+            "message": "邀请成功",
+            "data": {
+                    "records": [
+                        {
+                            "inviter": "",
+                            "receiver": "",
+                            "squadId": "",
+                            "squadName": "",
+                            "squadAvatar": "",
+                            "content": "",
+                            "status": 10
+                        },
+                        {
+                            "inviter": "",
+                            "receiver": "",
+                            "squadId": "",
+                            "squadName": "Box Squad",
+                            "squadAvatar": "",
+                            "content": "",
+                            "status": 10
+                        },
+                        {
+                            "inviter": "",
+                            "receiver": "",
+                            "squadId": "",
+                            "squadName": "Jimmy Squad",
+                            "squadAvatar": "",
+                            "content": "",
+                            "status": 10
+                        },
+                        {
+                            "inviter": "",
+                            "receiver": "",
+                            "squadId": "",
+                            "squadName": "Tom Squad",
+                            "squadAvatar": "",
+                            "content": "",
+                            "status": 10
+                        }
+                    ]
+                    "total": 10
+                    "size": 10
+                    "current": 1
+                }
+            }
+            """.data(using: .utf8)!
         default:
             return Data()
         }
@@ -276,7 +326,7 @@ extension SquadAPI: TargetType {
             return .requestParameters(parameters: params, encoding: URLEncoding.default)
             
         //FIXME: - 测试接口
-        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .getMembersFromSquad:
+        case .quardTopSquad, .isAlreadyRegistered, .queryAllFriends, .inviteFriends, .getMembersFromSquad, .queryAllSquads, .myInviteRecords, .deleteInviteRecord:
             return .requestPlain
         }
     }

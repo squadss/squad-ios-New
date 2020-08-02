@@ -34,7 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 配置IM
         let config = TIMSdkConfig()
         config.sdkAppId = App.Account.TIMAppKey
-        config.disableLogPrint = false //禁止在控制台打印
+        config.disableLogPrint = true //禁止在控制台打印
         TIMManager.sharedInstance()?.initSdk(config)
         
         // 配置UMeng统计
@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //注册远程推送
         registerNotification(launchOptions)
         
-        // 配置导航栏样式
+        // 全局配置导航栏样式
         UIBarButtonItem.appearance().setTitleTextAttributes([.foregroundColor: UIColor.black,
                                                              .font: UIFont.systemFont(ofSize: 15)], for: .normal)
         
@@ -86,14 +86,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         return true
-    }
-    
-    private func pathComponentsParse(url: URL, key: String) -> String? {
-        guard url.pathComponents.count == 2 else { return nil }
-        if url.pathComponents.first == key {
-            return url.lastPathComponent
-        }
-        return nil
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
@@ -202,11 +194,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             else if setting.authorizationStatus == .denied {
                 guard let appSettingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
                 
-                let alertVC = UIAlertController(title: "友情提示",
-                                                message: "建议您开启通知功能，以便及时获取相关信息",
+                let alertVC = UIAlertController(title: "Tips",
+                                                message: "It is recommended that you turn on notifications so that you can get relevant information in a timely manner",
                                                 preferredStyle: .alert)
-                alertVC.addAction(UIAlertAction(title: "忽略", style: .cancel, handler: nil))
-                alertVC.addAction(UIAlertAction(title: "去开启", style: .default, handler: { _ in
+                alertVC.addAction(UIAlertAction(title: "Ignore", style: .cancel, handler: nil))
+                alertVC.addAction(UIAlertAction(title: "Go", style: .default, handler: { _ in
                     if UIApplication.shared.canOpenURL(appSettingsURL) {
                         UIApplication.shared.open(appSettingsURL, options: [:], completionHandler: nil)
                     }
@@ -238,6 +230,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         alreadyDidReceiveNotificaction(application: application, userInfo: userInfo)
         completionHandler(.newData)
+    }
+    
+    
+    private func pathComponentsParse(url: URL, key: String) -> String? {
+        guard url.pathComponents.count == 2 else { return nil }
+        if url.pathComponents.first == key {
+            return url.lastPathComponent
+        }
+        return nil
     }
 }
 

@@ -44,6 +44,11 @@ class CreateEventLocationViewController: BaseViewController, CLLocationManagerDe
         view.theme.backgroundColor = UIColor.background
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        inputField.becomeFirstResponder()
+    }
+    
     override func setupView() {
         
         backgroundLayer.backgroundColor = UIColor(hexString: "#F4F5F4")

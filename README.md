@@ -9,7 +9,7 @@
 ### 目录结构
 
 - Extensions, 主要收藏一些类的扩展方法
-- Base, 定义了一些基础类, 开发时可以直接选择继承它, 少写一些重复代码
+- Common, 定义了一些常用类, 开发时可以直接选择继承它, 少写一些重复代码
 - Networking, 网络服务都写在这里, 在这里定义接口模型
 - Config, 配置类, 在这里定义项目中使用到的账号, 主题颜色, 本地持久化管理
 - Tool, 定义一些常用的工具类, 封装类
@@ -102,3 +102,34 @@
    ```
 
    这是固定格式, 每一个Reactor都需要有这些功能及方法. 如果不熟悉此框架, 可以通过[点击这里](https://github.com/ReactorKit/ReactorKit)去学习它.
+
+4. 页面布局
+
+   采用SnapKit框架自动布局, 在项目中普遍存在, 不过有些复杂的布局建议还是采用Frame方案处理, 因为使用SnapKit这种autoLayout框架, 它的本质还是会通过算法转为frame进行布局, 所以为了避免不必要计算浪费性能, 建议使用Frame.
+
+5. 设置颜色, 框架中为了适配暗黑模式, 预设了几个颜色值, 存于与Config->Color->UIColor+Squads.swift中, 在项目中使用时:
+
+```
+// 原生的颜色配置
+view.background = UIColor.white
+// 适配了暗黑模式的颜色配置
+view.theme.background = UIColor.background
+```
+
+6. 程序的主入口
+
+   iOS13中将应用的主入口和屏幕的主入口进行区分了, 分为两个文件AppDelete.swift, SceneDelegate.swift, 如果要自定义屏幕的主入口, 可以在SceneDelegate.swift文件中的**scene(scene: , willConnectTo: , options: )** 方法中进行:
+
+   ```
+   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+   	guard let windowScene = (scene as? UIWindowScene) else { return }
+   	window = UIWindow(windowScene: windowScene)
+   	window?.backgroundColor = .white
+   	Application.shared.presentInitialScreent(in: window)
+   	window?.makeKeyAndVisible()
+   }
+   ```
+
+   
+
+7. 其中Application为自定义的类, 主要的作用是为了处理当前状态下需要显示的主屏幕, 如果未登录状态, 就显示Login页面, 如果已登录没有可用的Squad, 就显示CreateSquad页面, 如果已经登录并且存在一个可用的Squad就显示Squad详情页面, 后期如果需要添加引导页面(Screen Guide)也需要通过此类改变其中的显示逻辑处理.

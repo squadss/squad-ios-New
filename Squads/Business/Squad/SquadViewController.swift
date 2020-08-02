@@ -19,8 +19,15 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     private var separatorLine = SeparatorLine()
     private var tableView = UITableView(frame: .zero, style: .grouped)
     private var sideMenuManager = SideMenuManager()
-    private var titleBarView = NavigationBarTitleView()
     
+    private var titleBarView: UIButton = {
+        let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 150, height: 44))
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        btn.setTitle("Squad Page", for: .normal)
+        return btn
+    }()
+    
+    //NavigationBarTitleView
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadPrimaryKey>>!
     override var allowedCustomBackBarItem: Bool {
         return false
@@ -108,10 +115,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     }
     
     private func setupTitleView() {
-        titleBarView.button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-        titleBarView.button.setTitle("Squad Page", for: .normal)
-        titleBarView.button.theme.titleColor(from: UIColor.text, for: .normal)
-        titleBarView.button.addTarget(self, action: #selector(titleBtnDidTapped), for: .touchUpInside)
+        titleBarView.theme.titleColor(from: UIColor.text, for: .normal)
+        titleBarView.addTarget(self, action: #selector(titleBtnDidTapped), for: .touchUpInside)
         addToTitleView(titleBarView)
     }
     
@@ -226,7 +231,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         reactor.state
             .compactMap{ $0.isLoading }
-            .bind(to: titleBarView.button.rx.loading)
+            .bind(to: titleBarView.rx.activityIndicator)
             .disposed(by: disposeBag)
         
         rx.viewWillAppear
