@@ -38,7 +38,7 @@ class LoginReactor: Reactor {
             timVo = try decoder.decode("timVo")
         }
         
-        func addTopSquad(squadId: Int) -> Model {
+        func addTopSquad(squadId: Int?) -> Model {
             var model = self
             model.topSquad = squadId
             return model
@@ -84,14 +84,7 @@ class LoginReactor: Reactor {
                 .flatMap{ [unowned self] result -> Observable<Result<Model, GeneralError>> in
                     switch result {
                     case .success(let model):
-                        return self.isExistTopSquad().map { (result) in
-                            switch result {
-                            case .success(let id):
-                                return .success(model.addTopSquad(squadId: id))
-                            case .failure(let error):
-                                return .failure(error)
-                            }
-                        }
+                        return self.isExistTopSquad.map { .success(model.addTopSquad(squadId: $0)) }
                     case .failure(let error):
                         return Observable.just(.failure(error))
                     }
@@ -128,20 +121,14 @@ class LoginReactor: Reactor {
     }
     
     /// 是否存在置顶squad, 因为服务器没有设计这个接口, 所以我们需要从"我加入的所有squad"列表中去找, 如果为空, 表示用户没有加入过任何一个squad, 然后我们需要引导用户去创建自己的squad, 如果列表中有值, 那么我们默认取列表中第一个值返回
-    private func isExistTopSquad() -> Observable<Result<Int, GeneralError>> {
+    private var isExistTopSquad: Observable<Int?> {
         return _squadProvider.request(target: .queryAllSquads, model: Array<SquadDetail>.self, atKeyPath: .data)
             .asObservable()
             .map { (result) in
-                switch result {
-                case .success(let list):
-                    if list.isEmpty {
-                        return .failure(.custom("Squad is Empty!"))
-                    } else {
-                        return .success(list[0].id)
-                    }
-                case .failure(let error):
-                    return .failure(error)
+                if case .success(let list) = result, !list.isEmpty {
+                    return list[0].id
                 }
+                return nil
             }
     }
     

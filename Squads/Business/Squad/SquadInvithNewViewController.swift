@@ -12,9 +12,9 @@ import RxDataSources
 import Contacts
 import MessageUI
 
-class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>, UITableViewDelegate, MFMessageComposeViewControllerDelegate {
+class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>, UITableViewDelegate, MFMessageComposeViewControllerDelegate, UIGestureRecognizerDelegate {
 
-    // 是否隐藏导航左侧按钮
+    // 控制是否隐藏导航左侧按钮
     var isHideBackButtonItem: Bool = false
     
     private var layout = UICollectionViewFlowLayout()
@@ -34,9 +34,14 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // 从创建squad页面跳转过来时, 需要将导航栏返回按钮隐藏
         if isHideBackButtonItem {
-            navigationItem.leftBarButtonItem = nil
-            navigationItem.backBarButtonItem = nil
+            // 隐藏导航栏返回按钮
+            navigationItem.hidesBackButton = true
+            // 禁止右滑返回上一页面的手势
+            if navigationController?.responds(to: #selector(getter: UINavigationController.interactivePopGestureRecognizer)) == true {
+                self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+            }
         }
     }
     
@@ -72,7 +77,6 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
     }
     
     private func setupNavigationBarRightItem() {
-        rightBarButtonItem.title = "Done"
         rightBarButtonItem.style = .plain
         rightBarButtonItem.theme.tintColor = UIColor.secondary
         navigationItem.rightBarButtonItem = rightBarButtonItem
@@ -150,7 +154,7 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
     
     override func bind(reactor: SquadInvithNewReactor) {
         
-        let collectionDataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, SquadInvithNewReactor.Member>>(configureCell: { data, collectionView, indexPath, model in
+        let collectionDataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, SquadInvithNewReactor.Member>>(configureCell: { [unowned self] data, collectionView, indexPath, model in
             let cell = collectionView.dequeue(Reusable.squadInvithNewMemberCell, for: indexPath)
             cell.isClosable = model.isColsable
             cell.avatarBtn.kf.setImage(with: nil, for: .normal, placeholder: UIImage(named: "Member Placeholder"), options: nil, progressBlock: nil, completionHandler: nil)
@@ -250,25 +254,39 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             .disposed(by: disposeBag)
         
         reactor.state
-            .map { $0.isEmptyRepos ? true : $0.members?.isEmpty == false }
-            .bind(to: rightBarButtonItem.rx.isEnabled)
+            .map { state in
+                if state.isEmptyRepos {
+                    return "Skip"
+                } else if state.members == nil || state.members?.isEmpty == true {
+                    return "Skip"
+                }
+                return "Confirm"
+            }
+            .bind(to: rightBarButtonItem.rx.title)
             .disposed(by: disposeBag)
         
         rightBarButtonItem.rx.tap
-            .filter{ !reactor.currentState.isEmptyRepos }
+            .filter{ reactor.currentState.members?.isEmpty == false }
             .map{ Reactor.Action.request }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        rightBarButtonItem.rx.tap
-            .filter{ reactor.currentState.isEmptyRepos }
-            .subscribe(onNext: { [unowned self] _ in
-                self.dismiss(animated: true)
-            })
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .filter { $0.inviteSuccess == true }
+        Observable.merge(
+            reactor.state
+                .filter { $0.inviteSuccess == true }
+                .map{ _ in () },
+            rightBarButtonItem.rx.tap
+                .filter {
+                    let state = reactor.currentState
+                    if state.isEmptyRepos {
+                        return true
+                    } else if state.members == nil || state.members?.isEmpty == true {
+                        return true
+                    }
+                    return false
+                }
+                .map{ _ in () }
+            )
             .subscribe(onNext: { [unowned self] _ in
                 var rootViewController = UIApplication.shared.keyWindow?.rootViewController
                 rootViewController = (rootViewController as? UINavigationController)?.viewControllers.first
@@ -373,5 +391,9 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
     
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
         dismiss(animated: true)
+    }
+    
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return false
     }
 }
