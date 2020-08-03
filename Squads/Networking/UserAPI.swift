@@ -38,8 +38,7 @@ enum UserAPI {
     /* nationCode: 国家（或地区）码 */
     /* phoneNumber: 手机号码，普通格式，示例如：13711112222。 */
     /* purePhoneNumber: +[国家或地区码][手机号] 例如值为: "+86" */
-    /* code: 验证码 */
-    case getverificationcode(nationCode: String, phoneNumber: String, purePhoneNumber: String, code: String)
+    case getverificationcode(nationCode: String, phoneNumber: String, purePhoneNumber: String)
     
     // 根据token获取系统登录用户信息
     case getAccountInfo
@@ -116,8 +115,8 @@ extension UserAPI: TargetType {
         case .verificationcode(let nationCode, let phoneNumber, let purePhoneNumber, let code):
             let params = ["nationCode": nationCode, "phoneNumber": phoneNumber, "purePhoneNumber": purePhoneNumber, "code": code]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
-        case .getverificationcode(let nationCode, let phoneNumber, let purePhoneNumber, let code):
-            let params = ["nationCode": nationCode, "phoneNumber": phoneNumber, "purePhoneNumber": purePhoneNumber, "code": code]
+        case .getverificationcode(let nationCode, let phoneNumber, let purePhoneNumber):
+            let params = ["nationCode": nationCode, "phoneNumber": phoneNumber, "purePhoneNumber": purePhoneNumber]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
         case .update(let phoneNumber, let nationCode, let password, let nickname, let gender, let avatar):
             var params = Dictionary<String, Any>()
