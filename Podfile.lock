@@ -46,7 +46,6 @@ PODS:
   - SwiftDate (6.1.0)
   - SwiftyUserDefaults (5.0.0)
   - Toast-Swift (5.0.1)
-  - TXIMSDK_iOS (4.6.51)
 
 DEPENDENCIES:
   - Alamofire
@@ -75,7 +74,6 @@ DEPENDENCIES:
   - SwiftDate
   - SwiftyUserDefaults
   - Toast-Swift
-  - TXIMSDK_iOS
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -105,7 +103,6 @@ SPEC REPOS:
     - SwiftDate
     - SwiftyUserDefaults
     - Toast-Swift
-    - TXIMSDK_iOS
 
 EXTERNAL SOURCES:
   JXPhotoBrowser:
@@ -162,8 +159,7 @@ SPEC CHECKSUMS:
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
   SwiftyUserDefaults: 33fcb42bd1feb53a37d873feb62c82967db5f7f6
   Toast-Swift: 9b6a70f28b3bf0b96c40d46c0c4b9d6639846711
-  TXIMSDK_iOS: 3e71bcdc7a829437d7b7d11d884293e15be8bedf
 
-PODFILE CHECKSUM: b4a2a3628e4e1c2d8ad715ff9b1a3bb0765201f9
+PODFILE CHECKSUM: 4406c048fb69d5b7f80f29b05fb635cd6ea4ac34
 
 COCOAPODS: 1.9.1

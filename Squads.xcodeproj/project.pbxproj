@@ -34,6 +34,8 @@
 		171F957324B35B0000BD229F /* ActivityCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F957224B35B0000BD229F /* ActivityCalendarView.swift */; };
 		1724412924B2067200666135 /* SquadActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412824B2067200666135 /* SquadActivitiesViewController.swift */; };
 		1724412B24B2067F00666135 /* SquadActivitiesReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */; };
+		1727630C24D8F2D4000869DF /* ImSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */; };
+		1727630D24D8F2D4000869DF /* ImSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */; };
 		172A4B8B24B6A06400A69803 /* VerificationCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */; };
 		172A4B9124B6D36300A69803 /* EditableAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B9024B6D36300A69803 /* EditableAvatarView.swift */; };
@@ -191,6 +193,20 @@
 		59206625CB7B469036D7008E /* Pods_Squads.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C23061446482E3BF342D5B6 /* Pods_Squads.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		1727630E24D8F2D4000869DF /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1727630D24D8F2D4000869DF /* ImSDK.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		170429C824AEBF4E0046F757 /* Squads.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Squads.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		170429CB24AEBF4E0046F757 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -334,6 +350,7 @@
 		17E5FA5D24B41FF900E8B819 /* SquadPreReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreReactor.swift; sourceTree = "<group>"; };
 		17E5FA5F24B4207D00E8B819 /* SquadPreInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreInfoView.swift; sourceTree = "<group>"; };
 		17E5FA6124B44FB300E8B819 /* SquadPreMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreMenuView.swift; sourceTree = "<group>"; };
+		17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ImSDK.framework; sourceTree = "<group>"; };
 		17F1721B24B96A6B0081E4C0 /* ChattingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChattingCardView.swift; sourceTree = "<group>"; };
 		17F1721D24B96A8E0081E4C0 /* ChattingCardHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChattingCardHeaderView.swift; sourceTree = "<group>"; };
 		17F1721F24B9A54E0081E4C0 /* CreateEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventViewController.swift; sourceTree = "<group>"; };
@@ -390,6 +407,7 @@
 				17B5ED8724CEF751009FA969 /* SystemConfiguration.framework in Frameworks */,
 				17B5ED8524CEF74A009FA969 /* libsqlite3.tbd in Frameworks */,
 				17B5ED8324CEF736009FA969 /* libz.tbd in Frameworks */,
+				1727630C24D8F2D4000869DF /* ImSDK.framework in Frameworks */,
 				17B5ED8124CEF72E009FA969 /* CoreTelephony.framework in Frameworks */,
 				59206625CB7B469036D7008E /* Pods_Squads.framework in Frameworks */,
 				17B5ED7F24CED77E009FA969 /* UMCommon.framework in Frameworks */,
@@ -687,6 +705,7 @@
 		17B5ED7B24CED706009FA969 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */,
 				17B5ED7E24CED77E009FA969 /* UMCommon.framework */,
 			);
 			path = Libraries;
@@ -901,6 +920,7 @@
 				170429C524AEBF4E0046F757 /* Frameworks */,
 				170429C624AEBF4E0046F757 /* Resources */,
 				01F6A7585C7314123AB7E3E5 /* [CP] Embed Pods Frameworks */,
+				1727630E24D8F2D4000869DF /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1336,6 +1356,82 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"Alamofire\"",
+					"-framework",
+					"\"CFNetwork\"",
+					"-framework",
+					"\"Codextended\"",
+					"-framework",
+					"\"CoreGraphics\"",
+					"-framework",
+					"\"CoreMedia\"",
+					"-framework",
+					"\"Differentiator\"",
+					"-framework",
+					"\"Disk\"",
+					"-framework",
+					"\"DynamicColor\"",
+					"-framework",
+					"\"ETNavBarTransparent\"",
+					"-framework",
+					"\"Foundation\"",
+					"-framework",
+					"\"HGPlaceholders\"",
+					"-framework",
+					"\"Hero\"",
+					"-framework",
+					"\"ISEmojiView\"",
+					"-framework",
+					"\"InputBarAccessoryView\"",
+					"-framework",
+					"\"JTAppleCalendar\"",
+					"-framework",
+					"\"JXPhotoBrowser\"",
+					"-framework",
+					"\"Kingfisher\"",
+					"-framework",
+					"\"MessageKit\"",
+					"-framework",
+					"\"MonkeyKing\"",
+					"-framework",
+					"\"Moya\"",
+					"-framework",
+					"\"NSObject_Rx\"",
+					"-framework",
+					"\"QuartzCore\"",
+					"-framework",
+					"\"ReactorKit\"",
+					"-framework",
+					"\"Result\"",
+					"-framework",
+					"\"ReusableKit\"",
+					"-framework",
+					"\"RxCocoa\"",
+					"-framework",
+					"\"RxDataSources\"",
+					"-framework",
+					"\"RxRelay\"",
+					"-framework",
+					"\"RxSwift\"",
+					"-framework",
+					"\"RxTheme\"",
+					"-framework",
+					"\"SideMenu\"",
+					"-framework",
+					"\"SnapKit\"",
+					"-framework",
+					"\"SwiftDate\"",
+					"-framework",
+					"\"SwiftyUserDefaults\"",
+					"-framework",
+					"\"Toast_Swift\"",
+					"-framework",
+					"\"UIKit\"",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.wieed.squad.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Squads/Squads-Bridging-Header.h";
@@ -1364,6 +1460,82 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"Alamofire\"",
+					"-framework",
+					"\"CFNetwork\"",
+					"-framework",
+					"\"Codextended\"",
+					"-framework",
+					"\"CoreGraphics\"",
+					"-framework",
+					"\"CoreMedia\"",
+					"-framework",
+					"\"Differentiator\"",
+					"-framework",
+					"\"Disk\"",
+					"-framework",
+					"\"DynamicColor\"",
+					"-framework",
+					"\"ETNavBarTransparent\"",
+					"-framework",
+					"\"Foundation\"",
+					"-framework",
+					"\"HGPlaceholders\"",
+					"-framework",
+					"\"Hero\"",
+					"-framework",
+					"\"ISEmojiView\"",
+					"-framework",
+					"\"InputBarAccessoryView\"",
+					"-framework",
+					"\"JTAppleCalendar\"",
+					"-framework",
+					"\"JXPhotoBrowser\"",
+					"-framework",
+					"\"Kingfisher\"",
+					"-framework",
+					"\"MessageKit\"",
+					"-framework",
+					"\"MonkeyKing\"",
+					"-framework",
+					"\"Moya\"",
+					"-framework",
+					"\"NSObject_Rx\"",
+					"-framework",
+					"\"QuartzCore\"",
+					"-framework",
+					"\"ReactorKit\"",
+					"-framework",
+					"\"Result\"",
+					"-framework",
+					"\"ReusableKit\"",
+					"-framework",
+					"\"RxCocoa\"",
+					"-framework",
+					"\"RxDataSources\"",
+					"-framework",
+					"\"RxRelay\"",
+					"-framework",
+					"\"RxSwift\"",
+					"-framework",
+					"\"RxTheme\"",
+					"-framework",
+					"\"SideMenu\"",
+					"-framework",
+					"\"SnapKit\"",
+					"-framework",
+					"\"SwiftDate\"",
+					"-framework",
+					"\"SwiftyUserDefaults\"",
+					"-framework",
+					"\"Toast_Swift\"",
+					"-framework",
+					"\"UIKit\"",
+					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.wieed.squad.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";

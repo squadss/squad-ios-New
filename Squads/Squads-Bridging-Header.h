@@ -6,3 +6,5 @@
 #import <UMCommon/UMCommon.h>
 //导入UMAnalytics的OC的头文件
 #import <UMCommon/MobClick.h>
+//导入IM的OC的头文件
+#import <ImSDK/ImSDK.h>

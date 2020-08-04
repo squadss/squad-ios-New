@@ -14,8 +14,8 @@ target 'Squads' do
   
   # share libr
   pod 'MonkeyKing'
-  # im
-  pod 'TXIMSDK_iOS'
+  # im 改为拖入framework的方式集成 因为cocoapod引入的又不是最新版, 导致文档和代码对应不上
+#  pod 'TXIMSDK_iOS'
 
   # tips
   pod 'Toast-Swift'

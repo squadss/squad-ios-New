@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import ImSDK
 
 public struct ChatNotification {
 //    public let receiver: Sender

@@ -69,17 +69,6 @@ extension User {
     }
 }
 
-extension User: SenderType {
-    
-    var senderId: String {
-        return username
-    }
-    
-    var displayName: String {
-        return nickname
-    }
-}
-
 //Mark: - 介绍Codextended的用法
 
 //struct User: Codable {

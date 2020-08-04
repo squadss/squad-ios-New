@@ -9,9 +9,15 @@
 import UIKit
 import SideMenu
 import SnapKit
+import RxCocoa
 import RxSwift
 import RxDataSources
 import JXPhotoBrowser
+
+enum RefreshChannelsAction {
+    case update(list: Array<V2TIMConversation>)
+    case insert(list: Array<V2TIMConversation>)
+}
 
 final class SquadViewController: ReactorViewController<SquadReactor>, UITableViewDelegate {
 
@@ -27,7 +33,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         return btn
     }()
     
-    //NavigationBarTitleView
+    private var onConversationChangedRelay = PublishRelay<RefreshChannelsAction>()
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadPrimaryKey>>!
     override var allowedCustomBackBarItem: Bool {
         return false
@@ -36,6 +42,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     override func viewDidLoad() {
         super.viewDidLoad()
         view.theme.backgroundColor = UIColor.background
+        V2TIMManager.sharedInstance()?.setConversationListener(self)
     }
     
     override func setupView() {
@@ -216,6 +223,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         reactor.state
             .filter{ $0.loginStateDidExpired }
+            .takeUntil(rx.viewWillAppear)
             .trackAlertJustConfirm(title: "Authentication has expired!", default: "To log in", target: self)
             .subscribe(onNext: { _ in
                 User.removeCurrentUser()
@@ -234,13 +242,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .bind(to: titleBarView.rx.activityIndicator)
             .disposed(by: disposeBag)
         
-        rx.viewWillAppear
-            .map{ Reactor.Action.refreshChannels }
-            .bind(to: reactor.action)
-            .disposed(by: disposeBag)
-        
-        Observable
-            .just(Reactor.Action.initialSDK)
+        onConversationChangedRelay
+            .map{ Reactor.Action.refreshChannels($0) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
@@ -399,6 +402,19 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         }
     }
     
+}
+
+extension SquadViewController: V2TIMConversationListener {
+    
+    //有新的会话（比如收到一个新同事发来的单聊消息、或者被拉入了一个新的群组中），可以根据会话的 lastMessage -> timestamp 重新对会话列表做排序。
+    func onNewConversation(_ conversationList: [V2TIMConversation]!) {
+        onConversationChangedRelay.accept(.insert(list: conversationList))
+    }
+    
+    // 某些会话的关键信息发生变化（未读计数发生变化、最后一条消息被更新等等），可以根据会话的 lastMessage -> timestamp 重新对会话列表做排序。
+    func onConversationChanged(_ conversationList: [V2TIMConversation]!) {
+        onConversationChangedRelay.accept(.update(list: conversationList))
+    }
 }
 
 fileprivate class CustomSideMenuNavigationController: SideMenuNavigationController {
