@@ -49,6 +49,8 @@ class MessagesContentView: BaseView {
         messagesCollectionView.alwaysBounceVertical = true
         messagesCollectionView.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
         messagesCollectionView.addSubview(refreshControl)
+        //如果不加这一行代码，依然可以实现点击反馈，但反馈会有轻微延迟，体验不好。
+        messagesCollectionView.delaysContentTouches = false
         addSubviews(messagesCollectionView, messageInputBar)
     }
     

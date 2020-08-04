@@ -16,7 +16,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
 
     var itemSelected: Observable<String> {
         return tableView.rx.itemSelected.map{ [unowned self] in
-            return self.dataSource[$0]
+            return String(self.dataSource[$0].id)
         }
 //        .do(onNext: { [unowned self] _ in
 //            self.dismiss(animated: true)
@@ -24,23 +24,14 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     }
     
     private var tableView = UITableView()
-    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, String>>!
+    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadDetail>>!
     
     var headerView = MyProfileHeaderView()
     var footerView = MyProfileFooterView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        navigationController?.navigationBar.tintColor = UIColor.red
         view.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
-        
-        
-//        let btn = UIButton()
-//        btn.frame = CGRect(x: 10, y: 100, width: 100, height: 44)
-//        btn.backgroundColor = .white
-//        btn.addTarget(self, action: #selector(didTapped), for: .touchUpInside)
-//        view.addSubview(btn)
     }
     
     override func initData() {
@@ -95,11 +86,11 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     }
     
     override func bind(reactor: MyProfileReactor) {
-        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
+        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadDetail>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
             let cell = tableView.dequeue(Reusable.mySquadsViewCell)!
-            cell.pritureView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"))
-            cell.titleLab.text = "Camp life"
-            cell.unreadNum = "12"
+            cell.pritureView.kf.setImage(with: model.logoPath.asURL)
+            cell.titleLab.text = model.squadName
+//            cell.unreadNum = "12"
 //            cell.titleLab.text = model.title
 //            cell.contentLab.text = model.content
 //            cell.longObservable
@@ -115,6 +106,11 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
         reactor.state
             .map{ [SectionModel(model: "", items: $0.repos)] }
             .bind(to: tableView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+        
+        rx.viewWillAppear
+            .map{ Reactor.Action.requestAllSquads }
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
     

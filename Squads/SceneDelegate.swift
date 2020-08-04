@@ -39,15 +39,32 @@ class AuthManager {
     }
 }
 
+enum ConnectStatus {
+    // 正在连接到腾讯云服务器
+    case onConnecting
+    // 连接成功
+    case onConnectSuccess
+    // 连接失败
+    case onConnectFailed(String)
+    // 被踢下线
+    case onKickedOffline
+    // 登录认证过期
+    case onUserSigExpired
+    // 用户资料更新
+    case onSelfInfoUpdated(V2TIMUserFullInfo)
+}
+
 final class Application: NSObject {
     
     static let shared = Application()
     let authManager: AuthManager
     private var window: UIWindow?
+    private var loginStatusDidChanged = PublishRelay<ConnectStatus>()
     
     private override init() {
         authManager = AuthManager.shared
         super.init()
+        setupLibs()
     }
     
     func presentInitialScreent(in window: UIWindow? = nil) {
@@ -59,6 +76,7 @@ final class Application: NSObject {
         if authManager.hasValidToken {
             if let squadId = UserDefaults.standard.topSquad {
                 let reactor = SquadReactor(currentSquadId: squadId)
+                reactor.loginStatusDidChanged = loginStatusDidChanged
                 let squadVC = SquadViewController(reactor: reactor)
                 let nav = BaseNavigationController(rootViewController: squadVC)
                 self.window?.rootViewController = nav
@@ -75,7 +93,53 @@ final class Application: NSObject {
             self.window?.rootViewController = nav
         }
     }
+    
+    // 配置第三方启动库
+    private func setupLibs() {
+        setupIM()
+    }
+    
+    private func setupIM() {
+        // 配置IM
+        let config = V2TIMSDKConfig()
+        config.logLevel = .LOG_NONE
+        V2TIMManager.sharedInstance()?.initSDK(App.Account.TIMAppKey, config: config, listener: self)
+    }
 }
+
+//MARK: - 监听 V2TIMSDKListener 回调
+extension Application: V2TIMSDKListener {
+    
+    // 连接腾讯云服务器失败
+    func onConnectFailed(_ code: Int32, err: String!) {
+        loginStatusDidChanged.accept(.onConnectFailed(err))
+    }
+    
+    // 已经成功连接到腾讯云服务器
+    func onConnectSuccess() {
+        loginStatusDidChanged.accept(.onConnectSuccess)
+    }
+    
+    // 正在连接到腾讯云服务器
+    func onConnecting() {
+        loginStatusDidChanged.accept(.onConnecting)
+    }
+    
+    /// 当前用户被踢下线，此时可以 UI 提示用户，并再次调用 V2TIMManager 的 login() 函数重新登录。
+    func onKickedOffline() {
+        loginStatusDidChanged.accept(.onKickedOffline)
+    }
+
+    /// 在线时票据过期：此时您需要生成新的 userSig 并再次调用 V2TIMManager 的 login() 函数重新登录。
+    func onUserSigExpired() {
+        loginStatusDidChanged.accept(.onUserSigExpired)
+    }
+    /// 当前用户的资料发生了更新
+    func onSelfInfoUpdated(_ Info: V2TIMUserFullInfo!) {
+        loginStatusDidChanged.accept(.onSelfInfoUpdated(Info))
+    }
+}
+
 
 @available(iOS 13, *)
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -86,7 +150,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
        
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
         window = UIWindow(windowScene: windowScene)
         window?.backgroundColor = .white
         Application.shared.presentInitialScreent(in: window)

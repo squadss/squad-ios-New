@@ -10,7 +10,6 @@ import Foundation
 import ReactorKit
 import RxSwift
 import RxCocoa
-import ImSDK
 
 protocol SquadPrimaryKey { }
 
@@ -18,13 +17,25 @@ struct SquadSqroll: SquadPrimaryKey {
     var list: Array<String>
 }
 
-struct SquadChannel: SquadPrimaryKey {
+struct SquadChannel: SquadPrimaryKey, Comparable {
     let sessionId: String
     var avatar: String?
     var title: String = ""
     var content: String = ""
     var unreadCount: Int = 0
-    var dateString: String = ""
+    var timeStamp: Date
+    
+    var dateString: String {
+        return timeStamp.chatTimeToString
+    }
+    
+    static func == (lhs: SquadChannel, rhs: SquadChannel) -> Bool {
+        return lhs.sessionId == rhs.sessionId
+    }
+    
+    static func < (lhs: SquadChannel, rhs: SquadChannel) -> Bool {
+        return lhs.timeStamp < rhs.timeStamp
+    }
 }
 
 struct SquadActivity: SquadPrimaryKey {
@@ -39,11 +50,11 @@ class SquadReactor: Reactor {
     
     enum Action {
         // 刷新会话列表
-        case refreshChannels
-        // 初始化SDK
-        case initialSDK
+        case refreshChannels(RefreshChannelsAction)
         // 请求squad详情
         case requestSquad(id: String)
+        // 获取登录状态
+        case connectStatus(ConnectStatus)
     }
     
     enum Mutation {
@@ -68,17 +79,58 @@ class SquadReactor: Reactor {
     var initialState: State
     var provider = OnlineProvider<SquadAPI>()
     
+    var loginStatusDidChanged: PublishRelay<ConnectStatus>!
+    
     init(currentSquadId: Int) {
         initialState = State(currentSquadId: currentSquadId)
         initialState.repos[0] = [SquadSqroll(list: ["http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg","http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg", "http://image.biaobaiju.com/uploads/20180803/23/1533309822-GCcDphRmqw.jpg"])]
         initialState.repos[1] = [SquadActivity(), SquadActivity()]
     }
     
+    func transform(action: Observable<SquadReactor.Action>) -> Observable<SquadReactor.Action> {
+        return Observable.merge(action, loginStatusDidChanged.map{ Action.connectStatus($0) })
+    }
+    
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .refreshChannels:
-            //TODO: - 刷新数据
-            return .never()
+        case .refreshChannels(let action):
+            let channels = currentState.repos[2] as! Array<SquadChannel>
+            switch action {
+            case .update(let list):
+                var newChannels = Array<SquadChannel>()
+                for channel in channels {
+                    if let conversation = list.first(where: { $0.groupID == channel.sessionId }), let lastMessage = conversation.lastMessage {
+                        let message = MessageElem(timMessage: lastMessage)
+                        var newChannel = channel
+                        newChannel.timeStamp = message.sentDate
+                        newChannel.content = message.description
+                        newChannel.unreadCount = Int(conversation.unreadCount)
+                        newChannels.append(newChannel)
+                    } else {
+                        newChannels.append(channel)
+                    }
+                }
+                return Observable.just(.setChannels(newChannels.sorted()))
+            case .insert(let list):
+                
+                var otherChannels = Array<SquadChannel>()
+                for conversation in list {
+                    let isContains = channels.contains(where: { $0.sessionId == conversation.groupID })
+                    if !isContains {
+                        
+                        var timeStamp: Date = Date.distantFuture
+                        var content: String = ""
+                        if let lastMessage = conversation.lastMessage {
+                            let message = MessageElem(timMessage: lastMessage)
+                            timeStamp = message.sentDate
+                            content = message.description
+                        }
+                        let channel = SquadChannel(sessionId: conversation.groupID, avatar: conversation.faceUrl, title: conversation.showName, content: content, unreadCount: Int(conversation.unreadCount), timeStamp: timeStamp)
+                        otherChannels.append(channel)
+                    }
+                }
+                return Observable.just(.setChannels((channels + otherChannels).sorted()))
+            }
         case .requestSquad(let id):
             return provider.request(target: .querySquad(id: id, setTop: true), model: SquadDetail.self, atKeyPath: .data)
                 .asObservable()
@@ -102,7 +154,7 @@ class SquadReactor: Reactor {
                     case .success(let detail):
                         // 通过squad中的列表, 去IM服务器查询这些群的信息
                         let groupIds = detail.channels?.map{ String($0.id) } ?? []
-                        return self.queryGroupsFromTIM(groupIds: groupIds)
+                        return self.queryGroupsFromTIM(groupIds: groupIds).map{ .success($0) }
                     case .failure(let error):
                         return Observable.just(.failure(error))
                     }
@@ -120,8 +172,9 @@ class SquadReactor: Reactor {
                     }
                 }
                 .startWith(.setLoading(true))
-        case .initialSDK:
-            guard let user = User.currentUser() else {
+        case .connectStatus(let status):
+            /// 检查登录状态
+            guard let user = User.currentUser(), case .onConnectSuccess = status else {
                 return .just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
             }
             return checkoutLoginStatus(userId: String(user.id))
@@ -160,7 +213,7 @@ class SquadReactor: Reactor {
                     case .success(let detail):
                         // 通过squad中的列表, 去IM服务器查询这些群的信息
                         let groupIds = detail.channels?.map{ String($0.id) } ?? []
-                        return self.queryGroupsFromTIM(groupIds: groupIds)
+                        return self.queryGroupsFromTIM(groupIds: groupIds).map{ .success($0) }
                     case .failure(let error):
                         return Observable.just(.failure(error))
                     }
@@ -205,53 +258,49 @@ class SquadReactor: Reactor {
     
     /// 从TIM中查询我所有的群组信息
     /// - Parameter groupIds: 群组id列表
-    func queryGroupsFromTIM(groupIds: Array<String>) -> Observable<Result<Array<SquadChannel>, GeneralError>> {
-        return Observable.create { (observer) -> Disposable in
-            
-            guard !groupIds.isEmpty else {
-                observer.onNext(.success([]))
+    private func queryGroupsFromTIM(groupIds: Array<String>) -> Observable<Array<SquadChannel>> {
+        
+        guard !groupIds.isEmpty else { return Observable.just([]) }
+        
+        let joinGroups = Observable<Array<V2TIMGroupInfo>>.create { (observer) -> Disposable in
+            V2TIMManager.sharedInstance()?.getJoinedGroupList({ (list) in
+                observer.onNext(list ?? [])
                 observer.onCompleted()
-                return Disposables.create()
-            }
-            
-            let groupManager = TIMManager.sharedInstance()?.groupManager()
-            let conversationList = TIMManager.sharedInstance()?.getConversationList() ?? []
-            
-            groupManager?.getGroupInfo(groupIds, succ: { (list) in
-                let groupList = list as? Array<TIMGroupInfo> ?? []
-                var channelsList = Array<SquadChannel>()
-                for i in 0..<groupList.count {
-                    let groupInfo = groupList[i]
-                    let conversation = conversationList.first(where: { $0.getReceiver() == groupInfo.group })
-                    if groupInfo.lastMsg != nil {
-                        // 获取本地会话, 将message添加到item中
-                        let message = MessageElem(message: groupInfo.lastMsg)
-                        let channel = SquadChannel(sessionId: groupInfo.group,
-                                                   avatar: groupInfo.faceURL,
-                                                   title: groupInfo.groupName,
-                                                   content: message.description,
-                                                   unreadCount: Int(conversation?.getUnReadMessageNum() ?? 0),
-                                                   dateString: message.dateString)
-                        channelsList.append(channel)
-                    } else {
-                        // 获取群信息
-                        let channel = SquadChannel(sessionId: groupInfo.group,
-                                                   avatar: groupInfo.faceURL,
-                                                   title: groupInfo.groupName,
-                                                   content: "",
-                                                   unreadCount: Int(conversation?.getUnReadMessageNum() ?? 0),
-                                                   dateString: "")
-                        channelsList.append(channel)
-                    }
-                }
-                observer.onNext(.success(channelsList))
-                observer.onCompleted()
-            }, fail: { (code, message) in
-                observer.onNext(.failure(.custom(message ?? "未知错误")))
+            }, fail: { (_, message) in
+                observer.onNext([])
                 observer.onCompleted()
             })
-            
             return Disposables.create()
+        }
+        
+        let conversationList = Observable<Array<V2TIMConversation>>.create { (observer) -> Disposable in
+            V2TIMManager.sharedInstance()?.getConversationList(0, count: 100, succ: { (conversationList, nextSeq, isFinished) in
+                observer.onNext(conversationList ?? [])
+                observer.onCompleted()
+            }, fail: { (code, message) in
+                observer.onNext([])
+                observer.onCompleted()
+            })
+            return Disposables.create()
+        }
+        
+        return Observable.zip(joinGroups, conversationList).map { (groupList, conversationList) -> Array<SquadChannel> in
+            var channelsList = Array<SquadChannel>()
+            for i in 0..<groupList.count {
+                let groupInfo = groupList[i]
+                let conversation = conversationList.first(where: { $0.groupID == groupInfo.groupID })
+                if let lastMessage = conversation?.lastMessage {
+                    // groupInfo.groupID 这里没有解包是没关系的, 只有当会话类型为group时, conversation才会有值
+                    let message = MessageElem(timMessage: lastMessage)
+                    let channel = SquadChannel(sessionId: groupInfo.groupID, avatar: groupInfo.faceURL, title: groupInfo.groupName, content: message.description, unreadCount: Int(conversation?.unreadCount ?? 0), timeStamp: message.sentDate)
+                    channelsList.append(channel)
+                } else {
+                    // 获取群信息
+                    let channel = SquadChannel(sessionId: groupInfo.groupID, avatar: groupInfo.faceURL, title: groupInfo.groupName, content: "", unreadCount: Int(conversation?.unreadCount ?? 0), timeStamp: Date.distantFuture)
+                    channelsList.append(channel)
+                }
+            }
+            return channelsList
         }
     }
     
@@ -276,37 +325,4 @@ class SquadReactor: Reactor {
             return Disposables.create()
         }
     }
-    
-    /*
-     本地存在很多的会话
-     本地存在很多的群
-     
-     一个squad对应很多的群
-     
-     
-     */
-    
-    private func request(groupIds: Array<String>) {
-        
-        // 通过服务器返回的群组列表, 去查询本地的群组列表信息
-        
-        // 获取所有的会话列表, 可以通过筛选会话对象, 获取当前的未读消息数
-        let conversationList = ConversationManager.shared.getConversation()
-        
-    }
-    
-    /// 获取Squad数据
-    /// 先读取本地信息, 读取成功后刷新页面, 同时发起请求同步服务器数据
-    private func loadSquadDetail() -> Observable<Result<Void, GeneralError>> {
-//        return provider.request(target: , model: <#T##Decodable.Protocol#>, atKeyPath: <#T##OnlineProvider<SquadAPI>.ParseKeyPath#>)
-        return Observable.just(.success(()))
-    }
-}
-
-extension TIMGroupInfo {
-    
-//    var channel: SquadChannel {
-//        return SquadChannel(sessionId: <#T##String#>, avatar: <#T##String?#>, title: <#T##String#>, content: <#T##String#>, unreadCount: <#T##Int#>, dateString: <#T##String#>)
-//    }
-    
 }

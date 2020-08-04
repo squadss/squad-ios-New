@@ -11,7 +11,6 @@ import RxSwift
 import RxCocoa
 import RxRelay
 import MonkeyKing
-import ImSDK
 import AVFoundation
 import JXPhotoBrowser
 
@@ -31,12 +30,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         InitializeNSObjects([
             UINavigationController.self
         ])
-        
-        // 配置IM
-        let config = TIMSdkConfig()
-        config.sdkAppId = App.Account.TIMAppKey
-        config.disableLogPrint = true //禁止在控制台打印
-        TIMManager.sharedInstance()?.initSdk(config)
         
         // 配置UMeng统计
         UMConfigure.initWithAppkey(App.Account.UMengAppKey, channel: "App Store")
