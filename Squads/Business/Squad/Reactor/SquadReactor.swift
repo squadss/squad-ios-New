@@ -34,7 +34,7 @@ struct SquadChannel: SquadPrimaryKey, Comparable {
     }
     
     static func < (lhs: SquadChannel, rhs: SquadChannel) -> Bool {
-        return lhs.timeStamp < rhs.timeStamp
+        return lhs.timeStamp > rhs.timeStamp
     }
 }
 
@@ -52,13 +52,14 @@ class SquadReactor: Reactor {
         // 刷新会话列表
         case refreshChannels(RefreshChannelsAction)
         // 请求squad详情
-        case requestSquad(id: String)
+        case requestSquad(id: Int)
         // 获取登录状态
         case connectStatus(ConnectStatus)
     }
     
     enum Mutation {
         case setChannels(Array<SquadChannel>)
+        case setSquadDetail(detail: SquadDetail, channels: Array<SquadChannel>)
         case setOneOrTheOther(loginStateDidExpired: Bool?, toast: String?)
         case setToast(String)
         case setLoading(Bool)
@@ -72,17 +73,22 @@ class SquadReactor: Reactor {
         var isLoading: Bool?
         // 错误提示
         var toast: String?
-        // 当前置顶的squad的id
-        var currentSquadId: Int
+        // 当前squad的资料
+        var currentSquadDetail: SquadDetail?
     }
     
     var initialState: State
     var provider = OnlineProvider<SquadAPI>()
     
-    var loginStatusDidChanged: PublishRelay<ConnectStatus>!
+    var loginStatusDidChanged: ReplaySubject<ConnectStatus>!
+    // 当前置顶的squad的id
+    var currentSquadId: Int
     
     init(currentSquadId: Int) {
-        initialState = State(currentSquadId: currentSquadId)
+        
+        self.currentSquadId = currentSquadId
+        
+        initialState = State()
         initialState.repos[0] = [SquadSqroll(list: ["http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg","http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg", "http://image.biaobaiju.com/uploads/20180803/23/1533309822-GCcDphRmqw.jpg"])]
         initialState.repos[1] = [SquadActivity(), SquadActivity()]
     }
@@ -99,7 +105,7 @@ class SquadReactor: Reactor {
             case .update(let list):
                 var newChannels = Array<SquadChannel>()
                 for channel in channels {
-                    if let conversation = list.first(where: { $0.groupID == channel.sessionId }), let lastMessage = conversation.lastMessage {
+                    if let conversation = list.first(where: { $0.groupID == channel.sessionId }), let lastMessage = conversation.lastMessage, lastMessage.msgID != nil {
                         let message = MessageElem(timMessage: lastMessage)
                         var newChannel = channel
                         newChannel.timeStamp = message.sentDate
@@ -120,7 +126,8 @@ class SquadReactor: Reactor {
                         
                         var timeStamp: Date = Date.distantFuture
                         var content: String = ""
-                        if let lastMessage = conversation.lastMessage {
+                        // 创建完群后生成的会话会包括一条空的message, 所以要根据msgID过滤掉
+                        if let lastMessage = conversation.lastMessage, lastMessage.msgID != nil {
                             let message = MessageElem(timMessage: lastMessage)
                             timeStamp = message.sentDate
                             content = message.description
@@ -132,105 +139,25 @@ class SquadReactor: Reactor {
                 return Observable.just(.setChannels((channels + otherChannels).sorted()))
             }
         case .requestSquad(let id):
-            return provider.request(target: .querySquad(id: id, setTop: true), model: SquadDetail.self, atKeyPath: .data)
-                .asObservable()
-                .flatMap { result -> Observable<Result<SquadDetail, GeneralError>> in
-                    switch result {
-                    case .success(let detail):
-                        return self.provider.request(target: .getSquadChannel(squadId: detail.id), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable().map {
-                            switch $0 {
-                            case .success(let list):
-                                return .success(detail.addChannels(list))
-                            case .failure(let error):
-                                return .failure(error)
-                            }
-                        }
-                    case .failure(let error):
-                        return Observable.just(.failure(error))
-                    }
-                }
-                .flatMap { [unowned self] result -> Observable<Result<Array<SquadChannel>, GeneralError>> in
-                    switch result {
-                    case .success(let detail):
-                        // 通过squad中的列表, 去IM服务器查询这些群的信息
-                        let groupIds = detail.channels?.map{ String($0.id) } ?? []
-                        return self.queryGroupsFromTIM(groupIds: groupIds).map{ .success($0) }
-                    case .failure(let error):
-                        return Observable.just(.failure(error))
-                    }
-                }
-                .map { (result) -> Mutation in
-                    switch result {
-                    case .success(let channelsList):
-                        return .setChannels(channelsList)
-                    case .failure(let error):
-                        if case .loginStatusDidExpired = error {
-                            return .setOneOrTheOther(loginStateDidExpired: true, toast: nil)
-                        } else {
-                            return .setOneOrTheOther(loginStateDidExpired: nil, toast: error.message)
-                        }
-                    }
-                }
-                .startWith(.setLoading(true))
+            return self.querySquad(id: id).do(onNext: { [unowned self] mutation in
+                // 切换squad成功后, 将currentSquadId更新为最新的squadId
+                guard case .setSquadDetail = mutation else { return }
+                self.currentSquadId = id
+            })
         case .connectStatus(let status):
             /// 检查登录状态
             guard let user = User.currentUser(), case .onConnectSuccess = status else {
                 return .just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
             }
-            return checkoutLoginStatus(userId: String(user.id))
-                .map { result -> Result<Void, GeneralError> in
-                    switch result {
-                    case .success: return .success(())
-                    case .failure: return .failure(.loginStatusDidExpired)
-                    }
+            return checkoutLoginStatus(userId: String(user.id)).flatMap { [unowned self] result -> Observable<Mutation> in
+                switch result {
+                case .success:
+                    let id = self.currentSquadId
+                    return self.querySquad(id: id)
+                case .failure:
+                    return Observable.just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
                 }
-                .flatMap { [unowned self] result -> Single<Result<SquadDetail, GeneralError>> in
-                    // 查询当前置顶的squad详情, 然后拿到该squad下的群列表
-                    switch result {
-                    case .success:
-                        return self.provider.request(target: .quardTopSquad, model: SquadDetail.self, atKeyPath: .data)
-                    case .failure(let error):
-                        return Single.just(.failure(error))
-                    }
-                }
-                .flatMap { result -> Observable<Result<SquadDetail, GeneralError>> in
-                    switch result {
-                    case .success(let detail):
-                        return self.provider.request(target: .getSquadChannel(squadId: detail.id), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable().map {
-                            switch $0 {
-                            case .success(let list):
-                                return .success(detail.addChannels(list))
-                            case .failure(let error):
-                                return .failure(error)
-                            }
-                        }
-                    case .failure(let error):
-                        return Observable.just(.failure(error))
-                    }
-                }
-                .flatMap { [unowned self] result -> Observable<Result<Array<SquadChannel>, GeneralError>> in
-                    switch result {
-                    case .success(let detail):
-                        // 通过squad中的列表, 去IM服务器查询这些群的信息
-                        let groupIds = detail.channels?.map{ String($0.id) } ?? []
-                        return self.queryGroupsFromTIM(groupIds: groupIds).map{ .success($0) }
-                    case .failure(let error):
-                        return Observable.just(.failure(error))
-                    }
-                }
-                .map { (result) -> Mutation in
-                    switch result {
-                    case .success(let channelsList):
-                        return .setChannels(channelsList)
-                    case .failure(let error):
-                        if case .loginStatusDidExpired = error {
-                            return .setOneOrTheOther(loginStateDidExpired: true, toast: nil)
-                        } else {
-                            return .setOneOrTheOther(loginStateDidExpired: nil, toast: error.message)
-                        }
-                    }
-                }
-                .startWith(.setLoading(true))
+            }
         }
     }
     
@@ -239,9 +166,9 @@ class SquadReactor: Reactor {
         switch mutation {
         case .setLoading(let s):
             state.isLoading = s
-        case .setChannels(let list):
+        case .setChannels(let channelds):
             state.isLoading = false
-            state.repos[2] = list
+            state.repos[2] = channelds
         case let .setOneOrTheOther(loginStateDidExpired, toast):
             state.isLoading = false
             if toast != nil {
@@ -252,8 +179,58 @@ class SquadReactor: Reactor {
         case .setToast(let str):
             state.isLoading = false
             state.toast = str
+        case let .setSquadDetail(detail, channelds):
+            state.isLoading = false
+            state.repos[2] = channelds
+            state.currentSquadDetail = detail
         }
         return state
+    }
+    
+    // 根据squadId查询详情, 并绑定到mutation上
+    private func querySquad(id: Int) -> Observable<Mutation> {
+        return provider
+            .request(target: .querySquad(id: id, setTop: true), model: SquadDetail.self, atKeyPath: .data)
+            .asObservable()
+            .flatMap { result -> Observable<Result<SquadDetail, GeneralError>> in
+                switch result {
+                case .success(let detail):
+                    // 根据详情, 去查询当前squad下存在的所有channel
+                    return self.provider.request(target: .getSquadChannel(squadId: detail.id), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable().map {
+                        switch $0 {
+                        case .success(let list):
+                            return .success(detail.addChannels(list))
+                        case .failure(let error):
+                            return .failure(error)
+                        }
+                    }
+                case .failure(let error):
+                    return Observable.just(.failure(error))
+                }
+            }
+            .flatMap { [unowned self] result -> Observable<Result<(SquadDetail, Array<SquadChannel>), GeneralError>> in
+                switch result {
+                case .success(let detail):
+                    // 通过squad中的channel列表, 去IM服务器查询这些群的信息
+                    let groupIds = detail.channels?.map{ String($0.id) } ?? []
+                    return self.queryGroupsFromTIM(groupIds: groupIds).map{ .success((detail, $0)) }
+                case .failure(let error):
+                    return Observable.just(.failure(error))
+                }
+            }
+            .map { (result) -> Mutation in
+                switch result {
+                case let .success(detail, channels):
+                    return .setSquadDetail(detail: detail, channels: channels)
+                case .failure(let error):
+                    if case .loginStatusDidExpired = error {
+                        return .setOneOrTheOther(loginStateDidExpired: true, toast: nil)
+                    } else {
+                        return .setOneOrTheOther(loginStateDidExpired: nil, toast: error.message)
+                    }
+                }
+            }
+            .startWith(.setLoading(true))
     }
     
     /// 从TIM中查询我所有的群组信息
@@ -289,7 +266,7 @@ class SquadReactor: Reactor {
             for i in 0..<groupList.count {
                 let groupInfo = groupList[i]
                 let conversation = conversationList.first(where: { $0.groupID == groupInfo.groupID })
-                if let lastMessage = conversation?.lastMessage {
+                if let lastMessage = conversation?.lastMessage, lastMessage.msgID != nil {
                     // groupInfo.groupID 这里没有解包是没关系的, 只有当会话类型为group时, conversation才会有值
                     let message = MessageElem(timMessage: lastMessage)
                     let channel = SquadChannel(sessionId: groupInfo.groupID, avatar: groupInfo.faceURL, title: groupInfo.groupName, content: message.description, unreadCount: Int(conversation?.unreadCount ?? 0), timeStamp: message.sentDate)

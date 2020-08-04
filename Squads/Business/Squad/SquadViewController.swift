@@ -29,7 +29,6 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     private var titleBarView: UIButton = {
         let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 150, height: 44))
         btn.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-        btn.setTitle("Squad Page", for: .normal)
         return btn
     }()
     
@@ -128,7 +127,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     }
     
     override func addTouchAction() {
-        guard let squadId = reactor?.currentState.currentSquadId else { return }
+        guard let squadId = reactor?.currentSquadId else { return }
         tableView.rx.itemSelected
             .subscribe(onNext: { [unowned self] indexPath in
                 if indexPath.section == 1 {
@@ -242,6 +241,11 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .bind(to: titleBarView.rx.activityIndicator)
             .disposed(by: disposeBag)
         
+        reactor.state
+            .compactMap{ $0.currentSquadDetail?.squadName }
+            .bind(to: titleBarView.rx.title(for: .normal))
+            .disposed(by: disposeBag)
+        
         onConversationChangedRelay
             .map{ Reactor.Action.refreshChannels($0) }
             .bind(to: reactor.action)
@@ -288,9 +292,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
 
     @objc
     private func titleBtnDidTapped() {
-        guard let squadId = reactor?.currentState.currentSquadId else {
-            return
-        }
+        guard let squadId = reactor?.currentSquadId else { return }
         let preReactor = SquadPreReactor(squadId: squadId)
         let preViewController = SquadPreViewController(reactor: preReactor)
         let nav = BaseNavigationController(rootViewController: preViewController)
@@ -322,7 +324,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     @objc
     private func channelBtnDidTapped() {
         //创建一个Channel
-        guard let currentSquadId = reactor?.currentState.currentSquadId else { return }
+        guard let currentSquadId = reactor?.currentSquadId else { return }
         let chattingVC = ChattingViewController(action: .create(squadId: currentSquadId))
         self.navigationController?.pushViewController(chattingVC, animated: false)
     }

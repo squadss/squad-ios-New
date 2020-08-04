@@ -63,7 +63,7 @@ class LoginReactor: Reactor {
     var initialState: State
     var provider = OnlineProvider<UserAPI>()
     // 这里后期可以通过接口优化, 在登录接口直接返回是否存在topSquad即可, 省的我们自己去查一遍, 待优化!
-    private var _squadProvider = OnlineProvider<SquadAPI>()
+    private var _squadProvider: OnlineProvider<SquadAPI>!
     
     init() {
         initialState = State()
@@ -121,6 +121,10 @@ class LoginReactor: Reactor {
     
     /// 是否存在置顶squad, 因为服务器没有设计这个接口, 所以我们需要从"我加入的所有squad"列表中去找, 如果为空, 表示用户没有加入过任何一个squad, 然后我们需要引导用户去创建自己的squad, 如果列表中有值, 那么我们默认取列表中第一个值返回
     private var isExistTopSquad: Observable<Int?> {
+        // 之所以要在这里做懒加载, 是因为OnlineProvider初始化时, 会自动写入token, 如果放在上面初始化反而不行, 因为那时候token还是空的
+        if _squadProvider == nil {
+            _squadProvider = OnlineProvider<SquadAPI>()
+        }
         return _squadProvider.request(target: .queryAllSquads, model: Array<SquadDetail>.self, atKeyPath: .data)
             .asObservable()
             .map { (result) in

@@ -49,7 +49,7 @@ class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
         confirmBtn.backgroundColor = UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        confirmBtn.setTitle("Get Started!", for: .normal)
+        confirmBtn.setTitle("Next", for: .normal)
         
         configInputField(codeField, placeholder: "Enter Code")
         

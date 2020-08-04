@@ -42,7 +42,7 @@ class RegisterViewController: BaseViewController, BrickInputFieldStyle {
         confirmBtn.backgroundColor = UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        confirmBtn.setTitle("Send Me a Code", for: .normal)
+        confirmBtn.setTitle("Next", for: .normal)
         confirmBtn.addTarget(self, action: #selector(confirmBtnDidTapped), for: .touchUpInside)
         
         passwordField.isSecureTextEntry = true

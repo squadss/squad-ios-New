@@ -59,7 +59,8 @@ final class Application: NSObject {
     static let shared = Application()
     let authManager: AuthManager
     private var window: UIWindow?
-    private var loginStatusDidChanged = PublishRelay<ConnectStatus>()
+    // 之所以用RelaySubject不用PublicSubject是因为需要在订阅时自动发送一次状态, 适用在用户先去登录页面, 这时connect流已经产生了, 当用户登录完成来到squad页面时, 就需要保存原来的流去唤醒它
+    private var loginStatusDidChanged = ReplaySubject<ConnectStatus>.create(bufferSize: 1)
     
     private override init() {
         authManager = AuthManager.shared
@@ -112,31 +113,31 @@ extension Application: V2TIMSDKListener {
     
     // 连接腾讯云服务器失败
     func onConnectFailed(_ code: Int32, err: String!) {
-        loginStatusDidChanged.accept(.onConnectFailed(err))
+        loginStatusDidChanged.onNext(.onConnectFailed(err))
     }
     
     // 已经成功连接到腾讯云服务器
     func onConnectSuccess() {
-        loginStatusDidChanged.accept(.onConnectSuccess)
+        loginStatusDidChanged.onNext(.onConnectSuccess)
     }
     
     // 正在连接到腾讯云服务器
     func onConnecting() {
-        loginStatusDidChanged.accept(.onConnecting)
+        loginStatusDidChanged.onNext(.onConnecting)
     }
     
     /// 当前用户被踢下线，此时可以 UI 提示用户，并再次调用 V2TIMManager 的 login() 函数重新登录。
     func onKickedOffline() {
-        loginStatusDidChanged.accept(.onKickedOffline)
+        loginStatusDidChanged.onNext(.onKickedOffline)
     }
 
     /// 在线时票据过期：此时您需要生成新的 userSig 并再次调用 V2TIMManager 的 login() 函数重新登录。
     func onUserSigExpired() {
-        loginStatusDidChanged.accept(.onUserSigExpired)
+        loginStatusDidChanged.onNext(.onUserSigExpired)
     }
     /// 当前用户的资料发生了更新
     func onSelfInfoUpdated(_ Info: V2TIMUserFullInfo!) {
-        loginStatusDidChanged.accept(.onSelfInfoUpdated(Info))
+        loginStatusDidChanged.onNext(.onSelfInfoUpdated(Info))
     }
 }
 

@@ -24,6 +24,13 @@ enum ConversationAction: Equatable {
         default: return false
         }
     }
+    
+    var groupId: String? {
+        switch self {
+        case .create: return nil
+        case let .load(groupId, _): return groupId
+        }
+    }
 }
 
 struct CreateChannel: Codable {
@@ -105,7 +112,7 @@ final class MessageElem: Comparable {
 
 extension MessageElem: MessageType {
     public var sender: SenderType {
-        return Sender(senderId: timMessage.sender, displayName: timMessage.nickName, avatar: timMessage.faceURL)
+        return Sender(senderId: timMessage.sender, displayName: timMessage.nickName ?? "", avatar: timMessage.faceURL ?? "")
     }
 
     /// The unique identifier for the message.
@@ -139,7 +146,7 @@ final class ChattingViewController: InputBarViewController {
     
     private var provider = OnlineProvider<SquadAPI>()
     private var disposeBag = DisposeBag()
-    private var conversationActionRelay: BehaviorRelay<ConversationAction>!
+    private var currentGroupAction: BehaviorRelay<ConversationAction>!
     
     private let currentUser: Sender
     
@@ -149,7 +156,7 @@ final class ChattingViewController: InputBarViewController {
         currentUser = Sender(senderId: String(user.id), displayName: user.nickname, avatar: user.avatar)
         
         super.init(nibName: nil, bundle: nil)
-        conversationActionRelay = BehaviorRelay<ConversationAction>(value: action)
+        currentGroupAction = BehaviorRelay<ConversationAction>(value: action)
     }
     
     required init?(coder: NSCoder) {
@@ -173,7 +180,7 @@ final class ChattingViewController: InputBarViewController {
         super.viewDidAppear(animated)
         contentView.isMessagesControllerBeingDismissed = false
         // 设置群消息已读
-        if case let .load(groupId, _) = conversationActionRelay.value {
+        if case let .load(groupId, _) = currentGroupAction.value {
             V2TIMManager.sharedInstance()?.markGroupMessage(asRead: groupId, succ: {
                 //TODO: 群消息置为已读
             }, fail: { (code, message) in
@@ -206,7 +213,7 @@ final class ChattingViewController: InputBarViewController {
     }
     
     private func addTouchAction() {
-        conversationActionRelay
+        currentGroupAction
             .distinctUntilChanged()
             .subscribe(onNext: { [unowned self] action in
                 switch action {
@@ -231,6 +238,7 @@ final class ChattingViewController: InputBarViewController {
                 return
             }
             if let message = V2TIMManager.sharedInstance()?.createTextMessage(text) {
+                self.inputBar.inputTextView.text = ""
                 self.sendMessage(message: message)
             }
         }
@@ -276,14 +284,14 @@ final class ChattingViewController: InputBarViewController {
     
     @objc
     private func loadMoreMessages() {
-        guard case let .load(groupId, _) = conversationActionRelay.value else { return }
+        guard case let .load(groupId, _) = currentGroupAction.value else { return }
         loadMessages(groupId: groupId, isFirst: false)
     }
     
     // 发送一条消息
     private func sendMessage(message: V2TIMMessage) {
 
-        guard case let .load(groupId, _) = conversationActionRelay.value else { return }
+        guard let groupId = currentGroupAction.value.groupId else { return }
         
         let pushInfo = V2TIMOfflinePushInfo()
         pushInfo.title = "\(groupId)发来一条消息"
@@ -375,7 +383,7 @@ extension ChattingViewController {
             let accountId = User.currentUser()?.id,
             let groupName = createChannelsView?.textField.text,
             let avatarData = createChannelsView?.imageTextView.snapshot()?.pngData(),
-            case let .create(squadId) = conversationActionRelay.value else {
+            case let .create(squadId) = currentGroupAction.value else {
             return
         }
         
@@ -413,7 +421,7 @@ extension ChattingViewController {
                 
                 switch result {
                 case .success(let groupId):
-                    self.conversationActionRelay.accept(.load(groupId: groupId, squadId: squadId))
+                    self.currentGroupAction.accept(.load(groupId: groupId, squadId: squadId))
                 case .failure(let error):
                     self.showToast(message: error.message)
                 }
@@ -462,10 +470,12 @@ extension ChattingViewController: V2TIMAdvancedMsgListener {
     
     /// 收到新消息
     func onRecvNewMessage(_ msg: V2TIMMessage!) {
+        // 只有当前会话才可以处理
+        guard let groupId = currentGroupAction.value.groupId, msg.groupID == groupId else { return }
+        
         let message = MessageElem(timMessage: msg)
-        self.messageList.insert(message, at: 0)
+        self.messageList.append(message)
         self.contentView.messagesCollectionView.reloadData()
-        print("收到新消息: \(msg)")
     }
 
     /// 收到消息已读回执（仅单聊有效）

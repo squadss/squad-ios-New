@@ -55,7 +55,7 @@ class CreateSquadViewController: BaseViewController {
         
         imageView.layer.cornerRadius = 40
         imageView.layer.masksToBounds = true
-        imageView.image = UIImage(named: "Avatar Placeholder")
+        imageView.image = UIImage(named: "Squad Placeholder")
         imageView.contentMode = .scaleAspectFill
         imageView.frame = CGRect(x: (viewWidth - 80)/2, y: 0, width: 80, height: 80)
         

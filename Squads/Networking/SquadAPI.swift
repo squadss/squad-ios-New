@@ -20,7 +20,7 @@ enum SquadAPI {
     case createSquad(name: String, avator: Data, remark: String)
     
     /// 获取小组详情
-    case querySquad(id: String, setTop: Bool)
+    case querySquad(id: Int, setTop: Bool)
     
     /// 删除Squad
     case deleteSquad(id: String)
@@ -295,8 +295,9 @@ extension SquadAPI: TargetType {
         case let .createSquad(name, avator, remark):
             let params = ["squadName": name, "logoImgBase64": avator.base64EncodedString(options: .lineLength64Characters), "createRemark": remark]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
-        case .deleteSquad, .querySquad, .quardTopSquad, .queryAllSquads, .querySquadByInviteCode:
+        case .deleteSquad, .querySquad, .quardTopSquad, .querySquadByInviteCode, .queryAllSquads:
             return .requestPlain
+
         case let .updateSquad(name, avator, remark):
             let params = ["squadName": name, "logoImgBase64": avator.base64EncodedString(options: .lineLength64Characters), "createRemark": remark]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
@@ -349,11 +350,6 @@ extension SquadAPI: TargetType {
     }
     
     var headers: [String : String]? {
-        switch self {
-        case .queryAllSquads:
-            return UserDefaults.standard.token.flatMap { ["token": $0] }
-        default:
-            return nil
-        }
+        return nil
     }
 }
