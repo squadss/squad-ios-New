@@ -53,7 +53,7 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
 
     override func bind(reactor: SquadMembersReactor) {
         
-        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: {data,tableView, indexPath, model in
+        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadMember>>(configureCell: {data,tableView, indexPath, model in
             
             let cell = tableView.dequeue(Reusable.applyListViewCell)!
             cell.avatarView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"), for: .normal)
@@ -67,9 +67,13 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
         })
         
         reactor.state
-            .map{ [SectionModel<String, String>(model: "", items: $0.repos)] }
+            .map{ [SectionModel<String, SquadMember>(model: "", items: $0.repos)] }
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
+        rx.viewWillAppear
+            .map{ Reactor.Action.refreshList }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
     }
 }

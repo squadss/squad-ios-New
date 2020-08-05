@@ -120,8 +120,7 @@ class SquadInvithNewReactor: Reactor {
         case .setAddMember(let member):
             
             if state.members == nil {
-                //FIXME: - 当前User为测试数据
-                let current = Member(user: User(username: "-1"), isAdded: false, isColsable: false)
+                let current = Member(user: User.currentUser()!, isAdded: false, isColsable: false)
                 state.members = [current, member]
             } else {
                 state.members?.append(member)

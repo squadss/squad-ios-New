@@ -136,7 +136,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                     self.navigationController?.pushViewController(activityDetailVC, animated: true)
                 } else if indexPath.section == 2 {
                     let model = self.dataSource[indexPath] as! SquadChannel
-                    let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId, squadId: squadId))
+                    let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId, groupName: model.title, squadId: squadId))
                     self.navigationController?.pushViewController(chattingVC, animated: true)
                 }
             })
@@ -222,7 +222,6 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         reactor.state
             .filter{ $0.loginStateDidExpired }
-            .takeUntil(rx.viewWillAppear)
             .trackAlertJustConfirm(title: "Authentication has expired!", default: "To log in", target: self)
             .subscribe(onNext: { _ in
                 User.removeCurrentUser()

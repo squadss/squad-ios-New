@@ -94,7 +94,8 @@ class SquadReactor: Reactor {
     }
     
     func transform(action: Observable<SquadReactor.Action>) -> Observable<SquadReactor.Action> {
-        return Observable.merge(action, loginStatusDidChanged.map{ Action.connectStatus($0) })
+        let status = loginStatusDidChanged.distinctUntilChanged().map{ Action.connectStatus($0) }
+        return Observable.merge(action, status)
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -146,9 +147,20 @@ class SquadReactor: Reactor {
             })
         case .connectStatus(let status):
             /// 检查登录状态
-            guard let user = User.currentUser(), case .onConnectSuccess = status else {
+            guard let user = User.currentUser() else {
                 return .just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
             }
+            
+            // 更加连接状态, 做出相应处理
+            switch status {
+            case .onConnectFailed(let s):
+                return .just(.setToast(s))
+            case .onKickedOffline, .onUserSigExpired:
+                return .just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
+            default:
+                break
+            }
+            
             return checkoutLoginStatus(userId: String(user.id)).flatMap { [unowned self] result -> Observable<Mutation> in
                 switch result {
                 case .success:

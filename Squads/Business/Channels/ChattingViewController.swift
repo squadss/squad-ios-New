@@ -15,12 +15,12 @@ import InputBarAccessoryView
 
 enum ConversationAction: Equatable {
     case create(squadId: Int)
-    case load(groupId: String, squadId: Int)
+    case load(groupId: String, groupName: String, squadId: Int)
     
     static func == (lhs: ConversationAction, rhs: ConversationAction) -> Bool {
         switch (lhs, rhs) {
         case (.create(let l_id), .create(let r_id)): return l_id == r_id
-        case (.load(let l_gid, let l_sid), .load(let r_gid, let r_sid)): return l_gid == r_gid && l_sid == r_sid
+        case (.load(let l_gid, _, let l_sid), .load(let r_gid, _, let r_sid)): return l_gid == r_gid && l_sid == r_sid
         default: return false
         }
     }
@@ -28,7 +28,7 @@ enum ConversationAction: Equatable {
     var groupId: String? {
         switch self {
         case .create: return nil
-        case let .load(groupId, _): return groupId
+        case let .load(groupId, _, _): return groupId
         }
     }
 }
@@ -73,6 +73,10 @@ final class MessageElem: Comparable {
         self.timMessage = timMessage
     }
     
+    var isValidType: Bool {
+        return true
+    }
+    
     var description: String {
         switch timMessage.elemType {
         case .ELEM_TYPE_TEXT: //文字消息
@@ -111,8 +115,9 @@ final class MessageElem: Comparable {
 }
 
 extension MessageElem: MessageType {
+    
     public var sender: SenderType {
-        return Sender(senderId: timMessage.sender, displayName: timMessage.nickName ?? "", avatar: timMessage.faceURL ?? "")
+        return Sender(senderId: timMessage.sender, displayName: timMessage.nickName ?? "未知昵称", avatar: timMessage.faceURL ?? "")
     }
 
     /// The unique identifier for the message.
@@ -137,16 +142,30 @@ extension MessageElem: MessageType {
     }
 }
 
-final class ChattingViewController: InputBarViewController {
+final class ChattingViewController: MessagesViewController, CustomNavigationBarItem {
     
-    private var contentView = MessagesContentView()
-    private var createChannelsView: CreateChannelsView?
-    
-    private var messageList: [MessageElem] = []
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .default
+    }
     
     private var provider = OnlineProvider<SquadAPI>()
     private var disposeBag = DisposeBag()
     private var currentGroupAction: BehaviorRelay<ConversationAction>!
+    
+    lazy var audioController = BasicAudioController(messageCollectionView: messagesCollectionView)
+    
+    // 记录当前页的消息列表
+    
+    private var flagMessage: V2TIMMessage?
+    private var messageList: [MessageElem] = []
+    private let refreshControl = UIRefreshControl()
+    private var createChannelsView: CreateChannelsView?
+    
+    let formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }()
     
     private let currentUser: Sender
     
@@ -165,22 +184,21 @@ final class ChattingViewController: InputBarViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.theme.backgroundColor = UIColor.background
-        setupView()
+        configureMessageCollectionView()
+        configureMessageInputBar()
+        setupBackBarItem()
         addTouchAction()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        contentView.addKeyboardObservers()
         V2TIMManager.sharedInstance()?.add(self)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        contentView.isMessagesControllerBeingDismissed = false
         // 设置群消息已读
-        if case let .load(groupId, _) = currentGroupAction.value {
+        if let groupId = currentGroupAction.value.groupId {
             V2TIMManager.sharedInstance()?.markGroupMessage(asRead: groupId, succ: {
                 //TODO: 群消息置为已读
             }, fail: { (code, message) in
@@ -191,25 +209,7 @@ final class ChattingViewController: InputBarViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        contentView.removeKeyboardObservers()
-        contentView.isMessagesControllerBeingDismissed = true
         V2TIMManager.sharedInstance()?.remove(self)
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        contentView.isMessagesControllerBeingDismissed = false
-    }
-    
-    private func setupView() {
-        contentView.messagesCollectionView.messagesDataSource = self
-        contentView.messagesCollectionView.messageCellDelegate = self
-        contentView.messagesCollectionView.messagesLayoutDelegate = self
-        contentView.messagesCollectionView.messagesDisplayDelegate = self
-        contentView.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
-        contentView.refreshControl.addTarget(self, action: #selector(loadMoreMessages), for: .valueChanged)
-        view.addSubviews(contentView)
-        contentView.snp.safeFull(parent: self)
     }
     
     private func addTouchAction() {
@@ -222,99 +222,425 @@ final class ChattingViewController: InputBarViewController {
                     self.isInputBarHidden = true
                     // 构建创建squad视图
                     self.setupCreateChannelsView()
-                case .load(let groupId, _):
+                case .load(let groupId, let groupName, _):
                     // 将底部InputBar显示出来
                     self.isInputBarHidden = false
                     // 移除创建squad视图
                     self.removeCreateChannelsView()
                     // 创建会话, 加载消息
                     self.loadMessages(groupId: groupId, isFirst: true)
+                    // 标题
+                    self.title = groupName
                 }
             })
             .disposed(by: disposeBag)
+    }
+    
+    private func configureMessageCollectionView() {
         
-        inputBar.sendButton.onTouchUpInside { [unowned self] (item) in
-            guard let text = self.inputBar.inputTextView.text else {
+        messagesCollectionView.messagesDataSource = self
+        messagesCollectionView.messageCellDelegate = self
+        messagesCollectionView.messagesLayoutDelegate = self
+        messagesCollectionView.messagesDisplayDelegate = self
+        // 设置值后, cell的topLabel高度计算就出现问题了, 暂时不改此值
+//        messagesCollectionView.messagesCollectionViewFlowLayout.sectionInset.top = 8
+//        messagesCollectionView.messagesCollectionViewFlowLayout.sectionInset.bottom = 20
+        scrollsToBottomOnKeyboardBeginsEditing = true // default false
+        maintainPositionOnKeyboardFrameChanged = true // default false
+        
+        messagesCollectionView.addSubview(refreshControl)
+        refreshControl.addTarget(self, action: #selector(loadMoreMessages), for: .valueChanged)
+    }
+    
+    private func configureMessageInputBar() {
+        messageInputBar.delegate = self
+        messageInputBar.inputTextView.theme.tintColor = UIColor.secondary
+        messageInputBar.separatorLine.backgroundColor = UIColor(hexString: "#EEEEEE")
+        messageInputBar.sendButton.theme.titleColor(from: UIColor.secondary, for: .normal)
+        messageInputBar.sendButton.theme.titleColor(from: UIColor.secondary.map{ $0?.withAlphaComponent(0.3) }, for: .highlighted)
+    }
+    
+    //MARK: - Input Bar
+    
+    var isInputBarHidden: Bool = false {
+        didSet {
+            isInputBarHiddenDidChange()
+        }
+    }
+    
+    func isInputBarHiddenDidChange() {
+        if isInputBarHidden, isFirstResponder {
+            resignFirstResponder()
+        } else if !isFirstResponder {
+            becomeFirstResponder()
+        }
+    }
+    
+    @discardableResult
+    override func resignFirstResponder() -> Bool {
+        messageInputBar.inputTextView.resignFirstResponder()
+        return super.resignFirstResponder()
+    }
+    
+    // MARK: - Helpers
+    
+    func insertMessage(_ message: MessageElem) {
+        messageList.append(message)
+        // Reload last section to update header/footer labels and insert a new one
+        messagesCollectionView.performBatchUpdates({
+            messagesCollectionView.insertSections([messageList.count - 1])
+            if messageList.count >= 2 {
+                messagesCollectionView.reloadSections([messageList.count - 2])
+            }
+        }, completion: { [weak self] _ in
+            if self?.isLastSectionVisible() == true {
+                self?.messagesCollectionView.scrollToBottom(animated: true)
+            }
+        })
+    }
+    
+    func isLastSectionVisible() -> Bool {
+        
+        guard !messageList.isEmpty else { return false }
+        
+        let lastIndexPath = IndexPath(item: 0, section: messageList.count - 1)
+        
+        return messagesCollectionView.indexPathsForVisibleItems.contains(lastIndexPath)
+    }
+}
+
+// MARK: - MessagesDataSource
+extension ChattingViewController: MessagesDataSource {
+    
+    func currentSender() -> SenderType {
+        return self.currentUser
+    }
+    
+    func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
+        return messageList.count
+    }
+    
+    func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
+        return messageList[indexPath.section]
+    }
+    
+    func cellTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        if let timestamp = timeTipIfNeeded(current: message.sentDate, reference: messageList[safe: indexPath.section - 1]?.sentDate) {
+            return NSAttributedString(string: MessageKitDateFormatter.shared.string(from: timestamp), attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
+        }
+        return nil
+    }
+    
+    func cellBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        return NSAttributedString(string: "Read", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
+    }
+    
+    func messageTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        let name = message.sender.displayName
+        return NSAttributedString(string: name, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption1)])
+    }
+    
+    func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        let dateString = formatter.string(from: message.sentDate)
+        return NSAttributedString(string: dateString, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2)])
+    }
+    
+    private func timeTipIfNeeded(current: Date, reference: Date?) -> Date? {
+        if let referenceDate = reference {
+            //判断时间间隔是否大于5分钟, 如果大于五分钟就返回followDate, 否则返回nil
+            return current.timeIntervalSince(referenceDate) > TimeInterval(5*60) ? current : nil
+        }
+        return current
+    }
+
+}
+
+extension ChattingViewController: MessageCellDelegate {
+    
+    func didTapAvatar(in cell: MessageCollectionViewCell) {
+        let friendReactor = FriendProfileReactor()
+        let friendVC = FriendProfileViewController(reactor: friendReactor)
+        navigationController?.pushViewController(friendVC, animated: true)
+    }
+    
+    func didTapMessage(in cell: MessageCollectionViewCell) {
+        print("Message tapped")
+    }
+    
+    func didTapImage(in cell: MessageCollectionViewCell) {
+        print("Image tapped")
+    }
+    
+    func didTapCellTopLabel(in cell: MessageCollectionViewCell) {
+        print("Top cell label tapped")
+    }
+    
+    func didTapCellBottomLabel(in cell: MessageCollectionViewCell) {
+        print("Bottom cell label tapped")
+    }
+    
+    func didTapMessageTopLabel(in cell: MessageCollectionViewCell) {
+        print("Top message label tapped")
+    }
+    
+    func didTapMessageBottomLabel(in cell: MessageCollectionViewCell) {
+        print("Bottom label tapped")
+    }
+
+    func didTapPlayButton(in cell: AudioMessageCell) {
+        guard let indexPath = messagesCollectionView.indexPath(for: cell),
+            let message = messagesCollectionView.messagesDataSource?.messageForItem(at: indexPath, in: messagesCollectionView) else {
+                print("Failed to identify message when audio cell receive tap gesture")
                 return
+        }
+        guard audioController.state != .stopped else {
+            // There is no audio sound playing - prepare to start playing for given audio message
+            audioController.playSound(for: message, in: cell)
+            return
+        }
+        if audioController.playingMessage?.messageId == message.messageId {
+            // tap occur in the current cell that is playing audio sound
+            if audioController.state == .playing {
+                audioController.pauseSound(for: message, in: cell)
+            } else {
+                audioController.resumeSound()
             }
-            if let message = V2TIMManager.sharedInstance()?.createTextMessage(text) {
-                self.inputBar.inputTextView.text = ""
-                self.sendMessage(message: message)
-            }
+        } else {
+            // tap occur in a difference cell that the one is currently playing sound. First stop currently playing and start the sound for given message
+            audioController.stopAnyOngoingPlaying()
+            audioController.playSound(for: message, in: cell)
         }
     }
 
-    private var lastMsg: V2TIMMessage?
+    func didStartAudio(in cell: AudioMessageCell) {
+        print("Did start playing audio sound")
+    }
+
+    func didPauseAudio(in cell: AudioMessageCell) {
+        print("Did pause audio sound")
+    }
+
+    func didStopAudio(in cell: AudioMessageCell) {
+        print("Did stop audio sound")
+    }
+
+    func didTapAccessoryView(in cell: MessageCollectionViewCell) {
+        print("Accessory view tapped")
+    }
+
+}
+
+// MARK: - MessageLabelDelegate, MessagesLayoutDelegate
+
+extension ChattingViewController: MessageLabelDelegate, MessagesLayoutDelegate {
+    
+    func didSelectAddress(_ addressComponents: [String: String]) {
+        print("Address Selected: \(addressComponents)")
+    }
+    
+    func didSelectDate(_ date: Date) {
+        print("Date Selected: \(date)")
+    }
+    
+    func didSelectPhoneNumber(_ phoneNumber: String) {
+        print("Phone Number Selected: \(phoneNumber)")
+    }
+    
+    func didSelectURL(_ url: URL) {
+        print("URL Selected: \(url)")
+    }
+    
+    func didSelectTransitInformation(_ transitInformation: [String: String]) {
+        print("TransitInformation Selected: \(transitInformation)")
+    }
+
+    func didSelectHashtag(_ hashtag: String) {
+        print("Hashtag selected: \(hashtag)")
+    }
+
+    func didSelectMention(_ mention: String) {
+        print("Mention selected: \(mention)")
+    }
+
+    func didSelectCustom(_ pattern: String, match: String?) {
+        print("Custom data detector patter selected: \(pattern)")
+    }
+
+    // 时间戳消息的高度
+    func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
+        let timestamp = timeTipIfNeeded(current: message.sentDate, reference: messageList[safe: indexPath.section - 1]?.sentDate)
+        if timestamp != nil {
+            return 25.0
+        }
+        return 0
+    }
+    
+    // 用户昵称消息的高度
+    func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
+        return 20
+    }
+}
+
+// MARK: - MessageInputBarDelegate
+
+extension ChattingViewController: InputBarAccessoryViewDelegate {
+
+    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
+
+        // Here we can parse for which substrings were autocompleted
+        let attributedText = messageInputBar.inputTextView.attributedText!
+        let range = NSRange(location: 0, length: attributedText.length)
+        attributedText.enumerateAttribute(.autocompleted, in: range, options: []) { (_, range, _) in
+
+            let substring = attributedText.attributedSubstring(from: range)
+            let context = substring.attribute(.autocompletedContext, at: 0, effectiveRange: nil)
+            print("Autocompleted: `", substring, "` with context: ", context ?? [])
+        }
+
+        let components = inputBar.inputTextView.components
+        messageInputBar.inputTextView.text = String()
+        messageInputBar.invalidatePlugins()
+
+        // Send button activity animation
+        messageInputBar.sendButton.startAnimating()
+        messageInputBar.inputTextView.placeholder = "Sending..."
+        insertMessages(components) { [weak self](msg) in
+            self?.messageInputBar.sendButton.stopAnimating()
+            self?.messageInputBar.inputTextView.placeholder = "Aa"
+            self?.insertMessage(msg)
+            self?.messagesCollectionView.scrollToBottom(animated: true)
+        }
+    }
+
+    private func insertMessages(_ data: [Any], successCompletion: @escaping(MessageElem) -> Void) {
+        for component in data {
+            if let str = component as? String {
+                if let message = V2TIMManager.sharedInstance()?.createTextMessage(str) {
+                    self.sendMessage(message: message, successCompletion: successCompletion)
+                }
+            } else if let img = component as? UIImage {
+//                let message = MockMessage(image: img, user: user, messageId: UUID().uuidString, date: Date())
+//                insertMessage(message)
+//                let user = self.currentSender
+            }
+        }
+    }
+}
+
+extension ChattingViewController: MessagesDisplayDelegate {
+    func didTapBackground(in cell: MessageCollectionViewCell) {
+        messageInputBar.inputTextView.resignFirstResponder()
+    }
+    
+    func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
+        avatarView.initials = "?"
+        
+        guard let sender = message as? Sender else {
+            avatarView.initials = "?"
+            return
+        }
+        let placeholder = UIImage(named: "Avatar Placeholder")?.drawColor(.black)
+        avatarView.kf.setImage(with: sender.avatar?.asURL, placeholder: placeholder, options: nil, progressBlock: nil, completionHandler: nil)
+    }
+}
+
+extension ChattingViewController: V2TIMAdvancedMsgListener {
     
     private func loadMessages(groupId: String, isFirst: Bool) {
         
-        V2TIMManager.sharedInstance()?.getGroupHistoryMessageList(groupId, count: 20, lastMsg: lastMsg, succ: { (list) in
-            
+        V2TIMManager.sharedInstance()?.getGroupHistoryMessageList(groupId, count: 20, lastMsg: self.flagMessage, succ: { (list) in
+
             guard let list = list, !list.isEmpty else {
                 //将下拉加载恢复为默认状态
-                if !isFirst { self.contentView.refreshControl.endRefreshing() }
+                if !isFirst { self.refreshControl.endRefreshing() }
                 return
             }
-            
-            // 将拉取到的第一条消息, 置为指针, 便于下次拉取
-            if let message = list.first {
-                self.lastMsg = message
+
+            // 将拉取到的最后一条消息(时间戳最靠前, 最老), 置为下次拉取的指针
+            if let message = list.last {
+                self.flagMessage = message
             }
-            
+
             //TODO: 利用多线程下载任务
             var newList = Array<MessageElem>()
             for msg in list {
                 let message = MessageElem(timMessage: msg)
                 newList.append(message)
             }
+            // 虽然sdk已经为我们将消息内容排好序了, 可我们这里进行多线程下载任务后, 任务完成的时间是不确定的, 所以下面再重新排序一下
             if isFirst {
                 self.messageList = newList.sorted()
-                self.contentView.messagesCollectionView.reloadData()
-                self.contentView.messagesCollectionView.scrollToBottom()
+                self.messagesCollectionView.reloadData()
+                self.messagesCollectionView.scrollToBottom()
             } else {
                 self.messageList = newList.sorted() + self.messageList
-                self.contentView.messagesCollectionView.reloadData()
-                self.contentView.refreshControl.endRefreshing()
+                self.messagesCollectionView.reloadData()
+                self.refreshControl.endRefreshing()
             }
         }, fail: { (code, message) in
             self.showToast(message: message ?? "获取消息未知错误")
         })
-        
     }
-    
+
     @objc
     private func loadMoreMessages() {
-        guard case let .load(groupId, _) = currentGroupAction.value else { return }
-        loadMessages(groupId: groupId, isFirst: false)
+        if let groupId = currentGroupAction.value.groupId  {
+            loadMessages(groupId: groupId, isFirst: false)
+        } else {
+            refreshControl.endRefreshing()
+        }
     }
-    
+
     // 发送一条消息
-    private func sendMessage(message: V2TIMMessage) {
+    private func sendMessage(message: V2TIMMessage, successCompletion: @escaping (MessageElem) -> Void) {
 
         guard let groupId = currentGroupAction.value.groupId else { return }
-        
+
         let pushInfo = V2TIMOfflinePushInfo()
         pushInfo.title = "\(groupId)发来一条消息"
         pushInfo.desc = "这是内容: \(message.description)"
-        
-        V2TIMManager.sharedInstance()?.send(message, receiver: nil, groupID: groupId, priority: .PRIORITY_DEFAULT, onlineUserOnly: false, offlinePushInfo: pushInfo, progress: { (progress) in
-            print("进度: \(progress)")
-        }, succ: {
+
+        V2TIMManager.sharedInstance()?.send(message, receiver: nil,
+                                            groupID: groupId,
+                                            priority: .PRIORITY_DEFAULT,
+                                            onlineUserOnly: false,
+                                            offlinePushInfo: pushInfo,
+                                            progress: { _ in },
+                                            succ: {
             
-            if self.lastMsg == nil {
-                print("message: \(message.msgID)")
-                self.lastMsg = message
+            // 如果为空, 表示本地没有加载到消息, 这时将发送出去的第一条消息置为指针, 下次拉取资料就以这个指针指向为准
+            if self.flagMessage == nil {
+                self.flagMessage = message
             }
             
+            // 将本条消息显示在列表中
             let message = MessageElem(timMessage: message)
-            self.messageList.append(message)
-            self.contentView.messagesCollectionView.reloadData()
-            self.contentView.messagesCollectionView.scrollToBottom()
-            
+            successCompletion(message)
         }, fail: { (code, message) in
             self.showToast(message: message ?? "发送未知错误")
         })
     }
+    
+    /// 收到新消息
+    func onRecvNewMessage(_ msg: V2TIMMessage!) {
+        // 只有当前会话才可以处理
+        guard let groupId = currentGroupAction.value.groupId, msg.groupID == groupId else { return }
+        
+        let message = MessageElem(timMessage: msg)
+        self.messageList.append(message)
+        self.messagesCollectionView.reloadData()
+    }
+
+    /// 收到消息已读回执（仅单聊有效）
+    func onRecvC2CReadReceipt(_ receiptList: [V2TIMMessageReceipt]!) {
+        
+    }
+
+    /// 收到消息撤回
+    func onRecvMessageRevoked(_ msgID: String!) {
+        
+    }
+    
 }
 
 //MARK: - Create Channel
@@ -402,7 +728,7 @@ extension ChattingViewController {
         
         Observable
             .zip(createChannel, members)
-            .flatMap { [unowned self] (channelResult, membersResult) -> Observable<Result<String, GeneralError>> in
+            .flatMap { [unowned self] (channelResult, membersResult) -> Observable<Result<(String, String), GeneralError>> in
                 switch (channelResult, membersResult) {
                 case (.success(let model), .success(let members)):
                     return self.createGroupsFromTIM(groupId: String(model.id), groupName: model.channelName, faceURL: model.headImgUrl, inviteMembers: members)
@@ -420,8 +746,8 @@ extension ChattingViewController {
                 sender.isEnabled = true
                 
                 switch result {
-                case .success(let groupId):
-                    self.currentGroupAction.accept(.load(groupId: groupId, squadId: squadId))
+                case .success(let groupId, let groupName):
+                    self.currentGroupAction.accept(.load(groupId: groupId, groupName: groupName, squadId: squadId))
                 case .failure(let error):
                     self.showToast(message: error.message)
                 }
@@ -437,7 +763,7 @@ extension ChattingViewController {
     private func createGroupsFromTIM(groupId: String,
                                      groupName: String,
                                      faceURL: String,
-                                     inviteMembers: Array<String> = []) -> Observable<Result<String, GeneralError>> {
+                                     inviteMembers: Array<String> = []) -> Observable<Result<(String, String), GeneralError>> {
         return Observable.create { (observer) -> Disposable in
             
             let memberList: Array<V2TIMCreateGroupMemberInfo> = inviteMembers.map {
@@ -454,7 +780,7 @@ extension ChattingViewController {
             info.groupName = groupName
             
             V2TIMManager.sharedInstance()?.createGroup(info, memberList: memberList, succ: { (id) in
-                observer.onNext(.success(groupId))
+                observer.onNext(.success((groupId, groupName)))
                 observer.onCompleted()
             }, fail: { (code, message) in
                 observer.onNext(.failure(.custom(message ?? "未知错误")))
@@ -466,51 +792,5 @@ extension ChattingViewController {
     }
 }
 
-extension ChattingViewController: V2TIMAdvancedMsgListener {
-    
-    /// 收到新消息
-    func onRecvNewMessage(_ msg: V2TIMMessage!) {
-        // 只有当前会话才可以处理
-        guard let groupId = currentGroupAction.value.groupId, msg.groupID == groupId else { return }
-        
-        let message = MessageElem(timMessage: msg)
-        self.messageList.append(message)
-        self.contentView.messagesCollectionView.reloadData()
-    }
 
-    /// 收到消息已读回执（仅单聊有效）
-    func onRecvC2CReadReceipt(_ receiptList: [V2TIMMessageReceipt]!) {
-        
-    }
 
-    /// 收到消息撤回
-    func onRecvMessageRevoked(_ msgID: String!) {
-        
-    }
-    
-}
-
-extension ChattingViewController: MessageCellDelegate, MessagesLayoutDelegate, MessagesDisplayDelegate, MessagesDataSource {
-    
-    func didTapBackground(in cell: MessageCollectionViewCell) {
-        contentView.messageInputBar.inputTextView?.resignFirstResponder()
-    }
-    
-    func didTapAvatar(in cell: MessageCollectionViewCell) {
-        let friendReactor = FriendProfileReactor()
-        let friendVC = FriendProfileViewController(reactor: friendReactor)
-        navigationController?.pushViewController(friendVC, animated: true)
-    }
-
-    func currentSender() -> SenderType {
-        return self.currentUser
-    }
-
-    func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-        return messageList[indexPath.section]
-    }
-
-    func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
-        return messageList.count
-    }
-}

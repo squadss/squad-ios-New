@@ -34,6 +34,14 @@ struct SquadDetail: Codable {
         squadCode = try decoder.decode("squadCode")
     }
     
+    func encode(to encoder: Encoder) throws {
+        try encoder.encode(id, for: "id")
+        try encoder.encode(squadName, for: "squadName")
+        try encoder.encode(logoPath, for: "logoPath")
+        try encoder.encode(createRemark, for: "createRemark")
+        try encoder.encode(squadCode, for: "squadCode")
+    }
+    
     func addChannels(_ list: Array<CreateChannel>) -> SquadDetail {
         var model = self
         model.channels = list

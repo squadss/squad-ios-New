@@ -39,7 +39,7 @@ class AuthManager {
     }
 }
 
-enum ConnectStatus {
+enum ConnectStatus: Equatable {
     // 正在连接到腾讯云服务器
     case onConnecting
     // 连接成功
@@ -52,6 +52,23 @@ enum ConnectStatus {
     case onUserSigExpired
     // 用户资料更新
     case onSelfInfoUpdated(V2TIMUserFullInfo)
+    
+    static func == (lhs: ConnectStatus, rhs: ConnectStatus) -> Bool {
+        switch (lhs, rhs) {
+        case (.onConnecting, onConnecting),
+             (.onConnectSuccess, .onConnectSuccess),
+             (.onConnectFailed, .onConnectFailed),
+             (.onKickedOffline, .onKickedOffline),
+             (.onUserSigExpired, .onUserSigExpired):
+            return true
+        case (.onSelfInfoUpdated(let l), .onSelfInfoUpdated(let r)):
+            return l.gender == r.gender
+                && l.selfSignature == r.selfSignature
+                && l.allowType == r.allowType
+        default:
+            return false
+        }
+    }
 }
 
 final class Application: NSObject {

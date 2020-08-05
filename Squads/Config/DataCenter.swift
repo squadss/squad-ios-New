@@ -9,6 +9,9 @@
 import Foundation
 import Disk
 
+//注意: 写入本地的对象编码遵守Encoder和Decoder协议后, 需要实现其对应的方法
+// init(from decoder: Decoder) throws { }
+// func encode(to encoder: Encoder) throws { }
 struct DataCenter {
     
     static var userInfo: User? {
@@ -25,27 +28,27 @@ struct DataCenter {
 extension DataCenter {
     
     private static func object<T: Codable>(key: String, type: T.Type = T.self) -> T? {
-        return try? Disk.retrieve(key + ".json", from: .documents, as: type)
+        return try? Disk.retrieve(key, from: .applicationSupport, as: type)
     }
     
     private static func object<T: Codable>(key: String, type: [T].Type = [T].self) -> Array<T>? {
-        return try? Disk.retrieve(key + ".json", from: .documents, as: type)
+        return try? Disk.retrieve(key, from: .applicationSupport, as: type)
     }
     
     private static func object<T: Codable>(key: String, type: Set<T>.Type = Set<T>.self) -> Set<T>? {
-        return try? Disk.retrieve(key + ".json", from: .documents, as: type)
+        return try? Disk.retrieve(key, from: .applicationSupport, as: type)
     }
     
     private static func set<T: Codable>(key: String, value: T) {
-        try? Disk.save(value, to: .documents, as: key + ".json")
+        try? Disk.save(value, to: .applicationSupport, as: key)
     }
     
     private static func set<T: Codable>(key: String, value: Array<T>) {
-        try? Disk.save(value, to: .documents, as: key + ".json")
+        try? Disk.save(value, to: .applicationSupport, as: key)
     }
     
     private static func set<T: Codable>(key: String, value: Set<T>) {
-        try? Disk.save(value, to: .documents, as: key + ".json")
+        try? Disk.save(value, to: .applicationSupport, as: key)
     }
     
 }
