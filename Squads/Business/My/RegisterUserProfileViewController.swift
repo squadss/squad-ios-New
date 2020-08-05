@@ -49,16 +49,15 @@ class RegisterUserProfileViewController: BaseViewController, BrickInputFieldStyl
         
         avatarView.canEdit = true
         avatarView.imageSize = CGSize(width: 107, height: 107)
-        avatarView.imageURL = URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")
         backgroundView.addSubview(avatarView)
         backgroundView.offsetY = 150
         
-        configInputField(nicknameField, placeholder: "Phone Number")
+        configInputField(nicknameField, placeholder: "Name")
         
         confirmBtn.backgroundColor = UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        confirmBtn.setTitle("Send Me a Code", for: .normal)
+        confirmBtn.setTitle("Get Started!", for: .normal)
         
         stackView = UIStackView(arrangedSubviews: [nicknameField, confirmBtn])
         stackView.axis = .vertical

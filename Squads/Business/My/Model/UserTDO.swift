@@ -49,8 +49,14 @@ struct UserTDO {
         if properties.contains(.username) && (username == nil || username?.isEmpty == true) {
             return .failure(.custom("Username cannot be empty"))
         }
+        if properties.contains(.username) && (username!.count < 6 || username!.count > 18) {
+            return .failure(.custom("Please enter a 6-bit to 18-bit user name"))
+        }
         if properties.contains(.password) && (password == nil || password?.isEmpty == true) {
             return .failure(.custom("Password cannot be empty"))
+        }
+        if properties.contains(.password) && (password!.count < 6 || password!.count > 18) {
+            return .failure(.custom("Please enter a 6-bit to 18-bit password"))
         }
         if properties.contains(.rePassword) && (rePassword == nil || rePassword?.isEmpty == true) {
             return .failure(.custom("Please enter your password again"))

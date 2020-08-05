@@ -30,11 +30,12 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
         tableView.register(Reusable.activityCalendarCell)
         tableView.theme.backgroundColor = UIColor.background
         tableView.tableFooterView = UIView(frame: .zero)
-        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0.001))
+        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 20))
         
         view.addSubview(tableView)
         
         let rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "navigationBarCalendar"), style: .plain, target: self, action: #selector(rightBarItemDidTapped))
+        rightBarButtonItem.theme.tintColor = UIColor.text
         navigationItem.rightBarButtonItem = rightBarButtonItem
     }
     

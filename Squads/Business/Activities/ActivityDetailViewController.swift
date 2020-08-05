@@ -232,7 +232,7 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
                     self.setupInfoView(reactor: reactor)
                     self.setupChooseTimeView(reactor: reactor)
                     self.setupMemberView(reactor: reactor)
-                    self.setupChattingView(reactor: reactor)
+//                    self.setupChattingView(reactor: reactor)
                 default: break
                 }
             })

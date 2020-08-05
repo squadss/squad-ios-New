@@ -187,61 +187,50 @@ import MessageKit
 //}
 //
 //
-//protocol ConversationDelegate: class {
-//
-//    /// 将消息添加到当前会话的消息列表
-//    ///
-//    /// - Parameter msg: 当前的消息
-//    /// - Returns: 新的消息数组
-//    func addMsgToList(msg followMessage: MessageElem, lastMessage: TIMMessage?) -> Array<MessageElem>
-//
-//    /// 对比两个消息,符合规则就添加时间戳
-//    ///   如果last为空,返回follow的时间戳,如果last不为空且对比follow已超过5分钟,返回follow的时间戳, 否则返回nil
-//    /// - Parameters:
-//    ///   - last: 最后一次的消息
-//    ///   - follow: 后来的消息
-//    /// - Returns: 时间文本/nil
-//    func timeTipOnNewMessageIfNeeded(last: Date?, follow: Date?) -> Date?
-//
-//    /*  将TIMMessage数组转换成IMMessage数组
-//
-//     元素排列规则为:
-//     ****** 文本0(数组最后一个元素).timeTip *******
-//     ****** 文本0 *******
-//     ****** 文本1.timeTip(如果时间较文本0超5分,才会添加) ******
-//     ****** 文本1 ******
-//     ****** 文本2 *******
-//     */
-//    func convertMessageElem(from array: Array<TIMMessage>) -> Array<MessageElem>
-//}
-//
-//extension ConversationDelegate {
-//
-//    public func timeTipOnNewMessageIfNeeded(last: Date?, follow: Date?) -> Date? {
-//
-//        guard let followDate = follow else { return nil }
-//
-//        if let lastDate = last {
-//            if followDate.timeIntervalSince(lastDate) > TimeInterval(5*60)  {
-//                //大于5分钟
-//                return followDate
-//            }
-//            else {
-//                return nil
-//            }
-//        }
-//        else {
-//            return followDate
-//        }
-//
-//    }
-//
-//
-//    func convertMessageElem(from array: Array<TIMMessage>) -> Array<MessageElem> {
-//
-//        var tempArray = Array<MessageElem>()
-//        var prevMessage: TIMMessage?
-//
+protocol ConversationDelegate: class {
+
+    /// 将消息添加到当前会话的消息列表
+    ///
+    /// - Parameter msg: 当前的消息
+    /// - Returns: 新的消息数组
+    func addMsgToList(msg followMessage: MessageElem, lastMessage: TIMMessage?) -> Array<MessageElem>
+
+    /// 对比两个消息,符合规则就添加时间戳
+    ///   如果last为空,返回follow的时间戳,如果last不为空且对比follow已超过5分钟,返回follow的时间戳, 否则返回nil
+    /// - Parameters:
+    ///   - last: 最后一次的消息
+    ///   - follow: 后来的消息
+    /// - Returns: 时间文本/nil
+    func timeTipOnNewMessageIfNeeded(last: Date?, follow: Date?) -> Date?
+
+    /*  将TIMMessage数组转换成IMMessage数组
+
+     元素排列规则为:
+     ****** 文本0(数组最后一个元素).timeTip *******
+     ****** 文本0 *******
+     ****** 文本1.timeTip(如果时间较文本0超5分,才会添加) ******
+     ****** 文本1 ******
+     ****** 文本2 *******
+     */
+    func convertMessageElem(from array: Array<TIMMessage>) -> Array<MessageElem>
+}
+
+extension ConversationDelegate {
+
+    public func timeTipOnNewMessageIfNeeded(last: Date?, follow: Date?) -> Date? {
+        guard let followDate = follow else { return nil }
+        if let lastDate = last {
+            //判断时间间隔是否大于5分钟, 如果大于五分钟就返回followDate, 否则返回nil
+            return followDate.timeIntervalSince(lastDate) > TimeInterval(5*60) ? followDate : nil
+        }
+        return followDate
+    }
+
+    func convertMessageElem(from array: Array<TIMMessage>) -> Array<MessageElem> {
+
+        var tempArray = Array<MessageElem>()
+        var prevMessage: TIMMessage?
+
 //        for index in (0 ..< array.count).reversed() {
 //
 //            let message = array[index]
@@ -268,27 +257,28 @@ import MessageKit
 //            let imamsg = MessageElem(message: message)
 //            tempArray.append(imamsg)
 //        }
-//
-//        return tempArray
-//
-//    }
-//
-//
-//    func addMsgToList(msg followMessage: MessageElem, lastMessage: TIMMessage?) -> Array<MessageElem> {
-//
-//        var array = Array<MessageElem>()
-//
+
+        return tempArray
+
+    }
+
+
+    func addMsgToList(msg followMessage: MessageElem, lastMessage: TIMMessage?) -> Array<MessageElem> {
+
+        var array = Array<MessageElem>()
+
 //        if let timeTip = timeTipOnNewMessageIfNeeded(last: lastMessage?.timestamp(), follow: followMessage.timestamp) {
 //            let dateMessage = MessageElem(dateMessage: timeTip)
 //            array.append(dateMessage)
 //        }
-//
-//        array.append(followMessage)
-//
-//        return array
-//
-//    }
-//}
+
+        array.append(followMessage)
+
+        return array
+
+    }
+}
+
 //
 //class Conversation: ConversationDelegate {
 //
@@ -422,40 +412,7 @@ import MessageKit
 //        })
 //    }
 //}
-//
-//extension Conversation: Hashable {
-//
-//    public func hash(into hasher: inout Hasher) {
-//        hasher.combine(conversation.hashValue)
-//    }
-//
-//    public var hashValue: Int {
-//        return conversation.hashValue
-//    }
-//
-//    public static func == (lhs: Conversation, rhs: Conversation) -> Bool {
-//        if lhs.conversation.getType() == rhs.conversation.getType() {
-//            return lhs.receiverId == rhs.receiverId
-//        }
-//        return lhs.conversation == rhs.conversation
-//    }
-//
-//    /// 获取会话人，单聊为对方账号，群聊为群组Id
-//    public var receiverId: String {
-//        return conversation.getReceiver()
-//    }
-//
-//    /// 会话类型
-//    public var type: TIMConversationType {
-//        return conversation.getType()
-//    }
-//
-//    /// 未读消息数
-//    public var unreadMessageCount: Int {
-//        return Int(conversation.getUnReadMessageNum())
-//    }
-//}
-//
+
 //final class ConversationManager: NSObject {
 //
 //    static let shared = ConversationManager()

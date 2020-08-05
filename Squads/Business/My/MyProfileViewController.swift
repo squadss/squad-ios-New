@@ -14,9 +14,9 @@ import ETNavBarTransparent
 
 class MyProfileViewController: ReactorViewController<MyProfileReactor> {
 
-    var itemSelected: Observable<String> {
+    var itemSelected: Observable<Int> {
         return tableView.rx.itemSelected.map{ [unowned self] in
-            return String(self.dataSource[$0].id)
+            return self.dataSource[$0].id
         }
 //        .do(onNext: { [unowned self] _ in
 //            self.dismiss(animated: true)
@@ -90,7 +90,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
             let cell = tableView.dequeue(Reusable.mySquadsViewCell)!
             cell.pritureView.kf.setImage(with: model.logoPath.asURL)
             cell.titleLab.text = model.squadName
-//            cell.unreadNum = "12"
+            cell.unreadNum = 0
 //            cell.titleLab.text = model.title
 //            cell.contentLab.text = model.content
 //            cell.longObservable

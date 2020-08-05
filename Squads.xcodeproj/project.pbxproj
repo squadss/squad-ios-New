@@ -49,7 +49,6 @@
 		1733564F24CBC8820022D9D5 /* ReactorInputBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1733564E24CBC8820022D9D5 /* ReactorInputBarViewController.swift */; };
 		1733565124CC3ABC0022D9D5 /* ConversationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1733565024CC3ABC0022D9D5 /* ConversationManager.swift */; };
 		174A839524CB2B0200ABB76D /* SquadAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174A839424CB2B0200ABB76D /* SquadAPI.swift */; };
-		174F6C1524B70FD200E5A1C6 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1424B70FD200E5A1C6 /* SessionManager.swift */; };
 		174F6C1B24B7291F00E5A1C6 /* ChatSoundRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */; };
 		174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */; };
 		174F6C1F24B7297300E5A1C6 /* ProximityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */; };
@@ -116,6 +115,8 @@
 		17A1513F24D3C0F800E441DE /* CreateEventLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1513E24D3C0F800E441DE /* CreateEventLocationViewController.swift */; };
 		17A1514124D3FDEA00E441DE /* CreateEventLocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */; };
 		17A1514324D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1514224D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift */; };
+		17B5DAB124D9AB6800A2A33F /* BasicAudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B5DAB024D9AB6800A2A33F /* BasicAudioController.swift */; };
+		17B5DAB324DA501A00A2A33F /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B5DAB224DA501900A2A33F /* Array+Extension.swift */; };
 		17B5ED7A24CECFB4009FA969 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B5ED7924CECFB4009FA969 /* App.swift */; };
 		17B5ED7F24CED77E009FA969 /* UMCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B5ED7E24CED77E009FA969 /* UMCommon.framework */; };
 		17B5ED8124CEF72E009FA969 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B5ED8024CEF72D009FA969 /* CoreTelephony.framework */; };
@@ -250,7 +251,6 @@
 		1733564E24CBC8820022D9D5 /* ReactorInputBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactorInputBarViewController.swift; sourceTree = "<group>"; };
 		1733565024CC3ABC0022D9D5 /* ConversationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationManager.swift; sourceTree = "<group>"; };
 		174A839424CB2B0200ABB76D /* SquadAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadAPI.swift; sourceTree = "<group>"; };
-		174F6C1424B70FD200E5A1C6 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSoundRecorder.swift; sourceTree = "<group>"; };
 		174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helper.swift"; sourceTree = "<group>"; };
 		174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityManager.swift; sourceTree = "<group>"; };
@@ -318,6 +318,8 @@
 		17A1513E24D3C0F800E441DE /* CreateEventLocationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventLocationViewController.swift; sourceTree = "<group>"; };
 		17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventLocationCell.swift; sourceTree = "<group>"; };
 		17A1514224D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvtivityConfirmScheduledViewController.swift; sourceTree = "<group>"; };
+		17B5DAB024D9AB6800A2A33F /* BasicAudioController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicAudioController.swift; sourceTree = "<group>"; };
+		17B5DAB224DA501900A2A33F /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
 		17B5ED7524CECEC8009FA969 /* Squads-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Squads-Bridging-Header.h"; sourceTree = "<group>"; };
 		17B5ED7924CECFB4009FA969 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		17B5ED7E24CED77E009FA969 /* UMCommon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = UMCommon.framework; sourceTree = "<group>"; };
@@ -499,7 +501,6 @@
 		174F6C1324B70FC700E5A1C6 /* Manager */ = {
 			isa = PBXGroup;
 			children = (
-				174F6C1424B70FD200E5A1C6 /* SessionManager.swift */,
 				1733565024CC3ABC0022D9D5 /* ConversationManager.swift */,
 			);
 			path = Manager;
@@ -646,6 +647,7 @@
 				179C051A24B1FC3600A669FA /* Reactor */,
 				178FCB8B24B4A8BF0054212F /* ChattingViewController.swift */,
 				172E8E5F24C55A44002F9181 /* ChattingPreviewViewController.swift */,
+				17B5DAB024D9AB6800A2A33F /* BasicAudioController.swift */,
 			);
 			path = Channels;
 			sourceTree = "<group>";
@@ -883,6 +885,7 @@
 				1775D04824C6D798001C94E9 /* UITextField+Extension.swift */,
 				179693D224CD92150023152A /* Rx+TImer.swift */,
 				179693D424CDC3D90023152A /* UIButton+Loading.swift */,
+				17B5DAB224DA501900A2A33F /* Array+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1038,7 +1041,6 @@
 				1795369E24B04D4C00FE1185 /* DataCenter.swift in Sources */,
 				1775511524D650CE004E54BE /* FlicksAPI.swift in Sources */,
 				17F39BCF24AECD5800EC90ED /* GeneralModel.swift in Sources */,
-				174F6C1524B70FD200E5A1C6 /* SessionManager.swift in Sources */,
 				1780D89B24CFFB5D0064DD28 /* UserTDO.swift in Sources */,
 				17C561AB24C32BD40016500A /* ApplyListViewController.swift in Sources */,
 				17F39BE524AECF5F00EC90ED /* SnapKit+Extension.swift in Sources */,
@@ -1171,9 +1173,11 @@
 				178FCB7424B476D40054212F /* SquadNotificationsViewController.swift in Sources */,
 				179536B024B1912000FE1185 /* MyProfileViewController.swift in Sources */,
 				17F6493B24C81D09008C334D /* TimeLineAxisView.swift in Sources */,
+				17B5DAB124D9AB6800A2A33F /* BasicAudioController.swift in Sources */,
 				178FCB7C24B4777C0054212F /* SquadInvithNewViewController.swift in Sources */,
 				171E47E224C4243A00100DFD /* SquadInvithNewMemberCell.swift in Sources */,
 				172E8E6024C55A44002F9181 /* ChattingPreviewViewController.swift in Sources */,
+				17B5DAB324DA501A00A2A33F /* Array+Extension.swift in Sources */,
 				170429CE24AEBF4E0046F757 /* SceneDelegate.swift in Sources */,
 				17F39BEF24AED0C800EC90ED /* BaseNavigationController.swift in Sources */,
 				17F39BDE24AECE8F00EC90ED /* UIViewController+Toast.swift in Sources */,
