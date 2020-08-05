@@ -533,14 +533,12 @@ extension ChattingViewController: MessagesDisplayDelegate {
     }
     
     func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
-        avatarView.initials = "?"
-        
-        guard let sender = message as? Sender else {
+        if let sender = message.sender as? Sender  {
+            let placeholder = UIImage(named: "Avatar Placeholder")?.drawColor(.black)
+            avatarView.kf.setImage(with: sender.avatar?.asURL, placeholder: placeholder, options: nil, progressBlock: nil, completionHandler: nil)
+        } else {
             avatarView.initials = "?"
-            return
         }
-        let placeholder = UIImage(named: "Avatar Placeholder")?.drawColor(.black)
-        avatarView.kf.setImage(with: sender.avatar?.asURL, placeholder: placeholder, options: nil, progressBlock: nil, completionHandler: nil)
     }
 }
 

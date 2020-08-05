@@ -19,19 +19,6 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        infoView.dateString = "Since Sep. 18,2018"
-        infoView.title = "Squad Name"
-        infoView.canEdit = true
-        infoView.imageURL = URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")
-        
-        menuView.daysView.numLab.text = "624"
-        menuView.daysView.titleLab.text = "DAYS"
-        
-        menuView.textsView.numLab.text = "23K"
-        menuView.textsView.titleLab.text = "TEXTS"
-        
-        menuView.flicksView.numLab.text = "32"
-        menuView.flicksView.titleLab.text = "FLICKS"
     }
 
     override func setupView() {
@@ -77,6 +64,25 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
         reactor.state
             .map{ [SectionModel(model: "", items: $0.repos)] }
             .bind(to: tableView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.squadDetail }
+            .subscribe(onNext: { [unowned self] detail in
+                self.infoView.dateString = detail.gmtCreate
+                self.infoView.title = detail.squadName
+                self.infoView.canEdit = true
+                self.infoView.imageURL = detail.logoPath.asURL
+                
+                self.menuView.daysView.numLab.text = "624"
+                self.menuView.daysView.titleLab.text = "DAYS"
+                
+                self.menuView.textsView.numLab.text = "23K"
+                self.menuView.textsView.titleLab.text = "TEXTS"
+                
+                self.menuView.flicksView.numLab.text = "32"
+                self.menuView.flicksView.titleLab.text = "FLICKS"
+            })
             .disposed(by: disposeBag)
         
         tableView.rx.itemSelected

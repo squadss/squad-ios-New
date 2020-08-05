@@ -226,6 +226,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .subscribe(onNext: { _ in
                 User.removeCurrentUser()
                 AuthManager.removeToken()
+                UserDefaults.standard.topSquad = nil
                 Application.shared.presentInitialScreent()
             })
             .disposed(by: disposeBag)
@@ -291,8 +292,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
 
     @objc
     private func titleBtnDidTapped() {
-        guard let squadId = reactor?.currentSquadId else { return }
-        let preReactor = SquadPreReactor(squadId: squadId)
+        guard let squadDetail = reactor?.currentState.currentSquadDetail else { return }
+        let preReactor = SquadPreReactor(squadDetail: squadDetail)
         let preViewController = SquadPreViewController(reactor: preReactor)
         let nav = BaseNavigationController(rootViewController: preViewController)
         nav.modalPresentationStyle = .fullScreen

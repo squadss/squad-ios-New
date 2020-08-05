@@ -277,6 +277,8 @@ class SquadReactor: Reactor {
             var channelsList = Array<SquadChannel>()
             for i in 0..<groupList.count {
                 let groupInfo = groupList[i]
+                // 只处理当前squad下的群组信息
+                guard groupIds.contains(groupInfo.groupID) else { continue }
                 let conversation = conversationList.first(where: { $0.groupID == groupInfo.groupID })
                 if let lastMessage = conversation?.lastMessage, lastMessage.msgID != nil {
                     // groupInfo.groupID 这里没有解包是没关系的, 只有当会话类型为group时, conversation才会有值

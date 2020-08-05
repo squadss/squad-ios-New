@@ -17,10 +17,11 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     var itemSelected: Observable<Int> {
         return tableView.rx.itemSelected.map{ [unowned self] in
             return self.dataSource[$0].id
-        }
-//        .do(onNext: { [unowned self] _ in
-//            self.dismiss(animated: true)
-//        })
+        }.do(onNext: { [weak self] _ in
+            DispatchQueue.main.async { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        })
     }
     
     private var tableView = UITableView()
@@ -158,6 +159,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             User.removeCurrentUser()
                             AuthManager.removeToken()
+                            UserDefaults.standard.topSquad = nil
                             Application.shared.presentInitialScreent()
                         }
                     }))
