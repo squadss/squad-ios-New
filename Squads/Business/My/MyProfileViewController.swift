@@ -16,15 +16,16 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
 
     var itemSelected: Observable<Int> {
         return tableView.rx.itemSelected.map{ [unowned self] in
-            return self.dataSource[$0].id
-        }
-//        .do(onNext: { [unowned self] _ in
-//            self.dismiss(animated: true)
-//        })
+            return self.dataSource[$0].squadDetail.id
+        }.do(onNext: { [weak self] _ in
+            DispatchQueue.main.async { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        })
     }
     
     private var tableView = UITableView()
-    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadDetail>>!
+    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, MyProfileReactor.Model>>!
     
     var headerView = MyProfileHeaderView()
     var footerView = MyProfileFooterView()
@@ -86,11 +87,11 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     }
     
     override func bind(reactor: MyProfileReactor) {
-        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadDetail>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
+        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, MyProfileReactor.Model>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
             let cell = tableView.dequeue(Reusable.mySquadsViewCell)!
-            cell.pritureView.kf.setImage(with: model.logoPath.asURL)
-            cell.titleLab.text = model.squadName
-            cell.unreadNum = 0
+            cell.pritureView.kf.setImage(with: model.squadDetail.logoPath.asURL)
+            cell.titleLab.text = model.squadDetail.squadName
+            cell.unreadNum = model.unreadCount
 //            cell.titleLab.text = model.title
 //            cell.contentLab.text = model.content
 //            cell.longObservable
@@ -158,6 +159,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             User.removeCurrentUser()
                             AuthManager.removeToken()
+                            UserDefaults.standard.topSquad = nil
                             Application.shared.presentInitialScreent()
                         }
                     }))

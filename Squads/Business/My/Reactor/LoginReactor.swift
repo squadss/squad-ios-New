@@ -22,19 +22,19 @@ class LoginReactor: Reactor {
     struct Model: Codable {
         let loginAccountVo: User
         let token: String
-        let timVo: TimVo
+        let timAccountVo: TimVo
         var topSquad: Int?
         
         enum CodingKeys: String, CodingKey {
             case loginAccountVo
             case token
-            case timVo
+            case timAccountVo
         }
         
         init(from decoder: Decoder) throws {
             loginAccountVo = try decoder.decode("loginAccountVo")
             token = try decoder.decode("token")
-            timVo = try decoder.decode("timVo")
+            timAccountVo = try decoder.decode("timAccountVo")
         }
         
         func addTopSquad(squadId: Int?) -> Model {
@@ -92,9 +92,9 @@ class LoginReactor: Reactor {
                     switch result {
                     case .success(let model):
                         let param = TIMLoginParam()
-                        param.appidAt3rd = "\(model.timVo.sdkappid)"
-                        param.identifier = model.timVo.userId
-                        param.userSig = model.timVo.userSig
+                        param.appidAt3rd = "\(model.timAccountVo.sdkappid)"
+                        param.identifier = model.timAccountVo.userId
+                        param.userSig = model.timAccountVo.userSig
                         return self.loaginTIM(param: param).map { (subResult)  in
                             switch subResult {
                             case .success:

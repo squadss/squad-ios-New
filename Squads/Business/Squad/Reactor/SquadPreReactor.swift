@@ -19,34 +19,67 @@ class SquadPreReactor: Reactor {
     }
     
     enum Action {
-        
+        case refreshSquadDetail
     }
     
     enum Mutation {
-        
+        case setSquadDetail(SquadDetail)
+        case setToast(String)
+        case setLoading(Bool)
     }
     
     struct State {
-        let repos: Array<Model>
+        let repos: Array<Model> = [
+            Model(title: "MEMBERS"),Model(title: "NOTIFICATIONS"),
+            Model(title: "CUSTOMIZE THEME"),
+            Model(title: "INVITH NEW"),
+            Model(title: "LEAVE SQUAD", isHight: true)
+        ]
+        var squadDetail: SquadDetail?
+        var toast: String?
+        var isLoading: Bool?
     }
     
-    var initialState: State
     let squadId: Int
+    var initialState: State
+    var provider = OnlineProvider<SquadAPI>()
+    
     init(squadId: Int) {
         self.squadId = squadId
-        initialState = State(repos: [Model(title: "MEMBERS"),
-                                     Model(title: "NOTIFICATIONS"),
-                                     Model(title: "CUSTOMIZE THEME"),
-                                     Model(title: "INVITH NEW"),
-                                     Model(title: "LEAVE SQUAD", isHight: true)])
+        initialState = State()
+    }
+    
+    init(squadDetail: SquadDetail) {
+        squadId = squadDetail.id
+        initialState = State(squadDetail: squadDetail)
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
-        
+        switch action {
+        case .refreshSquadDetail:
+            return provider.request(target: .querySquad(id: squadId, setTop: false), model: SquadDetail.self, atKeyPath: .data).asObservable().map { result in
+                switch result {
+                case .success(let detail): return .setSquadDetail(detail)
+                case .failure(let error): return .setToast(error.message)
+                }
+            }.startWith(.setLoading(true))
+        }
     }
     
     func reduce(state: State, mutation: Mutation) -> State {
-        
+        var state = state
+        switch mutation {
+        case .setLoading(let s):
+            state.toast = nil
+            state.isLoading = s
+        case .setToast(let s):
+            state.isLoading = false
+            state.toast = s
+        case .setSquadDetail(let detail):
+            state.isLoading = false
+            state.squadDetail = detail
+        }
+        return state
     }
 }
 

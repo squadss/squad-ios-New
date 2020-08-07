@@ -14,8 +14,9 @@ struct SquadDetail: Codable {
     let logoPath: String
     let createRemark: String
     let squadCode: String
+    let gmtCreate: String
     
-    // 本地添加数据, 不是服务器返回的数据, 后期可以将该数据放到接口中返回
+    // 有得接口不返回此条数据
     var channels: Array<CreateChannel>?
     
     enum CodingKeys: String, CodingKey {
@@ -24,6 +25,8 @@ struct SquadDetail: Codable {
         case logoPath
         case createRemark
         case squadCode
+        case gmtCreate
+        case channels
     }
     
     init(from decoder: Decoder) throws {
@@ -32,6 +35,8 @@ struct SquadDetail: Codable {
         logoPath = try decoder.decode("logoPath")
         createRemark = try decoder.decode("createRemark")
         squadCode = try decoder.decode("squadCode")
+        gmtCreate = try decoder.decode("gmtCreate")
+        channels = try decoder.decodeIfPresent("channels")
     }
     
     func encode(to encoder: Encoder) throws {
@@ -40,6 +45,7 @@ struct SquadDetail: Codable {
         try encoder.encode(logoPath, for: "logoPath")
         try encoder.encode(createRemark, for: "createRemark")
         try encoder.encode(squadCode, for: "squadCode")
+        try encoder.encode(gmtCreate, for: "gmtCreate")
     }
     
     func addChannels(_ list: Array<CreateChannel>) -> SquadDetail {

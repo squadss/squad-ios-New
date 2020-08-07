@@ -41,10 +41,6 @@ struct CreateChannel: Codable {
     let ownerAccountId: Int
 }
 
-struct SquadMember: Codable {
-    let id: Int
-    let accountId: Int
-}
 
 struct Sender: SenderType {
     let senderId: String
@@ -533,14 +529,12 @@ extension ChattingViewController: MessagesDisplayDelegate {
     }
     
     func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
-        avatarView.initials = "?"
-        
-        guard let sender = message as? Sender else {
+        if let sender = message.sender as? Sender  {
+            let placeholder = UIImage(named: "Avatar Placeholder")?.drawColor(.black)
+            avatarView.kf.setImage(with: sender.avatar?.asURL, placeholder: placeholder, options: nil, progressBlock: nil, completionHandler: nil)
+        } else {
             avatarView.initials = "?"
-            return
         }
-        let placeholder = UIImage(named: "Avatar Placeholder")?.drawColor(.black)
-        avatarView.kf.setImage(with: sender.avatar?.asURL, placeholder: placeholder, options: nil, progressBlock: nil, completionHandler: nil)
     }
 }
 
@@ -715,12 +709,12 @@ extension ChattingViewController {
         
         // 拿到groupName, avatarData后准备发起请求去创建该channel
         let createChannel: Observable<Result<CreateChannel, GeneralError>> = provider.request(target: .createChannel(squadId: squadId, name: groupName, avatar: avatarData, ownerAccountId: accountId), model: CreateChannel.self, atKeyPath: .data).asObservable()
-        let members: Observable<Result<Array<String>, GeneralError>> = provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<SquadMember>.self, atKeyPath: .data).asObservable()
+        let members: Observable<Result<Array<String>, GeneralError>> = provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<User>.self, atKeyPath: .data).asObservable()
             .map{
                 switch $0 {
                 case .success(let list):
                     // 获取squad中的所有成员, 过滤掉自己
-                    return .success(list.filter{ User.currentUser()?.id != $0.accountId }.map{ String($0.accountId) })
+                    return .success(list.filter{ User.currentUser()?.id != $0.id }.map{ String($0.id) })
                 case .failure(let error):
                     return .failure(error)
                 }

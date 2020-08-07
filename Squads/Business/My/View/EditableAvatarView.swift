@@ -17,7 +17,7 @@ class EditableAvatarView: BaseView {
         return canEditSubject.asObservable()
     }
     
-    var placeholderImage = UIImage(named: "Avatar Placeholder")
+    private var placeholderImage = UIImage(named: "Avatar Placeholder")
     var placeholderColor: UIColor = .white {
         didSet { placeholderImage = placeholderImage?.drawColor(placeholderColor) }
     }
@@ -53,6 +53,7 @@ class EditableAvatarView: BaseView {
         canEditView = UIButton()
         canEditView?.setImage(UIImage(named: "Edit Group"), for: .normal)
         canEditView?.addTarget(self, action: #selector(canEditBtnDidTapped), for: .touchUpInside)
+        imageBtn.setImage(placeholderImage, for: .normal)
         addSubview(canEditView!)
     }
     

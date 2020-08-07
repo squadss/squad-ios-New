@@ -18,13 +18,13 @@ class SquadMembersReactor: Reactor {
     }
     
     enum Mutation {
-        case setRepos(Array<SquadMember>)
+        case setRepos(Array<User>)
         case setToast(String)
         case setLoading(Bool)
     }
     
     struct State {
-        var repos = Array<SquadMember>()
+        var repos = Array<User>()
         var isLoading: Bool?
         var toast: String?
     }
@@ -42,7 +42,7 @@ class SquadMembersReactor: Reactor {
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .refreshList:
-            return provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<SquadMember>.self, atKeyPath: .data).asObservable().map { result in
+            return provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<User>.self, atKeyPath: .data).asObservable().map { result in
                 switch result {
                 case .success(let list): return .setRepos(list)
                 case .failure(let error): return .setToast(error.message)

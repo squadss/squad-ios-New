@@ -107,6 +107,11 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .bind(to: reactor!.action)
             .disposed(by: disposeBag)
         
+        onConversationChangedRelay
+            .map{ MyProfileReactor.Action.refreshChannels($0) }
+            .bind(to: profileReactor.action)
+            .disposed(by: disposeBag)
+        
         var setting = SideMenuSettings()
         setting.statusBarEndAlpha = 0
         setting.menuWidth = view.bounds.width * 0.8
@@ -226,6 +231,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .subscribe(onNext: { _ in
                 User.removeCurrentUser()
                 AuthManager.removeToken()
+                UserDefaults.standard.topSquad = nil
                 Application.shared.presentInitialScreent()
             })
             .disposed(by: disposeBag)
@@ -291,8 +297,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
 
     @objc
     private func titleBtnDidTapped() {
-        guard let squadId = reactor?.currentSquadId else { return }
-        let preReactor = SquadPreReactor(squadId: squadId)
+        guard let squadDetail = reactor?.currentState.currentSquadDetail else { return }
+        let preReactor = SquadPreReactor(squadDetail: squadDetail)
         let preViewController = SquadPreViewController(reactor: preReactor)
         let nav = BaseNavigationController(rootViewController: preViewController)
         nav.modalPresentationStyle = .fullScreen

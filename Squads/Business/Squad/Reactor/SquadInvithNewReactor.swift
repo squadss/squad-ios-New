@@ -27,11 +27,13 @@ class SquadInvithNewReactor: Reactor {
     enum Action {
         case deleteSelectedMember(Member)
         case addSelectedMember(Member)
-        case request
+        case makeInvitation
         // 获取通讯录中联系人手机号
         case visibleContacts(phoneList: Array<String>, isDenied: Bool)
         // 邀请好友, 生成邀请链接
         case createLink
+        // 查询全部的好友
+        case getAllFriends
     }
     
     enum Mutation {
@@ -78,29 +80,35 @@ class SquadInvithNewReactor: Reactor {
             return Observable.just(.setDeleteMember(member))
         case .addSelectedMember(let member):
             return Observable.just(.setAddMember(member))
-        case .request:
-            let userIds = currentState.members?.map{ $0.user.username } ?? []
-            return provider.request(target: .inviteFriends(squadId: squadId, userIds: userIds), model: GeneralModel.Plain.self).asObservable().map { result in
+        case .getAllFriends:
+            return provider.request(target: .queryAllFriends, model: Array<User>.self, atKeyPath: .data).asObservable().map{ result in
                 switch result {
-                case .success:
-                    return .setInviteSuccess
-                case .failure(let error):
-                    return .setToast(error.message)
+                case .success(let list): return .setMembers(members: list.map{ Member(user: $0, isAdded: false, isColsable: true) }, isDenied: nil)
+                case .failure(let error): return .setToast(error.message)
                 }
             }
+        case .makeInvitation:
+            return Observable.from(currentState.members?.map{ $0.user.id } ?? [])
+                .flatMap { userId -> Observable<Result<GeneralModel.Plain, GeneralError>> in
+                    return self.provider.request(target: .inviteFriend(squadId: self.squadId, userId: userId), model: GeneralModel.Plain.self).asObservable()
+                }
+                .reduce(false) { (total, result) -> Bool in
+                    return total || result.error == nil
+                }
+                .map { state in
+                    return state ? .setInviteSuccess : .setToast("Invitation failed")
+                }
         case let .visibleContacts(phoneList, isDenied):
             return provider.request(target: .isAlreadyRegistered(phoneList: phoneList),
                                     model: Array<User>.self,
                                     atKeyPath: .data).asObservable().map { result in
                 switch result {
-                case .success(let list):
-                    return .setMembers(members: list.map{ Member(user: $0, isAdded: false, isColsable: true) }, isDenied: isDenied)
-                case .failure(let error):
-                    return .setToast(error.message)
+                case .success(let list): return .setMembers(members: list.map{ Member(user: $0, isAdded: false, isColsable: true) }, isDenied: isDenied)
+                case .failure(let error): return .setToast(error.message)
                 }
             }
         case .createLink:
-            return provider.request(target: .createLinkBySquad(squadId: squadId, nationCode: "+86", phoneNumber: 17771865607), model: String.self, atKeyPath: .data).asObservable().map { result in
+            return provider.request(target: .createLinkBySquad(squadId: squadId, nationCode: "", phoneNumber: ""), model: String.self, atKeyPath: .data).asObservable().map { result in
                 switch result {
                 case .success(let linkString):
                     return .setLinkText(linkString)
