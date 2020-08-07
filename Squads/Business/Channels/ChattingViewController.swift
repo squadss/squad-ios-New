@@ -41,10 +41,6 @@ struct CreateChannel: Codable {
     let ownerAccountId: Int
 }
 
-struct SquadMember: Codable {
-    let id: Int
-    let accountId: Int
-}
 
 struct Sender: SenderType {
     let senderId: String
@@ -713,12 +709,12 @@ extension ChattingViewController {
         
         // 拿到groupName, avatarData后准备发起请求去创建该channel
         let createChannel: Observable<Result<CreateChannel, GeneralError>> = provider.request(target: .createChannel(squadId: squadId, name: groupName, avatar: avatarData, ownerAccountId: accountId), model: CreateChannel.self, atKeyPath: .data).asObservable()
-        let members: Observable<Result<Array<String>, GeneralError>> = provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<SquadMember>.self, atKeyPath: .data).asObservable()
+        let members: Observable<Result<Array<String>, GeneralError>> = provider.request(target: .getMembersFromSquad(squadId: squadId), model: Array<User>.self, atKeyPath: .data).asObservable()
             .map{
                 switch $0 {
                 case .success(let list):
                     // 获取squad中的所有成员, 过滤掉自己
-                    return .success(list.filter{ User.currentUser()?.id != $0.accountId }.map{ String($0.accountId) })
+                    return .success(list.filter{ User.currentUser()?.id != $0.id }.map{ String($0.id) })
                 case .failure(let error):
                     return .failure(error)
                 }

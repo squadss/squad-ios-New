@@ -63,9 +63,17 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
         inputBar.textField.becomeFirstResponder()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShowNotification), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHideNotification), name: UIResponder.keyboardDidHideNotification, object: nil)
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         imageManager.stopCachingImagesForAllAssets()
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardDidHideNotification, object: nil)
     }
     
     override func setupView() {
@@ -94,12 +102,14 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
     }
     
     private func setupInputBar() {
-        inputBar.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 54)
+        let insetsBottom = UIApplication.shared.keyWindow?.layoutInsets.bottom ?? 0
+        inputBar.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 54 + insetsBottom)
+        inputBar.insert.bottom = insetsBottom
         inputBar.backgroundColor = UIColor(hexString: "#F1F1F1")
         inputBar.textField.text = "Add a name..."
         inputBar.textField.font = UIFont.systemFont(ofSize: 16)
         inputBar.textField.theme.textColor = UIColor.textGray
-        inputBar.textField.returnKeyType = .search
+        inputBar.textField.returnKeyType = .done
         if #available(iOS 13.0, *) {
             inputBar.textField.attributedPlaceholder = NSAttributedString(string: "Search", attributes: [
                 .foregroundColor: UIColor(red: 0.571, green: 0.571, blue: 0.571, alpha: 1),
@@ -240,6 +250,25 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
     @objc
     private func rightBtnBtnDidTapped() {
         dismiss(animated: true)
+    }
+    
+    @objc
+    private func keyboardWillShowNotification(_ notification: Notification) {
+        guard inputBar.transform == .identity else { return }
+        let insetsBottom = UIApplication.shared.keyWindow?.layoutInsets.bottom ?? 0
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double
+        UIView.animate(withDuration: duration ?? 0.25) {
+            self.inputBar.transform = CGAffineTransform(translationX: 0, y: insetsBottom)
+        }
+    }
+    
+    @objc
+    private func keyboardWillHideNotification(_ notification: Notification) {
+        guard inputBar.transform != .identity else { return }
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double
+        UIView.animate(withDuration: duration ?? 0.25) {
+            self.inputBar.transform = .identity
+        }
     }
     
     private func requestAuthorization() -> Observable<(Int, PHAuthorizationStatus)> {

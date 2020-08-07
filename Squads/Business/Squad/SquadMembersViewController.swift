@@ -53,12 +53,12 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
 
     override func bind(reactor: SquadMembersReactor) {
         
-        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadMember>>(configureCell: {data,tableView, indexPath, model in
+        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, User>>(configureCell: {data,tableView, indexPath, model in
             
             let cell = tableView.dequeue(Reusable.applyListViewCell)!
-            cell.avatarView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"), for: .normal)
+            cell.avatarView.kf.setImage(with: model.avatar.asURL, for: .normal)
             cell.selectionStyle = .none
-            cell.nicknameLab.text = "Squad Name"
+            cell.nicknameLab.text = model.nickname
             cell.contentLab.text = "Alex, Hannah, Mari and 2 others"
             cell.actionBtn.setTitle("Add", for: .normal)
             return cell
@@ -67,7 +67,7 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
         })
         
         reactor.state
-            .map{ [SectionModel<String, SquadMember>(model: "", items: $0.repos)] }
+            .map{ [SectionModel<String, User>(model: "", items: $0.repos)] }
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         

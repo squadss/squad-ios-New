@@ -107,6 +107,11 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .bind(to: reactor!.action)
             .disposed(by: disposeBag)
         
+        onConversationChangedRelay
+            .map{ MyProfileReactor.Action.refreshChannels($0) }
+            .bind(to: profileReactor.action)
+            .disposed(by: disposeBag)
+        
         var setting = SideMenuSettings()
         setting.statusBarEndAlpha = 0
         setting.menuWidth = view.bounds.width * 0.8

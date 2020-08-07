@@ -38,12 +38,13 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
         titleLab.textAlignment = .center
         view.addSubview(titleLab)
         
-        confirmBtn.setTitle("Create New Squad", for: .normal)
+        confirmBtn.setTitle("Join Squad", for: .normal)
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         confirmBtn.setBackgroundImage(UIImage(color: UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)), for: .normal)
         view.addSubview(confirmBtn)
         
+        inputField.text = reactor?.inviteCode
         inputField.placeholder = "Input Code"
         inputField.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
         inputField.borderStyle = .none
@@ -108,12 +109,12 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
             .bind(to: rx.loading)
             .disposed(by: disposeBag)
         
-        reactor.state
-            .compactMap{ $0.squadDetail }
-            .subscribe(onNext: { [unowned self] in
-                self.showToast(message: $0.logoPath)
-            })
-            .disposed(by: disposeBag)
+//        reactor.state
+//            .compactMap{ $0.squadDetail }
+//            .subscribe(onNext: { [unowned self] in
+//                self.showToast(message: $0.logoPath)
+//            })
+//            .disposed(by: disposeBag)
         
         reactor.state
             .compactMap{ $0.joinSuccess }

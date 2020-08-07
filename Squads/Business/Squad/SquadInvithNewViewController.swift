@@ -157,8 +157,8 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         let collectionDataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, SquadInvithNewReactor.Member>>(configureCell: { [unowned self] data, collectionView, indexPath, model in
             let cell = collectionView.dequeue(Reusable.squadInvithNewMemberCell, for: indexPath)
             cell.isClosable = model.isColsable
-            cell.avatarBtn.kf.setImage(with: nil, for: .normal, placeholder: UIImage(named: "Member Placeholder"), options: nil, progressBlock: nil, completionHandler: nil)
-            cell.nicknameLab.text = "哈哈哈"
+            cell.avatarBtn.kf.setImage(with: model.user.avatar.asURL, for: .normal, placeholder: UIImage(named: "Member Placeholder"), options: nil, progressBlock: nil, completionHandler: nil)
+            cell.nicknameLab.text = model.user.nickname
             
             cell.avatarBtn.rx.tap
                 .subscribe(onNext: { [unowned self] in
@@ -228,9 +228,9 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         
         tableDataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadInvithNewReactor.Member>>(configureCell: { data, tableView, indexPath, model in
             let cell = tableView.dequeue(Reusable.squadInvithNewContactCell)!
-            cell.avatarView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"), for: .normal)
+            cell.avatarView.kf.setImage(with: model.user.avatar.asURL, for: .normal)
             cell.selectionStyle = .none
-            cell.nicknameLab.text = "Squad Name"
+            cell.nicknameLab.text = model.user.nickname
             cell.contentLab.text = "Alex, Hannah, Mari and 2 others"
             cell.actionBtn.setTitle("Add", for: .normal)
             cell.actionBtn.setTitle("Remove", for: .selected)
@@ -267,7 +267,7 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         
         rightBarButtonItem.rx.tap
             .filter{ reactor.currentState.members?.isEmpty == false }
-            .map{ Reactor.Action.request }
+            .map{ Reactor.Action.makeInvitation }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -298,14 +298,19 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             })
             .disposed(by: disposeBag)
         
-        requestVisibleContacts()
-            .takeUntil(rx.viewDidLoad)
-            .subscribeOn(MainScheduler.instance)
-            .map { [unowned self] status in
-                var list = Array<String>()
-                if status { list = self.getContactsPhone() }
-                return Reactor.Action.visibleContacts(phoneList: list, isDenied: !status)
-            }
+//        requestVisibleContacts()
+//            .takeUntil(rx.viewDidLoad)
+//            .subscribeOn(MainScheduler.instance)
+//            .map { [unowned self] status in
+//                var list = Array<String>()
+//                if status { list = self.getContactsPhone() }
+//                return Reactor.Action.visibleContacts(phoneList: list, isDenied: !status)
+//            }
+//            .bind(to: reactor.action)
+//            .disposed(by: disposeBag)
+        
+        rx.viewDidLoad
+            .map{ Reactor.Action.getAllFriends }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }

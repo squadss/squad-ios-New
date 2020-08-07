@@ -19,6 +19,6 @@ class CreateFlickInputView: BaseView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        textField.frame = CGRect(x: insert.left, y: 0, width: bounds.width - insert.left - insert.right, height: bounds.height)
+        textField.frame = CGRect(x: insert.left, y: insert.top, width: bounds.width - insert.left - insert.right, height: bounds.height - insert.top - insert.bottom)
     }
 }

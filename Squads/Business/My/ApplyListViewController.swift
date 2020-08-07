@@ -56,28 +56,59 @@ class ApplyListViewController: ReactorViewController<ApplyListReactor>, UITableV
 
     override func bind(reactor: ApplyListReactor) {
         
-        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: {data,tableView, indexPath, model in
+        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, Invitation>>(configureCell: {data,tableView, indexPath, model in
             
             let cell = tableView.dequeue(Reusable.applyListViewCell)!
-            cell.avatarView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"), for: .normal)
+            cell.avatarView.kf.setImage(with: model.inviteSquadLogoPath?.asURL, for: .normal)
             cell.selectionStyle = .none
-            cell.nicknameLab.text = "Squad Name"
-            cell.contentLab.text = "Alex, Hannah, Mari and 2 others"
-            cell.actionBtn.setTitle("Add", for: .normal)
+            cell.nicknameLab.text = model.inviterNickname
+            cell.contentLab.text = model.inviteeNickname
+            
+            switch model.inviteStatus {
+            case .accepted:     //已接受
+                cell.actionBtn.setTitle("Accept", for: .normal)
+                cell.actionBtn.isEnabled = false
+            case .doing:    //邀请中
+                cell.actionBtn.setTitle("Add", for: .normal)
+                cell.actionBtn.isEnabled = true
+            case .failure:  //已拒绝
+                cell.actionBtn.isEnabled = false
+                cell.actionBtn.setTitle("Refused", for: .disabled)
+            }
+            
+            cell.actionBtn.rx.tap
+                .map{ Reactor.Action.joinSquad(model.inviteSquadId) }
+                .bind(to: reactor.action)
+                .disposed(by: cell.disposeBag)
             return cell
         }, canEditRowAtIndexPath: { _,_ in
             return true
         })
         
         reactor.state
-            .map{ [SectionModel<String, String>(model: "", items: $0.repos)] }
+            .map{ [SectionModel<String, Invitation>(model: "", items: $0.repos)] }
             .bind(to: tableView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.isLoading }
+            .bind(to: rx.loading)
             .disposed(by: disposeBag)
         
         tableView.rx.itemDeleted
             .subscribe(onNext: {
                 print($0)
             })
+            .disposed(by: disposeBag)
+        
+        rx.viewDidLoad
+            .map{ Reactor.Action.requestAllRecord }
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
 //        tableView.rx.actionButtonTapped

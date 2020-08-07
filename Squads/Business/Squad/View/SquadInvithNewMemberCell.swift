@@ -43,6 +43,8 @@ class SquadInvithNewMemberCell: BaseCollectionViewCell {
         nicknameLab.font = UIFont.systemFont(ofSize: 10)
         nicknameLab.textColor = .black
         
+        avatarBtn.imageView?.layer.cornerRadius = 25
+        avatarBtn.imageView?.layer.masksToBounds = true
         addSubviews(nicknameLab, avatarBtn)
     }
     

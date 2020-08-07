@@ -34,7 +34,6 @@
 		171F957324B35B0000BD229F /* ActivityCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F957224B35B0000BD229F /* ActivityCalendarView.swift */; };
 		1724412924B2067200666135 /* SquadActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412824B2067200666135 /* SquadActivitiesViewController.swift */; };
 		1724412B24B2067F00666135 /* SquadActivitiesReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */; };
-		1727630C24D8F2D4000869DF /* ImSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */; };
 		1727630D24D8F2D4000869DF /* ImSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */; };
 		172A4B8B24B6A06400A69803 /* VerificationCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */; };
@@ -130,6 +129,8 @@
 		17BF5CB824AEC92F00D5D8D8 /* UserDefaultHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CB724AEC92F00D5D8D8 /* UserDefaultHelper.swift */; };
 		17BF5CBB24AECA0800D5D8D8 /* UIColor+Squads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CBA24AECA0800D5D8D8 /* UIColor+Squads.swift */; };
 		17BF5CBD24AECA1F00D5D8D8 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CBC24AECA1F00D5D8D8 /* ThemeManager.swift */; };
+		17C1ABB024DCFFF400A5D550 /* Invitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C1ABAF24DCFFF400A5D550 /* Invitation.swift */; };
+		17C1ABB124DD160700A5D550 /* ImSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */; };
 		17C561AB24C32BD40016500A /* ApplyListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C561AA24C32BD40016500A /* ApplyListViewController.swift */; };
 		17C561AD24C32BE40016500A /* ApplyListReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C561AC24C32BE40016500A /* ApplyListReactor.swift */; };
 		17C561AF24C32FA00016500A /* ApplyListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C561AE24C32FA00016500A /* ApplyListViewCell.swift */; };
@@ -334,6 +335,7 @@
 		17BF5CB724AEC92F00D5D8D8 /* UserDefaultHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultHelper.swift; sourceTree = "<group>"; };
 		17BF5CBA24AECA0800D5D8D8 /* UIColor+Squads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Squads.swift"; sourceTree = "<group>"; };
 		17BF5CBC24AECA1F00D5D8D8 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		17C1ABAF24DCFFF400A5D550 /* Invitation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Invitation.swift; sourceTree = "<group>"; };
 		17C561AA24C32BD40016500A /* ApplyListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyListViewController.swift; sourceTree = "<group>"; };
 		17C561AC24C32BE40016500A /* ApplyListReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyListReactor.swift; sourceTree = "<group>"; };
 		17C561AE24C32FA00016500A /* ApplyListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyListViewCell.swift; sourceTree = "<group>"; };
@@ -406,10 +408,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17C1ABB124DD160700A5D550 /* ImSDK.framework in Frameworks */,
 				17B5ED8724CEF751009FA969 /* SystemConfiguration.framework in Frameworks */,
 				17B5ED8524CEF74A009FA969 /* libsqlite3.tbd in Frameworks */,
 				17B5ED8324CEF736009FA969 /* libz.tbd in Frameworks */,
-				1727630C24D8F2D4000869DF /* ImSDK.framework in Frameworks */,
 				17B5ED8124CEF72E009FA969 /* CoreTelephony.framework in Frameworks */,
 				59206625CB7B469036D7008E /* Pods_Squads.framework in Frameworks */,
 				17B5ED7F24CED77E009FA969 /* UMCommon.framework in Frameworks */,
@@ -552,6 +554,7 @@
 				17B89B8524B0486300E6AE78 /* User.swift */,
 				1780D89824CFFB360064DD28 /* Gender.swift */,
 				1780D89A24CFFB5D0064DD28 /* UserTDO.swift */,
+				17C1ABAF24DCFFF400A5D550 /* Invitation.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -1091,6 +1094,7 @@
 				17F355E724AEDB9000AE00EC /* Rx+UIAlertController.swift in Sources */,
 				17F39BE724AECFB800EC90ED /* UIImage+Extension.swift in Sources */,
 				172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */,
+				17C1ABB024DCFFF400A5D550 /* Invitation.swift in Sources */,
 				178FCB8424B49E7A0054212F /* FriendProfileViewController.swift in Sources */,
 				17F1721C24B96A6B0081E4C0 /* ChattingCardView.swift in Sources */,
 				171F957324B35B0000BD229F /* ActivityCalendarView.swift in Sources */,
@@ -1360,6 +1364,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -1465,6 +1470,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
