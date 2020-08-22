@@ -22,9 +22,16 @@ extension UserDefaults {
 extension UserDefaults {
     
     /// 是否存在置顶的squad
-    var topSquad: String? {
+    var topSquad: Int? {
         set { UserDefaults.Defaults.topSquadKey.store(value: newValue) }
-        get { return UserDefaults.Defaults.topSquadKey.storedString }
+        get {
+            // 默认值为0, 需要将这个值过滤掉
+            let value = UserDefaults.Defaults.topSquadKey.storedInt
+            if value == 0 {
+                return nil
+            }
+            return value
+        }
     }
     
     /// 用户的token

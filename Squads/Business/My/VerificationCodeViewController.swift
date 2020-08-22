@@ -49,7 +49,7 @@ class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
         confirmBtn.backgroundColor = UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        confirmBtn.setTitle("Get Started!", for: .normal)
+        confirmBtn.setTitle("Next", for: .normal)
         
         configInputField(codeField, placeholder: "Enter Code")
         
@@ -128,7 +128,7 @@ class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
         timer
             .debug()
             .filter{ $0 == totalSeconds }
-            .flatMap { [unowned self] _ -> Observable<Result<String, GeneralError>> in
+            .flatMap { [unowned self] _ -> Observable<Result<GeneralModel.Plain, GeneralError>> in
                 guard
                     let nationCode = UserTDO.instance.nationCode,
                     let phoneNumer = UserTDO.instance.phoneNumber,
@@ -137,14 +137,13 @@ class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
                 }
                 return self.provider.request(target: .getverificationcode(nationCode: nationCode,
                                                                           phoneNumber: phoneNumer,
-                                                                          purePhoneNumber: purePhoneNumber,
-                                                                          code: "888888"),
-                                             model: String.self, atKeyPath: .data).asObservable()
+                                                                          purePhoneNumber: purePhoneNumber),
+                                             model: GeneralModel.Plain.self).asObservable()
             }
             .subscribe(onNext: { [unowned self] result in
                 switch result {
-                case .success(let message):
-                    self.showToast(message: message)
+                case .success(let plain):
+                    self.showToast(message: plain.message)
                 case .failure(let error):
                     self.showToast(message: error.message)
                 }

@@ -14,33 +14,25 @@ import ETNavBarTransparent
 
 class MyProfileViewController: ReactorViewController<MyProfileReactor> {
 
-    var itemSelected: Observable<String> {
+    var itemSelected: Observable<Int> {
         return tableView.rx.itemSelected.map{ [unowned self] in
-            return self.dataSource[$0]
-        }
-        .do(onNext: { [unowned self] _ in
-            self.dismiss(animated: true)
+            return self.dataSource[$0].squadDetail.id
+        }.do(onNext: { [weak self] _ in
+            DispatchQueue.main.async { [weak self] in
+                self?.dismiss(animated: true)
+            }
         })
     }
     
     private var tableView = UITableView()
-    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, String>>!
+    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, MyProfileReactor.Model>>!
     
     var headerView = MyProfileHeaderView()
     var footerView = MyProfileFooterView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        navigationController?.navigationBar.tintColor = UIColor.red
         view.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
-        
-        
-//        let btn = UIButton()
-//        btn.frame = CGRect(x: 10, y: 100, width: 100, height: 44)
-//        btn.backgroundColor = .white
-//        btn.addTarget(self, action: #selector(didTapped), for: .touchUpInside)
-//        view.addSubview(btn)
     }
     
     override func initData() {
@@ -95,11 +87,11 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     }
     
     override func bind(reactor: MyProfileReactor) {
-        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
+        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, MyProfileReactor.Model>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
             let cell = tableView.dequeue(Reusable.mySquadsViewCell)!
-            cell.pritureView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"))
-            cell.titleLab.text = "Camp life"
-            cell.unreadNum = "12"
+            cell.pritureView.kf.setImage(with: model.squadDetail.logoPath.asURL)
+            cell.titleLab.text = model.squadDetail.squadName
+            cell.unreadNum = model.unreadCount
 //            cell.titleLab.text = model.title
 //            cell.contentLab.text = model.content
 //            cell.longObservable
@@ -115,6 +107,11 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
         reactor.state
             .map{ [SectionModel(model: "", items: $0.repos)] }
             .bind(to: tableView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+        
+        rx.viewWillAppear
+            .map{ Reactor.Action.requestAllSquads }
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
     
@@ -142,7 +139,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
                 switch flag {
                 case "profile":
                     //FIXME: - 暂时为空
-                    let preReactor = SquadPreReactor(squadId: "")
+                    let preReactor = SquadPreReactor(squadId: 0)
                     let preViewController = SquadPreViewController(reactor: preReactor)
                     let nav = BaseNavigationController(rootViewController: preViewController)
                     nav.modalPresentationStyle = .fullScreen
@@ -162,6 +159,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             User.removeCurrentUser()
                             AuthManager.removeToken()
+                            UserDefaults.standard.topSquad = nil
                             Application.shared.presentInitialScreent()
                         }
                     }))

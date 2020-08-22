@@ -11,8 +11,8 @@ import RxSwift
 import RxCocoa
 import RxRelay
 import MonkeyKing
-import ImSDK
 import AVFoundation
+import JXPhotoBrowser
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -31,17 +31,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UINavigationController.self
         ])
         
-        // 配置IM
-        let config = TIMSdkConfig()
-        config.sdkAppId = App.Account.TIMAppKey
-        config.disableLogPrint = false //禁止在控制台打印
-        TIMManager.sharedInstance()?.initSdk(config)
-        
         // 配置UMeng统计
         UMConfigure.initWithAppkey(App.Account.UMengAppKey, channel: "App Store")
         
         //注册远程推送
         registerNotification(launchOptions)
+        
+        // 全局配置导航栏样式
+        UIBarButtonItem.appearance().setTitleTextAttributes([.foregroundColor: UIColor.black,
+                                                             .font: UIFont.systemFont(ofSize: 15)], for: .normal)
         
         return true
     }
@@ -59,6 +57,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    }
+    
+    // 仅仅支持iOS 13以下的方法, 这里修改完记得修改sceneDelegate中对应的方法
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        
+        restorationHandler(nil)
+        
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb else {
+            return true
+        }
+        
+        if let webpageURL = userActivity.webpageURL {
+            if webpageURL.host == App.AssociatedDomains {
+                //获取邀请码
+                if let code = pathComponentsParse(url: webpageURL, key: "invite") {
+                    let reactor = WelcomeReactor(inviteCode: code)
+                    let welcomeVC = WelcomeViewController(reactor: reactor)
+                    let nav = BaseNavigationController(rootViewController: welcomeVC)
+                    nav.modalPresentationStyle = .fullScreen
+                    JXPhotoBrowser.topMost?.present(nav, animated: true)
+                } else {
+                    let view = UIApplication.shared.keyWindow
+                    view?.showToast(message: "Your request could not be processed")
+                }
+            } else {
+                UIApplication.shared.open(webpageURL, options: .init(), completionHandler: nil)
+            }
+        }
+        
+        return true
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
@@ -167,11 +195,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             else if setting.authorizationStatus == .denied {
                 guard let appSettingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
                 
-                let alertVC = UIAlertController(title: "友情提示",
-                                                message: "建议您开启通知功能，以便及时获取相关信息",
+                let alertVC = UIAlertController(title: "Tips",
+                                                message: "It is recommended that you turn on notifications so that you can get relevant information in a timely manner",
                                                 preferredStyle: .alert)
-                alertVC.addAction(UIAlertAction(title: "忽略", style: .cancel, handler: nil))
-                alertVC.addAction(UIAlertAction(title: "去开启", style: .default, handler: { _ in
+                alertVC.addAction(UIAlertAction(title: "Ignore", style: .cancel, handler: nil))
+                alertVC.addAction(UIAlertAction(title: "Go", style: .default, handler: { _ in
                     if UIApplication.shared.canOpenURL(appSettingsURL) {
                         UIApplication.shared.open(appSettingsURL, options: [:], completionHandler: nil)
                     }
@@ -203,6 +231,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         alreadyDidReceiveNotificaction(application: application, userInfo: userInfo)
         completionHandler(.newData)
+    }
+    
+    
+    private func pathComponentsParse(url: URL, key: String) -> String? {
+        let pathComponents = url.pathComponents
+        guard pathComponents.count >= 2 else { return nil }
+        for i in 0..<pathComponents.count {
+            let pathComponent = pathComponents[i]
+            if key == pathComponent && i != pathComponents.count - 1 {
+                return pathComponents[i + 1]
+            }
+        }
+        return nil
     }
 }
 

@@ -12,7 +12,7 @@ import RxCocoa
 
 extension Reactive where Base: UIButton {
     
-    var isLoading: Binder<Bool> {
+    var activityIndicator: Binder<Bool> {
         return Binder(base) { (view, state) in
             if state {
                 view.startButtonActivityIndicatorView()
@@ -30,18 +30,20 @@ extension UIButton {
     
     func startButtonActivityIndicatorView(indicatorViewSize: CGFloat = 20) {
         
-        guard let font = titleLabel?.font, let title = currentTitle, isEnabled else { return }
+        guard isEnabled else { return }
         
         backgroundColor = backgroundColor?.withAlphaComponent(0.4)
         isEnabled = false
         
+        var rect: CGRect = .zero
+        if let font = titleLabel?.font, let title = currentTitle {
+            rect = NSString(string: title).boundingRect(with: bounds.size,
+                                                            options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                                            attributes: [.font: font],
+                                                            context: nil)
+        }
+        
         let indicatorView = UIActivityIndicatorView(style: .gray)
-        
-        let rect = NSString(string: title).boundingRect(with: bounds.size,
-                                                                options: [.usesLineFragmentOrigin, .usesFontLeading],
-                                                                attributes: [.font: font],
-                                                                context: nil)
-        
         indicatorView.frame = CGRect(x: (bounds.width - rect.width)/2 - indicatorViewSize - 5,
                                      y: (bounds.height - indicatorViewSize)/2,
                                      width: indicatorViewSize, height: indicatorViewSize)
@@ -60,4 +62,5 @@ extension UIButton {
         isEnabled = true
         backgroundColor = backgroundColor?.withAlphaComponent(0.4 * (5/2))
     }
+    
 }

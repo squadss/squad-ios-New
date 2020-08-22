@@ -49,7 +49,7 @@ class RegisterPhoneNumberViewController: BaseViewController, BrickInputFieldStyl
         confirmBtn.backgroundColor = UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        confirmBtn.setTitle("Send Me a Code", for: .normal)
+        confirmBtn.setTitle("Send Me a Verification Code", for: .normal)
         confirmBtn.addTarget(self, action: #selector(confirmBtnDidTapped), for: .touchUpInside)
         
         phoneNumberField.keyboardType = .numberPad
@@ -114,7 +114,7 @@ class RegisterPhoneNumberViewController: BaseViewController, BrickInputFieldStyl
     
     @objc
     private func confirmBtnDidTapped() {
-        UserTDO.instance.purePhoneNumber = formatPhone
+        UserTDO.instance.phoneNumber = formatPhone
         UserTDO.instance.nationCode = nationCodeBtn.title(for: .normal)
         
         let result = UserTDO.instance.checkout(properties: .phoneNumber)

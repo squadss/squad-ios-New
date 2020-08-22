@@ -23,16 +23,15 @@ struct User: Codable {
         username = try decoder.decode("username")
         gender = try decoder.decode("gender")
         nickname = try decoder.decode("nickname")
-        avatar = try decoder.decode("nickname")
+        avatar = try decoder.decode("headimgurl")
     }
     
-    //FIXME: - DEBUG
-    init(username: String = "") {
-        self.username = username
-        self.nickname = ""
-        self.gender = .unknown
-        self.avatar = ""
-        self.id = 0
+    func encode(to encoder: Encoder) throws {
+        try encoder.encode(id, for: "id")
+        try encoder.encode(username, for: "username")
+        try encoder.encode(gender, for: "gender")
+        try encoder.encode(nickname, for: "nickname")
+        try encoder.encode(avatar, for: "headimgurl")
     }
 }
 
@@ -66,17 +65,6 @@ extension User {
     /// 移除当前用户
     static func removeCurrentUser() {
         DataCenter.userInfo = nil
-    }
-}
-
-extension User: SenderType {
-    
-    var senderId: String {
-        return username
-    }
-    
-    var displayName: String {
-        return nickname
     }
 }
 

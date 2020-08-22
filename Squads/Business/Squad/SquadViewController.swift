@@ -9,9 +9,15 @@
 import UIKit
 import SideMenu
 import SnapKit
+import RxCocoa
 import RxSwift
 import RxDataSources
 import JXPhotoBrowser
+
+enum RefreshChannelsAction {
+    case update(list: Array<V2TIMConversation>)
+    case insert(list: Array<V2TIMConversation>)
+}
 
 final class SquadViewController: ReactorViewController<SquadReactor>, UITableViewDelegate {
 
@@ -19,8 +25,14 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     private var separatorLine = SeparatorLine()
     private var tableView = UITableView(frame: .zero, style: .grouped)
     private var sideMenuManager = SideMenuManager()
-    private var titleBarView = NavigationBarTitleView()
     
+    private var titleBarView: UIButton = {
+        let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 150, height: 44))
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        return btn
+    }()
+    
+    private var onConversationChangedRelay = PublishRelay<RefreshChannelsAction>()
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadPrimaryKey>>!
     override var allowedCustomBackBarItem: Bool {
         return false
@@ -29,6 +41,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     override func viewDidLoad() {
         super.viewDidLoad()
         view.theme.backgroundColor = UIColor.background
+        V2TIMManager.sharedInstance()?.setConversationListener(self)
     }
     
     override func setupView() {
@@ -94,6 +107,11 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .bind(to: reactor!.action)
             .disposed(by: disposeBag)
         
+        onConversationChangedRelay
+            .map{ MyProfileReactor.Action.refreshChannels($0) }
+            .bind(to: profileReactor.action)
+            .disposed(by: disposeBag)
+        
         var setting = SideMenuSettings()
         setting.statusBarEndAlpha = 0
         setting.menuWidth = view.bounds.width * 0.8
@@ -108,14 +126,13 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     }
     
     private func setupTitleView() {
-        titleBarView.button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-        titleBarView.button.setTitle("Squad Page", for: .normal)
-        titleBarView.button.theme.titleColor(from: UIColor.text, for: .normal)
-        titleBarView.button.addTarget(self, action: #selector(titleBtnDidTapped), for: .touchUpInside)
+        titleBarView.theme.titleColor(from: UIColor.text, for: .normal)
+        titleBarView.addTarget(self, action: #selector(titleBtnDidTapped), for: .touchUpInside)
         addToTitleView(titleBarView)
     }
     
     override func addTouchAction() {
+        guard let squadId = reactor?.currentSquadId else { return }
         tableView.rx.itemSelected
             .subscribe(onNext: { [unowned self] indexPath in
                 if indexPath.section == 1 {
@@ -124,7 +141,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                     self.navigationController?.pushViewController(activityDetailVC, animated: true)
                 } else if indexPath.section == 2 {
                     let model = self.dataSource[indexPath] as! SquadChannel
-                    let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId))
+                    let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId, groupName: model.title, squadId: squadId))
                     self.navigationController?.pushViewController(chattingVC, animated: true)
                 }
             })
@@ -210,9 +227,11 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         reactor.state
             .filter{ $0.loginStateDidExpired }
+            .trackAlertJustConfirm(title: "Authentication has expired!", default: "To log in", target: self)
             .subscribe(onNext: { _ in
                 User.removeCurrentUser()
                 AuthManager.removeToken()
+                UserDefaults.standard.topSquad = nil
                 Application.shared.presentInitialScreent()
             })
             .disposed(by: disposeBag)
@@ -224,16 +243,16 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         reactor.state
             .compactMap{ $0.isLoading }
-            .bind(to: titleBarView.button.rx.loading)
+            .bind(to: titleBarView.rx.activityIndicator)
             .disposed(by: disposeBag)
         
-        rx.viewWillAppear
-            .map{ Reactor.Action.refreshChannels }
-            .bind(to: reactor.action)
+        reactor.state
+            .compactMap{ $0.currentSquadDetail?.squadName }
+            .bind(to: titleBarView.rx.title(for: .normal))
             .disposed(by: disposeBag)
         
-        Observable
-            .just(Reactor.Action.initialSDK)
+        onConversationChangedRelay
+            .map{ Reactor.Action.refreshChannels($0) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
@@ -278,8 +297,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
 
     @objc
     private func titleBtnDidTapped() {
-        //FIXME: - SquadId暂时为空
-        let preReactor = SquadPreReactor(squadId: "")
+        guard let squadDetail = reactor?.currentState.currentSquadDetail else { return }
+        let preReactor = SquadPreReactor(squadDetail: squadDetail)
         let preViewController = SquadPreViewController(reactor: preReactor)
         let nav = BaseNavigationController(rootViewController: preViewController)
         nav.modalPresentationStyle = .fullScreen
@@ -310,7 +329,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     @objc
     private func channelBtnDidTapped() {
         //创建一个Channel
-        let chattingVC = ChattingViewController(action: .create)
+        guard let currentSquadId = reactor?.currentSquadId else { return }
+        let chattingVC = ChattingViewController(action: .create(squadId: currentSquadId))
         self.navigationController?.pushViewController(chattingVC, animated: false)
     }
     
@@ -389,6 +409,19 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         }
     }
     
+}
+
+extension SquadViewController: V2TIMConversationListener {
+    
+    //有新的会话（比如收到一个新同事发来的单聊消息、或者被拉入了一个新的群组中），可以根据会话的 lastMessage -> timestamp 重新对会话列表做排序。
+    func onNewConversation(_ conversationList: [V2TIMConversation]!) {
+        onConversationChangedRelay.accept(.insert(list: conversationList))
+    }
+    
+    // 某些会话的关键信息发生变化（未读计数发生变化、最后一条消息被更新等等），可以根据会话的 lastMessage -> timestamp 重新对会话列表做排序。
+    func onConversationChanged(_ conversationList: [V2TIMConversation]!) {
+        onConversationChangedRelay.accept(.update(list: conversationList))
+    }
 }
 
 fileprivate class CustomSideMenuNavigationController: SideMenuNavigationController {

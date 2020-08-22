@@ -10,10 +10,11 @@ import UIKit
 import RxSwift
 import RxDataSources
 import Contacts
+import MessageUI
 
-class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>, UITableViewDelegate {
+class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>, UITableViewDelegate, MFMessageComposeViewControllerDelegate, UIGestureRecognizerDelegate {
 
-    // 是否隐藏导航左侧按钮
+    // 控制是否隐藏导航左侧按钮
     var isHideBackButtonItem: Bool = false
     
     private var layout = UICollectionViewFlowLayout()
@@ -33,9 +34,14 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // 从创建squad页面跳转过来时, 需要将导航栏返回按钮隐藏
         if isHideBackButtonItem {
-            navigationItem.leftBarButtonItem = nil
-            navigationItem.backBarButtonItem = nil
+            // 隐藏导航栏返回按钮
+            navigationItem.hidesBackButton = true
+            // 禁止右滑返回上一页面的手势
+            if navigationController?.responds(to: #selector(getter: UINavigationController.interactivePopGestureRecognizer)) == true {
+                self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+            }
         }
     }
     
@@ -43,7 +49,6 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         headerView = SquadInvithNewHeaderView()
         headerView.contentView = collectionView
         headerView.insertBottom = 30
-        headerView.inviteBtn.addTarget(self, action: #selector(inviteBtnDidTapped), for: .touchUpInside)
         headerView.backgroundColor = UIColor(hexString: "#E5E5E5")
         
         footerView = UIView()
@@ -72,7 +77,6 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
     }
     
     private func setupNavigationBarRightItem() {
-        rightBarButtonItem.title = "Done"
         rightBarButtonItem.style = .plain
         rightBarButtonItem.theme.tintColor = UIColor.secondary
         navigationItem.rightBarButtonItem = rightBarButtonItem
@@ -104,6 +108,211 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         searchBtn.hero.id = "SearchFieldKey"
         searchBtn.addTarget(self, action: #selector(searchBtnDidTapped), for: .touchUpInside)
         footerView.addSubview(searchBtn)
+    }
+    
+    override func addTouchAction() {
+        headerView.inviteBtn.rx.tap
+            .map{ Reactor.Action.createLink }
+            .bind(to: reactor!.action)
+            .disposed(by: disposeBag)
+    }
+    
+    override func setupConstraints() {
+        
+        headerView.snp.makeConstraints { (maker) in
+            maker.leading.trailing.equalToSuperview()
+            maker.height.equalTo(148)
+            if #available(iOS 11, *) {
+                maker.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            } else {
+                maker.top.equalTo(topLayoutGuide.snp.bottom)
+            }
+        }
+        
+        footerView.snp.makeConstraints { (maker) in
+            maker.leading.trailing.equalToSuperview()
+            if #available(iOS 11, *) {
+                maker.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            } else {
+                maker.bottom.equalTo(bottomLayoutGuide.snp.top)
+            }
+            maker.top.equalTo(headerView.snp.bottom).offset(-headerView.insertBottom)
+        }
+        
+        searchBtn.snp.makeConstraints { (maker) in
+            maker.leading.equalTo(32)
+            maker.top.equalTo(19)
+            maker.trailing.equalTo(-34)
+            maker.height.equalTo(28)
+        }
+        
+        tableView.snp.makeConstraints { (maker) in
+            maker.leading.trailing.bottom.equalToSuperview()
+            maker.top.equalTo(searchBtn.snp.bottom).offset(20)
+        }
+    }
+    
+    override func bind(reactor: SquadInvithNewReactor) {
+        
+        let collectionDataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, SquadInvithNewReactor.Member>>(configureCell: { [unowned self] data, collectionView, indexPath, model in
+            let cell = collectionView.dequeue(Reusable.squadInvithNewMemberCell, for: indexPath)
+            cell.isClosable = model.isColsable
+            cell.avatarBtn.kf.setImage(with: model.user.avatar.asURL, for: .normal, placeholder: UIImage(named: "Member Placeholder"), options: nil, progressBlock: nil, completionHandler: nil)
+            cell.nicknameLab.text = model.user.nickname
+            
+            cell.avatarBtn.rx.tap
+                .subscribe(onNext: { [unowned self] in
+                    let friendReactor = FriendProfileReactor()
+                    let vc = FriendProfileViewController(reactor: friendReactor)
+                    self.navigationController?.pushViewController(vc, animated: true)
+                })
+                .disposed(by: cell.disposeBag)
+            
+            cell.closeBtnDidTapped
+                .map{ Reactor.Action.deleteSelectedMember(model) }
+                .bind(to: reactor.action)
+                .disposed(by: cell.disposeBag)
+            
+            return cell
+        })
+        
+        reactor.state
+            .compactMap{ $0.members }
+            .map{ [SectionModel(model: "", items: $0)] }
+            .bind(to: collectionView.rx.items(dataSource: collectionDataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.isLoading }
+            .bind(to: rx.loading)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map{ $0.members != nil }
+            .debug()
+            .filter{ $0 }
+            .distinctUntilChanged()
+            .subscribe(onNext: { [unowned self] _ in
+                guard self.headerView.contentView.isHidden else { return }
+                self.headerView.snp.updateConstraints { (maker) in
+                    maker.height.equalTo(244)
+                }
+                UIView.animate(withDuration: 0.25, animations: {
+                    self.view.layoutIfNeeded()
+                }) { _ in
+                    self.headerView.contentView.isHidden = false
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.linkText }
+            .subscribe(onNext: { [unowned self] text in
+                if MFMessageComposeViewController.canSendText() {
+                    let messageVC = MFMessageComposeViewController()
+                    messageVC.messageComposeDelegate = self
+                    messageVC.body = text
+                    self.present(messageVC, animated: true)
+                } else {
+                    let alert = UIAlertController(title: "Warning", message: "This feature is not supported on current devices", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: nil))
+                    self.present(alert, animated: true)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        tableDataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadInvithNewReactor.Member>>(configureCell: { data, tableView, indexPath, model in
+            let cell = tableView.dequeue(Reusable.squadInvithNewContactCell)!
+            cell.avatarView.kf.setImage(with: model.user.avatar.asURL, for: .normal)
+            cell.selectionStyle = .none
+            cell.nicknameLab.text = model.user.nickname
+            cell.contentLab.text = "Alex, Hannah, Mari and 2 others"
+            cell.actionBtn.setTitle("Add", for: .normal)
+            cell.actionBtn.setTitle("Remove", for: .selected)
+            cell.actionBtn.isSelected = model.isAdded
+            cell.actionBtn.rx.tap
+                .map{
+                    if model.isAdded {
+                        return Reactor.Action.deleteSelectedMember(model)
+                    } else {
+                        return Reactor.Action.addSelectedMember(model)
+                    }
+                }
+                .bind(to: reactor.action)
+                .disposed(by: cell.disposeBag)
+            return cell
+        })
+        
+        reactor.state
+            .compactMap{ $0.repos.map{ SectionModel(model: "", items: $0) } }
+            .bind(to: tableView.rx.items(dataSource: tableDataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { state in
+                if state.isEmptyRepos {
+                    return "Skip"
+                } else if state.members == nil || state.members?.isEmpty == true {
+                    return "Skip"
+                }
+                return "Confirm"
+            }
+            .bind(to: rightBarButtonItem.rx.title)
+            .disposed(by: disposeBag)
+        
+        rightBarButtonItem.rx.tap
+            .filter{ reactor.currentState.members?.isEmpty == false }
+            .map{ Reactor.Action.makeInvitation }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        Observable.merge(
+            reactor.state
+                .filter { $0.inviteSuccess == true }
+                .map{ _ in () },
+            rightBarButtonItem.rx.tap
+                .filter {
+                    let state = reactor.currentState
+                    if state.isEmptyRepos {
+                        return true
+                    } else if state.members == nil || state.members?.isEmpty == true {
+                        return true
+                    }
+                    return false
+                }
+                .map{ _ in () }
+            )
+            .subscribe(onNext: { [unowned self] _ in
+                var rootViewController = UIApplication.shared.keyWindow?.rootViewController
+                rootViewController = (rootViewController as? UINavigationController)?.viewControllers.first
+                if rootViewController is LoginViewController || rootViewController is CreateSquadViewController {
+                    Application.shared.presentInitialScreent()
+                } else {
+                    self.dismiss(animated: true)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+//        requestVisibleContacts()
+//            .takeUntil(rx.viewDidLoad)
+//            .subscribeOn(MainScheduler.instance)
+//            .map { [unowned self] status in
+//                var list = Array<String>()
+//                if status { list = self.getContactsPhone() }
+//                return Reactor.Action.visibleContacts(phoneList: list, isDenied: !status)
+//            }
+//            .bind(to: reactor.action)
+//            .disposed(by: disposeBag)
+        
+        rx.viewDidLoad
+            .map{ Reactor.Action.getAllFriends }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
     }
     
     // 请求访问通讯录 true: 已拥有权限
@@ -154,156 +363,6 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         return contactList
     }
     
-    override func setupConstraints() {
-        
-        headerView.snp.makeConstraints { (maker) in
-            maker.leading.trailing.equalToSuperview()
-            maker.height.equalTo(148)
-            if #available(iOS 11, *) {
-                maker.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-            } else {
-                maker.top.equalTo(topLayoutGuide.snp.bottom)
-            }
-        }
-        
-        footerView.snp.makeConstraints { (maker) in
-            maker.leading.trailing.equalToSuperview()
-            if #available(iOS 11, *) {
-                maker.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            } else {
-                maker.bottom.equalTo(bottomLayoutGuide.snp.top)
-            }
-            maker.top.equalTo(headerView.snp.bottom).offset(-headerView.insertBottom)
-        }
-        
-        searchBtn.snp.makeConstraints { (maker) in
-            maker.leading.equalTo(32)
-            maker.top.equalTo(19)
-            maker.trailing.equalTo(-34)
-            maker.height.equalTo(28)
-        }
-        
-        tableView.snp.makeConstraints { (maker) in
-            maker.leading.trailing.bottom.equalToSuperview()
-            maker.top.equalTo(searchBtn.snp.bottom).offset(20)
-        }
-    }
-    
-    override func bind(reactor: SquadInvithNewReactor) {
-        
-        let collectionDataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, SquadInvithNewReactor.Member>>(configureCell: { data, collectionView, indexPath, model in
-            let cell = collectionView.dequeue(Reusable.squadInvithNewMemberCell, for: indexPath)
-            cell.isClosable = model.isColsable
-            cell.avatarBtn.kf.setImage(with: nil, for: .normal, placeholder: UIImage(named: "Member Placeholder"), options: nil, progressBlock: nil, completionHandler: nil)
-            cell.nicknameLab.text = "哈哈哈"
-            
-            cell.avatarBtn.rx.tap
-                .subscribe(onNext: { [unowned self] in
-                    let friendReactor = FriendProfileReactor()
-                    let vc = FriendProfileViewController(reactor: friendReactor)
-                    self.navigationController?.pushViewController(vc, animated: true)
-                })
-                .disposed(by: cell.disposeBag)
-            
-            cell.closeBtnDidTapped
-                .map{ Reactor.Action.deleteSelectedMember(model) }
-                .bind(to: reactor.action)
-                .disposed(by: cell.disposeBag)
-            
-            return cell
-        })
-        
-        reactor.state
-            .compactMap{ $0.members }
-            .map{ [SectionModel(model: "", items: $0)] }
-            .bind(to: collectionView.rx.items(dataSource: collectionDataSource))
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .compactMap{ $0.toast }
-            .bind(to: rx.toastNormal)
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .map{ $0.members != nil }
-            .debug()
-            .filter{ $0 }
-            .distinctUntilChanged()
-            .subscribe(onNext: { [unowned self] _ in
-                guard self.headerView.contentView.isHidden else { return }
-                self.headerView.snp.updateConstraints { (maker) in
-                    maker.height.equalTo(244)
-                }
-                UIView.animate(withDuration: 0.25, animations: {
-                    self.view.layoutIfNeeded()
-                }) { _ in
-                    self.headerView.contentView.isHidden = false
-                }
-            })
-            .disposed(by: disposeBag)
-        
-        tableDataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadInvithNewReactor.Member>>(configureCell: { data, tableView, indexPath, model in
-            let cell = tableView.dequeue(Reusable.squadInvithNewContactCell)!
-            cell.avatarView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"), for: .normal)
-            cell.selectionStyle = .none
-            cell.nicknameLab.text = "Squad Name"
-            cell.contentLab.text = "Alex, Hannah, Mari and 2 others"
-            cell.actionBtn.setTitle("Add", for: .normal)
-            cell.actionBtn.setTitle("Remove", for: .selected)
-            cell.actionBtn.isSelected = model.isAdded
-            cell.actionBtn.rx.tap
-                .map{
-                    if model.isAdded {
-                        return Reactor.Action.deleteSelectedMember(model)
-                    } else {
-                        return Reactor.Action.addSelectedMember(model)
-                    }
-                }
-                .bind(to: reactor.action)
-                .disposed(by: cell.disposeBag)
-            return cell
-        })
-        
-        reactor.state
-            .compactMap{ $0.repos.map{ SectionModel(model: "", items: $0) } }
-            .bind(to: tableView.rx.items(dataSource: tableDataSource))
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .map { $0.members?.isEmpty == false }
-            .bind(to: rightBarButtonItem.rx.isEnabled)
-            .disposed(by: disposeBag)
-        
-        rightBarButtonItem.rx.tap
-            .map{ Reactor.Action.request }
-            .bind(to: reactor.action)
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .filter { $0.inviteSuccess == true }
-            .subscribe(onNext: { [unowned self] _ in
-                var rootViewController = UIApplication.shared.keyWindow?.rootViewController
-                rootViewController = (rootViewController as? UINavigationController)?.viewControllers.first
-                if rootViewController is LoginViewController || rootViewController is CreateSquadViewController {
-                    Application.shared.presentInitialScreent()
-                } else {
-                    self.dismiss(animated: true)
-                }
-            })
-            .disposed(by: disposeBag)
-        
-        requestVisibleContacts()
-            .takeUntil(rx.viewDidLoad)
-            .subscribeOn(MainScheduler.instance)
-            .map { [unowned self] status in
-                var list = Array<String>()
-                if status { list = self.getContactsPhone() }
-                return Reactor.Action.visibleContacts(phoneList: list, isDenied: !status)
-            }
-            .bind(to: reactor.action)
-            .disposed(by: disposeBag)
-    }
-    
     @objc
     private func searchBtnDidTapped() {
         let searchVC = SquadInvithNewSearchViewController()
@@ -311,11 +370,6 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         searchVC.hero.modalAnimationType = .selectBy(presenting: .fade, dismissing: .fade)
         searchVC.modalPresentationStyle = .fullScreen
         self.present(searchVC, animated: true)
-    }
-    
-    @objc
-    private func inviteBtnDidTapped() {
-        
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -340,4 +394,11 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         return tempView
     }
     
+    func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+        dismiss(animated: true)
+    }
+    
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return false
+    }
 }

@@ -10,7 +10,6 @@ import Foundation
 import ReactorKit
 import RxSwift
 import RxCocoa
-import ImSDK
 
 protocol SquadPrimaryKey { }
 
@@ -18,13 +17,25 @@ struct SquadSqroll: SquadPrimaryKey {
     var list: Array<String>
 }
 
-struct SquadChannel: SquadPrimaryKey {
+struct SquadChannel: SquadPrimaryKey, Comparable {
     let sessionId: String
     var avatar: String?
     var title: String = ""
     var content: String = ""
     var unreadCount: Int = 0
-    var dateString: String = ""
+    var timeStamp: Date
+    
+    var dateString: String {
+        return timeStamp.chatTimeToString
+    }
+    
+    static func == (lhs: SquadChannel, rhs: SquadChannel) -> Bool {
+        return lhs.sessionId == rhs.sessionId
+    }
+    
+    static func < (lhs: SquadChannel, rhs: SquadChannel) -> Bool {
+        return lhs.timeStamp > rhs.timeStamp
+    }
 }
 
 struct SquadActivity: SquadPrimaryKey {
@@ -39,15 +50,16 @@ class SquadReactor: Reactor {
     
     enum Action {
         // 刷新会话列表
-        case refreshChannels
-        // 初始化SDK
-        case initialSDK
+        case refreshChannels(RefreshChannelsAction)
         // 请求squad详情
-        case requestSquad(id: String)
+        case requestSquad(id: Int)
+        // 获取登录状态
+        case connectStatus(ConnectStatus)
     }
     
     enum Mutation {
         case setChannels(Array<SquadChannel>)
+        case setSquadDetail(detail: SquadDetail, channels: Array<SquadChannel>)
         case setOneOrTheOther(loginStateDidExpired: Bool?, toast: String?)
         case setToast(String)
         case setLoading(Bool)
@@ -61,99 +73,103 @@ class SquadReactor: Reactor {
         var isLoading: Bool?
         // 错误提示
         var toast: String?
-        // 当前置顶的squad的id
-        var currentSquadId: String
+        // 当前squad的资料
+        var currentSquadDetail: SquadDetail?
     }
     
     var initialState: State
-    var provider = OnlineProvider<SquadAPI>(stubClosure: { (api)  in
-        switch api {
-        case .querySquad, .quardTopSquad: return .delayed(seconds: 1)
-        default: return .never
-        }
-    })
+    var provider = OnlineProvider<SquadAPI>()
     
-    init(currentSquadId: String) {
-        initialState = State(currentSquadId: currentSquadId)
+    var loginStatusDidChanged: ReplaySubject<ConnectStatus>!
+    // 当前置顶的squad的id
+    var currentSquadId: Int
+    
+    init(currentSquadId: Int) {
         
+        self.currentSquadId = currentSquadId
+        
+        initialState = State()
         initialState.repos[0] = [SquadSqroll(list: ["http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg","http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg", "http://image.biaobaiju.com/uploads/20180803/23/1533309822-GCcDphRmqw.jpg"])]
         initialState.repos[1] = [SquadActivity(), SquadActivity()]
-        initialState.repos[2] = [SquadChannel(sessionId: "1", avatar: "http://image.biaobaiju.com/uploads/20180803/23/1533309822-GCcDphRmqw.jpg", title: "Main", content: "Danny: Yeah I Know", unreadCount: 1, dateString: "10:10 PM"),
-                                 SquadChannel(sessionId: "1", avatar: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg", title: "Main", content: "Danny: Yeah I Know", unreadCount: 1, dateString: "10:10 PM")]
+    }
+    
+    func transform(action: Observable<SquadReactor.Action>) -> Observable<SquadReactor.Action> {
+        let status = loginStatusDidChanged.distinctUntilChanged().map{ Action.connectStatus($0) }
+        return Observable.merge(action, status)
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .refreshChannels:
-            //TODO: - 刷新数据
-            return .never()
-        case .requestSquad(let id):
-            return provider.request(target: .querySquad(id: id, setTop: true), model: SquadDetail.self, atKeyPath: .data)
-                .asObservable()
-                .flatMap { [unowned self] result -> Observable<Result<Array<SquadChannel>, GeneralError>> in
-                    switch result {
-                    case .success(let detail):
-                        // 通过squad中的列表, 去IM服务器查询这些群的信息
-                        return self.queryGroupsFromTIM(groupIds: ["123", "234"])
-                    case .failure(let error):
-                        return Observable.just(.failure(error))
+        case .refreshChannels(let action):
+            let channels = currentState.repos[2] as! Array<SquadChannel>
+            switch action {
+            case .update(let list):
+                var newChannels = Array<SquadChannel>()
+                for channel in channels {
+                    if let conversation = list.first(where: { $0.groupID == channel.sessionId }), let lastMessage = conversation.lastMessage, lastMessage.msgID != nil {
+                        let message = MessageElem(timMessage: lastMessage)
+                        var newChannel = channel
+                        newChannel.timeStamp = message.sentDate
+                        newChannel.content = message.description
+                        newChannel.unreadCount = Int(conversation.unreadCount)
+                        newChannels.append(newChannel)
+                    } else {
+                        newChannels.append(channel)
                     }
                 }
-                .map { (result) -> Mutation in
-                    switch result {
-                    case .success(let channelsList):
-                        return .setChannels(channelsList)
-                    case .failure(let error):
-                        if case .loginStatusDidExpired = error {
-                            return .setOneOrTheOther(loginStateDidExpired: true, toast: nil)
-                        } else {
-                            return .setOneOrTheOther(loginStateDidExpired: nil, toast: error.message)
+                return Observable.just(.setChannels(newChannels.sorted()))
+            case .insert(let list):
+                
+                var otherChannels = Array<SquadChannel>()
+                for conversation in list {
+                    let isContains = channels.contains(where: { $0.sessionId == conversation.groupID })
+                    if !isContains {
+                        
+                        var timeStamp: Date = Date.distantFuture
+                        var content: String = ""
+                        // 创建完群后生成的会话会包括一条空的message, 所以要根据msgID过滤掉
+                        if let lastMessage = conversation.lastMessage, lastMessage.msgID != nil {
+                            let message = MessageElem(timMessage: lastMessage)
+                            timeStamp = message.sentDate
+                            content = message.description
                         }
+                        let channel = SquadChannel(sessionId: conversation.groupID, avatar: conversation.faceUrl, title: conversation.showName, content: content, unreadCount: Int(conversation.unreadCount), timeStamp: timeStamp)
+                        otherChannels.append(channel)
                     }
                 }
-                .startWith(.setLoading(true))
-        case .initialSDK:
+                return Observable.just(.setChannels((channels + otherChannels).sorted()))
+            }
+        case .requestSquad(let id):
+            return self.querySquad(id: id).do(onNext: { [unowned self] mutation in
+                // 切换squad成功后, 将currentSquadId更新为最新的squadId
+                guard case .setSquadDetail = mutation else { return }
+                self.currentSquadId = id
+            })
+        case .connectStatus(let status):
+            /// 检查登录状态
             guard let user = User.currentUser() else {
                 return .just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
             }
-            return checkoutLoginStatus(userId: user.username)
-                .map { result -> Result<Void, GeneralError> in
-                    switch result {
-                    case .success: return .success(())
-                    case .failure: return .failure(.loginStatusDidExpired)
-                    }
+            
+            // 更加连接状态, 做出相应处理
+            switch status {
+            case .onConnectFailed(let s):
+                return .just(.setToast(s))
+            case .onKickedOffline, .onUserSigExpired:
+                return .just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
+            default:
+                break
+            }
+            
+            return checkoutLoginStatus(userId: String(user.id)).flatMap { [unowned self] result -> Observable<Mutation> in
+                switch result {
+                case .success:
+                    let id = self.currentSquadId
+                    return self.querySquad(id: id)
+                case .failure:
+                    return Observable.just(.setOneOrTheOther(loginStateDidExpired: true, toast: nil))
                 }
-                .flatMap { [unowned self] result -> Single<Result<SquadDetail, GeneralError>> in
-                    // 查询当前置顶的squad详情, 然后拿到该squad下的群列表
-                    switch result {
-                    case .success:
-                        return self.provider.request(target: .quardTopSquad, model: SquadDetail.self, atKeyPath: .data)
-                    case .failure(let error):
-                        return Single.just(.failure(error))
-                    }
-                }
-                .flatMap { [unowned self] result -> Observable<Result<Array<SquadChannel>, GeneralError>> in
-                    switch result {
-                    case .success(let detail):
-                        // 通过squad中的列表, 去IM服务器查询这些群的信息
-                        return self.queryGroupsFromTIM(groupIds: ["123", "234"])
-                    case .failure(let error):
-                        return Observable.just(.failure(error))
-                    }
-                }
-                .map { (result) -> Mutation in
-                    switch result {
-                    case .success(let channelsList):
-                        return .setChannels(channelsList)
-                    case .failure(let error):
-                        if case .loginStatusDidExpired = error {
-                            return .setOneOrTheOther(loginStateDidExpired: true, toast: nil)
-                        } else {
-                            return .setOneOrTheOther(loginStateDidExpired: nil, toast: error.message)
-                        }
-                    }
-                }
-                .startWith(.setLoading(true))
+            }
         }
     }
     
@@ -162,9 +178,9 @@ class SquadReactor: Reactor {
         switch mutation {
         case .setLoading(let s):
             state.isLoading = s
-        case .setChannels(let list):
+        case .setChannels(let channelds):
             state.isLoading = false
-            state.repos[2] = list
+            state.repos[2] = channelds
         case let .setOneOrTheOther(loginStateDidExpired, toast):
             state.isLoading = false
             if toast != nil {
@@ -175,41 +191,107 @@ class SquadReactor: Reactor {
         case .setToast(let str):
             state.isLoading = false
             state.toast = str
+        case let .setSquadDetail(detail, channelds):
+            state.isLoading = false
+            state.repos[2] = channelds
+            state.currentSquadDetail = detail
         }
         return state
     }
     
+    // 根据squadId查询详情, 并绑定到mutation上
+    private func querySquad(id: Int) -> Observable<Mutation> {
+        return provider
+            .request(target: .querySquad(id: id, setTop: true), model: SquadDetail.self, atKeyPath: .data)
+            .asObservable()
+            .flatMap { result -> Observable<Result<SquadDetail, GeneralError>> in
+                switch result {
+                case .success(let detail):
+                    // 根据详情, 去查询当前squad下存在的所有channel
+                    return self.provider.request(target: .getSquadChannel(squadId: detail.id), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable().map {
+                        switch $0 {
+                        case .success(let list):
+                            return .success(detail.addChannels(list))
+                        case .failure(let error):
+                            return .failure(error)
+                        }
+                    }
+                case .failure(let error):
+                    return Observable.just(.failure(error))
+                }
+            }
+            .flatMap { [unowned self] result -> Observable<Result<(SquadDetail, Array<SquadChannel>), GeneralError>> in
+                switch result {
+                case .success(let detail):
+                    // 通过squad中的channel列表, 去IM服务器查询这些群的信息
+                    let groupIds = detail.channels?.map{ String($0.id) } ?? []
+                    return self.queryGroupsFromTIM(groupIds: groupIds).map{ .success((detail, $0)) }
+                case .failure(let error):
+                    return Observable.just(.failure(error))
+                }
+            }
+            .map { (result) -> Mutation in
+                switch result {
+                case let .success(detail, channels):
+                    return .setSquadDetail(detail: detail, channels: channels)
+                case .failure(let error):
+                    if case .loginStatusDidExpired = error {
+                        return .setOneOrTheOther(loginStateDidExpired: true, toast: nil)
+                    } else {
+                        return .setOneOrTheOther(loginStateDidExpired: nil, toast: error.message)
+                    }
+                }
+            }
+            .startWith(.setLoading(true))
+    }
+    
     /// 从TIM中查询我所有的群组信息
     /// - Parameter groupIds: 群组id列表
-    func queryGroupsFromTIM(groupIds: Array<String>) -> Observable<Result<Array<SquadChannel>, GeneralError>> {
-        return Observable.create { (observer) -> Disposable in
-            
-            let groupManager = TIMManager.sharedInstance()?.groupManager()
-            let conversationList = TIMManager.sharedInstance()?.getConversationList() ?? []
-            
-            groupManager?.getGroupInfo(groupIds, succ: { (list) in
-                let groupList = list as? Array<TIMGroupInfo> ?? []
-                var channelsList = Array<SquadChannel>()
-                for i in 0..<groupList.count {
-                    let groupInfo = groupList[i]
-                    let conversation = conversationList.first(where: { $0.getReceiver() == groupInfo.group })
-                    let message = MessageElem(message: groupInfo.lastMsg)
-                    let channel = SquadChannel(sessionId: groupInfo.group,
-                                               avatar: groupInfo.faceURL,
-                                               title: groupInfo.groupName,
-                                               content: message.description,
-                                               unreadCount: Int(conversation?.getUnReadMessageNum() ?? 0),
-                                               dateString: message.dateString)
-                    channelsList.append(channel)
-                }
-                observer.onNext(.success(channelsList))
+    private func queryGroupsFromTIM(groupIds: Array<String>) -> Observable<Array<SquadChannel>> {
+        
+        guard !groupIds.isEmpty else { return Observable.just([]) }
+        
+        let joinGroups = Observable<Array<V2TIMGroupInfo>>.create { (observer) -> Disposable in
+            V2TIMManager.sharedInstance()?.getJoinedGroupList({ (list) in
+                observer.onNext(list ?? [])
                 observer.onCompleted()
-            }, fail: { (code, message) in
-                observer.onNext(.failure(.custom(message ?? "未知错误")))
+            }, fail: { (_, message) in
+                observer.onNext([])
                 observer.onCompleted()
             })
-            
             return Disposables.create()
+        }
+        
+        let conversationList = Observable<Array<V2TIMConversation>>.create { (observer) -> Disposable in
+            V2TIMManager.sharedInstance()?.getConversationList(0, count: 100, succ: { (conversationList, nextSeq, isFinished) in
+                observer.onNext(conversationList ?? [])
+                observer.onCompleted()
+            }, fail: { (code, message) in
+                observer.onNext([])
+                observer.onCompleted()
+            })
+            return Disposables.create()
+        }
+        
+        return Observable.zip(joinGroups, conversationList).map { (groupList, conversationList) -> Array<SquadChannel> in
+            var channelsList = Array<SquadChannel>()
+            for i in 0..<groupList.count {
+                let groupInfo = groupList[i]
+                // 只处理当前squad下的群组信息
+                guard groupIds.contains(groupInfo.groupID) else { continue }
+                let conversation = conversationList.first(where: { $0.groupID == groupInfo.groupID })
+                if let lastMessage = conversation?.lastMessage, lastMessage.msgID != nil {
+                    // groupInfo.groupID 这里没有解包是没关系的, 只有当会话类型为group时, conversation才会有值
+                    let message = MessageElem(timMessage: lastMessage)
+                    let channel = SquadChannel(sessionId: groupInfo.groupID, avatar: groupInfo.faceURL, title: groupInfo.groupName, content: message.description, unreadCount: Int(conversation?.unreadCount ?? 0), timeStamp: message.sentDate)
+                    channelsList.append(channel)
+                } else {
+                    // 获取群信息
+                    let channel = SquadChannel(sessionId: groupInfo.groupID, avatar: groupInfo.faceURL, title: groupInfo.groupName, content: "", unreadCount: Int(conversation?.unreadCount ?? 0), timeStamp: Date.distantFuture)
+                    channelsList.append(channel)
+                }
+            }
+            return channelsList
         }
     }
     
@@ -234,37 +316,4 @@ class SquadReactor: Reactor {
             return Disposables.create()
         }
     }
-    
-    /*
-     本地存在很多的会话
-     本地存在很多的群
-     
-     一个squad对应很多的群
-     
-     
-     */
-    
-    private func request(groupIds: Array<String>) {
-        
-        // 通过服务器返回的群组列表, 去查询本地的群组列表信息
-        
-        // 获取所有的会话列表, 可以通过筛选会话对象, 获取当前的未读消息数
-        let conversationList = ConversationManager.shared.getConversation()
-        
-    }
-    
-    /// 获取Squad数据
-    /// 先读取本地信息, 读取成功后刷新页面, 同时发起请求同步服务器数据
-    private func loadSquadDetail() -> Observable<Result<Void, GeneralError>> {
-//        return provider.request(target: , model: <#T##Decodable.Protocol#>, atKeyPath: <#T##OnlineProvider<SquadAPI>.ParseKeyPath#>)
-        return Observable.just(.success(()))
-    }
-}
-
-extension TIMGroupInfo {
-    
-//    var channel: SquadChannel {
-//        return SquadChannel(sessionId: <#T##String#>, avatar: <#T##String?#>, title: <#T##String#>, content: <#T##String#>, unreadCount: <#T##Int#>, dateString: <#T##String#>)
-//    }
-    
 }

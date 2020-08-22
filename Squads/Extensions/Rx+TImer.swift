@@ -55,7 +55,6 @@ extension Observable where Element: Hashable {
             return Observable<Int>.timer(.seconds(0), period: .seconds(interval), scheduler: scheduler)
                 .map { $0 * interval }
                 .map { ascending ? $0 : (duration - $0) }
-                .debug("定时器")
                 .take(count)
     }
 }

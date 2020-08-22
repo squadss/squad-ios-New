@@ -13,4 +13,44 @@ struct SquadDetail: Codable {
     let squadName: String
     let logoPath: String
     let createRemark: String
+    let squadCode: String
+    let gmtCreate: String
+    
+    // 有得接口不返回此条数据
+    var channels: Array<CreateChannel>?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case squadName
+        case logoPath
+        case createRemark
+        case squadCode
+        case gmtCreate
+        case channels
+    }
+    
+    init(from decoder: Decoder) throws {
+        id = try decoder.decode("id")
+        squadName = try decoder.decode("squadName")
+        logoPath = try decoder.decode("logoPath")
+        createRemark = try decoder.decode("createRemark")
+        squadCode = try decoder.decode("squadCode")
+        gmtCreate = try decoder.decode("gmtCreate")
+        channels = try decoder.decodeIfPresent("channels")
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        try encoder.encode(id, for: "id")
+        try encoder.encode(squadName, for: "squadName")
+        try encoder.encode(logoPath, for: "logoPath")
+        try encoder.encode(createRemark, for: "createRemark")
+        try encoder.encode(squadCode, for: "squadCode")
+        try encoder.encode(gmtCreate, for: "gmtCreate")
+    }
+    
+    func addChannels(_ list: Array<CreateChannel>) -> SquadDetail {
+        var model = self
+        model.channels = list
+        return model
+    }
 }

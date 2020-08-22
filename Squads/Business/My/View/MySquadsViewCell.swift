@@ -13,9 +13,14 @@ class MySquadsViewCell: BaseTableViewCell {
     var pritureView = UIImageView()
     var titleLab = UILabel()
     
-    var unreadNum: String? {
+    var unreadNum: Int = 0 {
         didSet {
-            unreadLab.text = unreadNum
+            if unreadNum > 0 {
+                unreadLab.isHidden = false
+                unreadLab.text = String(unreadNum)
+            } else {
+                unreadLab.isHidden = true
+            }
         }
     }
     

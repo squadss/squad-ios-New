@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 import RxDataSources
 
 class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITableViewDelegate {
@@ -57,12 +59,36 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
         let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, CreateEventModelPrimaryKey>>(configureCell: { data, tableView, indexPath, model in
             switch model {
             case is CreateEventTextEditor:
+                
                 let cell = tableView.dequeue(Reusable.createEventTextEditedCell)!
                 cell.dataSource = model as? CreateEventTextEditor
-                cell.inputCompleted.subscribe(onNext: {
-                    print($0)
-                })
-                .disposed(by: cell.disposeBag)
+            
+                cell.inputCompleted
+                    .filter{ $0.isTitle }
+                    .map{ Reactor.Action.selectedTextEditor($0) }
+                    .bind(to: reactor.action)
+                    .disposed(by: cell.disposeBag)
+            
+                cell.inputCompleted
+                    .filter{ !$0.isTitle }
+                    .subscribe(onNext: { [unowned self] result in
+                        if case .location = result {
+                            let locationVC = CreateEventLocationViewController()
+                            locationVC.title = "Location"
+                            locationVC.itemSelected
+                                .map { item in
+                                    let location = SquadLocation(address: item.name ?? "",
+                                                                 longitude: item.placemark.coordinate.longitude,
+                                                                 latitude: item.placemark.coordinate.latitude)
+                                    return Reactor.Action.selectedTextEditor(CreateEventTextEditor.location(value: location, attachImageNamed: "CreateEvent Location"))
+                                }
+                                .bind(to: reactor.action)
+                                .disposed(by: self.disposeBag)
+                            let nav = UINavigationController(rootViewController: locationVC)
+                            self.present(nav, animated: true)
+                        }
+                    })
+                    .disposed(by: cell.disposeBag)
                 cell.selectionStyle = .none
                 return cell
             case is CreateEventLabels:
