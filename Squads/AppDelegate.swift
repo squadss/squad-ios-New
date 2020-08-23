@@ -72,9 +72,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if webpageURL.host == App.AssociatedDomains {
                 //获取邀请码
                 if let code = pathComponentsParse(url: webpageURL, key: "invite") {
-                    let reactor = WelcomeReactor(inviteCode: code)
-                    let welcomeVC = WelcomeViewController(reactor: reactor)
-                    let nav = BaseNavigationController(rootViewController: welcomeVC)
+                    let reactor = JoinSquadReactor(inviteCode: code)
+                    let vc = JoinSquadViewController(reactor: reactor)
+                    let nav = BaseNavigationController(rootViewController: vc)
                     nav.modalPresentationStyle = .fullScreen
                     JXPhotoBrowser.topMost?.present(nav, animated: true)
                 } else {

@@ -92,21 +92,29 @@ class RegisterPhoneNumberViewController: BaseViewController, BrickInputFieldStyl
         NotificationCenter.default.rx
             .notification(UITextField.textDidChangeNotification)
             .subscribe(onNext: { [unowned self] notification in
-                guard let textField = notification.object as? UITextField, let text = textField.text else {
+                guard let textField = notification.object as? UITextField, let text = textField.text, self.phoneNumberField == textField else {
                     return
                 }
                 
-                if textField === self.phoneNumberField {
-                    textField.text = textField.text?.insertSpacePhone
-                    let newPosition = textField.endOfDocument
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                        textField.selectedTextRange = textField.textRange(from: newPosition, to: newPosition)
-                    }
+                // 是否为美国地区的号码
+                let isAmerica = self.nationCodeBtn.title(for: .normal) == "+1"
+                if isAmerica {
+                    textField.text = textField.text?.insertSpacePhoneReferenceAmerica
+                } else {
+                    textField.text = textField.text?.insertSpacePhoneReferenceChina
                 }
                 
-                //  13 位包括两个空格
-                if textField === self.phoneNumberField && text.count >= 13 {
-                    textField.text = text[0..<13]
+                let newPosition = textField.endOfDocument
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                    textField.selectedTextRange = textField.textRange(from: newPosition, to: newPosition)
+                }
+                
+                if isAmerica {
+                    // 12 位包括两个空格
+                    if text.count >= 12 { textField.text = text[0..<12] }
+                } else {
+                    // 13 位包括两个空格
+                    if text.count >= 13 { textField.text = text[0..<13] }
                 }
             })
             .disposed(by: rx.disposeBag)

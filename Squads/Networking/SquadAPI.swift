@@ -87,6 +87,65 @@ enum SquadAPI {
     
     /// 根据squadid生成邀请链接
     case createLinkBySquad(squadId: Int, nationCode: String, phoneNumber: String)
+    
+    // MARK: - 活动相关
+    
+    // 创建活动
+    // type: 活动类型
+    // squadId: 所属的小队
+    // title: 标题
+    // location: 定位, 可选参数 包含经纬度和地址
+    // myTime: 我的时间 包含开始时间, 结束时间
+    case createActivity(type: EventCategory, squadId: Int, title: String, location: SquadLocation?)
+    
+    // 删除活动, 权限只有活动发起人有
+    case deleteActivity(activityId: Int)
+    
+    // 编辑活动
+    // activityId: 活动id
+    // title: 标题
+    // setTime: 设置活动的时间段(此权限只有活动发起人才有)
+    case setActivityInfo(activityId: Int, squadId: Int, title: String?, location: SquadLocation?,  setTime: TimePeriod?, status: ActivityStatus?)
+    
+    // 获取活动详情
+    case queryActivityInfo(activityId: Int)
+    
+    // 获取活动分页列表
+    case queryActivities(squadId: Int)
+    
+    // 加入活动
+    // activityId: 活动id
+    // myTime: 我的时间 包含开始时间, 结束时间
+    case joinActivity(activityId: Int, myTime: Array<TimePeriod>?)
+    
+    // 退出活动
+    case exitActivity(activityId: Int)
+    
+    // 获取已响应时间的用户列表 参与活动的人数最多也不超过20人, 所以暂时不用分页
+    case getResponded(activityId: Int)
+    
+    // 获取还未选择时间的用户列表
+    case getWaiting(activityId: Int)
+    
+    // 修改活动成员表
+    case updateActivityMemberInfo(activityId: Int, myTime: Array<TimePeriod>?, isGoing: Bool?)
+    
+    //MARK: - Flick 相关
+    
+    // 添加小组, 媒体内容
+    // mediaType: 媒体类型：1->图片；2->视频
+    // media: 图片 Base64 的数组，或服务器返回路径数组
+    // url: 链接地址
+    case addMediaWithFlick(squadId: Int, mediaType: MediaType, media: Array<Data>, title: String, url: String)
+    
+    // 删除小组-媒体内容
+    case deleteMediaWithFlick(id: Int)
+    
+    // 小组-媒体内容分页列表
+    case getPageListWithFlick(pageIndex: Int, pageSize: Int, keyword: String)
+    
+    // 某条媒体内容详情
+    case mediaDetailWithFlick(id: Int)
 }
 
 extension SquadAPI: TargetType {
@@ -142,8 +201,36 @@ extension SquadAPI: TargetType {
         case .myInviteRecords:
             let id = User.currentUser()!.id
             return "friend/invitee/\(id)"
+        case .createActivity:
+            return "activity/add"
+        case .deleteActivity(let activityId):
+            return "activity/delete/\(activityId)"
+        case .queryActivities(let squadId):
+            return "activity/list/\(squadId)"
+        case .setActivityInfo:
+            return "activity/update"
+        case .queryActivityInfo(let activityId):
+            return "activity/info/\(activityId)"
+        case .joinActivity:
+            return "activityMember/add"
+        case .exitActivity(let activityId):
+            return "activityMember/delete/\(activityId)"
+        case .getResponded(let activityId):
+            return "activityMember/responded/\(activityId)"
+        case .getWaiting(let activityId):
+            return "activityMember/wating/\(activityId)"
+        case .updateActivityMemberInfo:
+            return "activityMember/update"
         case .isAlreadyRegistered, .deleteInviteRecord, .inviteFriends:
             return ""
+        case .getPageListWithFlick:
+            return "squadMedia/getPageList"
+        case .addMediaWithFlick:
+            return "squadMedia/add"
+        case .deleteMediaWithFlick(let id):
+            return "squadMedia/delete/\(id)"
+        case .mediaDetailWithFlick(let id):
+            return "squadMedia/info/\(id)"
         }
     }
     
@@ -173,6 +260,14 @@ extension SquadAPI: TargetType {
              .querySquadByInviteCode,
              .queryAllFriends,
              .myInviteRecords:
+            return .get
+        case .deleteActivity, .exitActivity, .setActivityInfo, .createActivity, .queryActivities, .joinActivity, .getResponded, .getWaiting, .updateActivityMemberInfo:
+            return .post
+        case .queryActivityInfo:
+            return .get
+        case .addMediaWithFlick, .getPageListWithFlick, .deleteMediaWithFlick:
+            return .post
+        case .mediaDetailWithFlick:
             return .get
         //FIXME: - 测试接口
         case .isAlreadyRegistered, .deleteInviteRecord: return .get
@@ -217,6 +312,76 @@ extension SquadAPI: TargetType {
                             ]
                 }
                 """.data(using: .utf8)!
+        case .getResponded:
+            return """
+            {
+                "code": 200,
+                "message": "",
+                "data": [
+                            {
+                              "id": 0,
+                              "accountId": 2,
+                              "activityId": 6,
+                              "nickname": "小明",
+                              "headimgurl": "string",
+                              "selectTime": "[{"startTime": 1597637876, "endTime": 1597652276}]",
+                              "memberGoing": 0,
+                              "createRemark": "string",
+                              "gmtCreate": "2020-08-15T08:30:03.748Z",
+                              "modifiedRemark": "string",
+                              "gmtModified": "2020-08-15T08:30:03.748Z"
+                            },
+                            {
+                              "id": 0,
+                              "accountId": 1,
+                              "activityId": 6,
+                              "nickname": "小李",
+                              "headimgurl": "string",
+                              "selectTime": "[]",
+                              "memberGoing": 0,
+                              "createRemark": "string",
+                              "gmtCreate": "2020-08-15T08:30:03.748Z",
+                              "modifiedRemark": "string",
+                              "gmtModified": "2020-08-15T08:30:03.748Z"
+                            }
+                        ]
+            }
+            """.data(using: .utf8)!
+        case .getWaiting:
+            return """
+            {
+                "code": 200,
+                "message": "",
+                "data": [
+                            {
+                              "id": 0,
+                              "accountId": 3,
+                              "activityId": 6,
+                              "nickname": "string",
+                              "headimgurl": "string",
+                              "selectTime": "[]",
+                              "memberGoing": 0,
+                              "createRemark": "string",
+                              "gmtCreate": "2020-08-15T08:30:03.748Z",
+                              "modifiedRemark": "string",
+                              "gmtModified": "2020-08-15T08:30:03.748Z"
+                            },
+                            {
+                              "id": 0,
+                              "accountId": 5,
+                              "activityId": 6,
+                              "nickname": "string",
+                              "headimgurl": "string",
+                              "selectTime": "[]",
+                              "memberGoing": 0,
+                              "createRemark": "string",
+                              "gmtCreate": "2020-08-15T08:30:03.748Z",
+                              "modifiedRemark": "string",
+                              "gmtModified": "2020-08-15T08:30:03.748Z"
+                            }
+                        ]
+            }
+            """.data(using: .utf8)!
         default:
             return Data()
         }
@@ -281,6 +446,99 @@ extension SquadAPI: TargetType {
                           "inviteSquadId": squadId,
                           "inviteStatus": Invitation.Status.doing.rawValue]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+        
+        case let .createActivity(type, squadId, title, location):
+            var params: [String: Any] = [
+                "accountId": User.currentUser()!.id,
+                "squadId": squadId,
+                "title": title,
+                "activityType": type.rawValue,
+                "activityStatus": ActivityStatus.prepare.rawValue
+            ]
+            location.flatMap{
+                params["address"] = $0.address
+                params["latitude"] = $0.latitude
+                params["longitude"] = $0.longitude
+            }
+            return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+        case .queryActivityInfo, .queryActivities:
+            return .requestPlain
+        case let .setActivityInfo(activityId, squadId, title, location, setTime, status):
+           
+            var params: [String: Any] = ["id": activityId, "squadId": squadId, "accountId": User.currentUser()!.id]
+            
+            title.flatMap {
+                params["title"] = $0
+            }
+            
+            setTime.flatMap {
+                params["startTime"] = $0.beginning
+                params["endTime"] = $0.end
+            }
+            
+            status.flatMap {
+                params["activityStatus"] = $0.rawValue
+            }
+                           
+            location.flatMap{
+                params["address"] = $0.address
+                params["latitude"] = $0.latitude
+                params["longitude"] = $0.longitude
+            }
+            
+            return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+        case let .joinActivity(activityId, myTime):
+            var params: [String: Any] = ["activityId": activityId]
+            
+            if let unwrappedMyTime = myTime, !unwrappedMyTime.isEmpty {
+                let jsonString = unwrappedMyTime.toJSONString()?
+                    .replacingOccurrences(of: " ", with: "")
+                    .replacingOccurrences(of: "\n", with: "")
+                if let unwrappedJsonString = jsonString {
+                    params["selectTime"] = unwrappedJsonString
+                }
+            }
+            
+            User.currentUser().flatMap {
+                params["accountId"] = $0.id
+                params["nickname"] = $0.nickname
+                params["headimgurl"] = $0.avatar
+            }
+            return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+        case .exitActivity, .deleteActivity, .getResponded, .getWaiting:
+            return .requestPlain
+        case let .updateActivityMemberInfo(activityId, myTime, isGoing):
+            var params: [String: Any] = ["activityId": activityId]
+            // 外部需要保证myTime数组个数不能为空
+            myTime.flatMap {
+                params["selectTime"] = $0.toJSONString()
+            }
+            // 是否参与
+            isGoing.flatMap {
+                params["memberGoing"] = $0 ? 1 : 0
+            }
+            User.currentUser().flatMap {
+                params["accountId"] = $0.id
+            }
+            return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+        case let .addMediaWithFlick(squadId, mediaType, media, title, url):
+            return .requestParameters(parameters: [
+                "squadId": squadId,
+                "accountId": User.currentUser()!.id,
+                "title": title,
+                "url": url,
+                "mediaType": mediaType.rawValue,
+                "media": media.map{ $0.base64EncodedString(options: .lineLength64Characters) }
+            ], encoding: JSONEncoding.default)
+        case let .getPageListWithFlick(pageIndex, pageSize, keyword):
+            return .requestParameters(parameters: [
+                "keyword": keyword,
+                "pageIndex": pageIndex,
+                "pageSize": pageSize,
+                "pageSorts": [["column": "gmtCreate", "asc": true]]
+            ], encoding: JSONEncoding.default)
+        case .deleteMediaWithFlick, .mediaDetailWithFlick:
+            return .requestPlain
         //FIXME: - 测试接口
         case .isAlreadyRegistered, .deleteInviteRecord, .inviteFriends:
             return .requestPlain

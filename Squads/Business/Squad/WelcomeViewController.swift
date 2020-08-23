@@ -20,14 +20,6 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.theme.backgroundColor = UIColor.background
-        
-        //自定义导航栏按钮
-        let leftBtn = UIButton()
-        leftBtn.setTitle("Cancel", for: .normal)
-        leftBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-        leftBtn.theme.titleColor(from: UIColor.text, for: .normal)
-        leftBtn.addTarget(self, action: #selector(leftBtnDidTapped), for: .touchUpInside)
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: leftBtn)
     }
 
     override func setupView() {
@@ -38,21 +30,26 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
         titleLab.textAlignment = .center
         view.addSubview(titleLab)
         
-        confirmBtn.setTitle("Join Squad", for: .normal)
+        confirmBtn.setTitle("Create New Squad", for: .normal)
         confirmBtn.setTitleColor(.white, for: .normal)
         confirmBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         confirmBtn.setBackgroundImage(UIImage(color: UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)), for: .normal)
         view.addSubview(confirmBtn)
         
-        inputField.text = reactor?.inviteCode
         inputField.placeholder = "Input Code"
         inputField.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
         inputField.borderStyle = .none
+        inputField.font = UIFont.systemFont(ofSize: 16)
+        inputField.theme.textColor = UIColor.textGray
+        inputField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 44))
+        inputField.leftViewMode = .always
+        inputField.setInputAccessoryView(target: self, selector: #selector(inputAccessoryDidTapped))
         view.addSubview(inputField)
         
         topDescriptionLab.textAlignment = .center
         topDescriptionLab.text = "Invited to existing Squad? Input Squad code here!"
         topDescriptionLab.font = UIFont.systemFont(ofSize: 16)
+        topDescriptionLab.numberOfLines = 0
         topDescriptionLab.theme.textColor = UIColor.textGray
         view.addSubview(topDescriptionLab)
         
@@ -64,35 +61,41 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
     }
     
     override func setupConstraints() {
+        
         titleLab.snp.makeConstraints { (maker) in
+            let offsetY: CGFloat = UIScreen.main.bounds.height > 667 ? 130 : 70
             maker.leading.trailing.equalToSuperview()
             if #available(iOS 11, *) {
-                maker.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(100)
+                maker.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(offsetY)
             } else {
-                maker.top.equalTo(topLayoutGuide.snp.bottom).offset(100)
+                maker.top.equalTo(topLayoutGuide.snp.bottom).offset(offsetY)
             }
         }
         
         topDescriptionLab.snp.makeConstraints { (maker) in
             maker.centerX.equalToSuperview()
-            maker.width.equalTo(300)
+            maker.width.equalTo(267)
             maker.top.equalTo(titleLab.snp.bottom).offset(50)
         }
         
         inputField.snp.makeConstraints { (maker) in
             maker.leading.trailing.equalToSuperview().inset(47)
             maker.height.equalTo(50)
-            maker.top.equalTo(topDescriptionLab.snp.bottom)
+            maker.top.equalTo(topDescriptionLab.snp.bottom).offset(30)
         }
         
         bottomDescriptionLab.snp.makeConstraints { (maker) in
             maker.centerX.width.equalTo(topDescriptionLab)
-            maker.top.equalTo(inputField.snp.bottom).offset(50)
+            maker.bottom.equalTo(confirmBtn.snp.top).offset(-30)
         }
         
         confirmBtn.snp.makeConstraints { (maker) in
             maker.leading.trailing.equalTo(inputField)
-            maker.top.equalTo(bottomDescriptionLab.snp.bottom).offset(30)
+            if #available(iOS 11, *) {
+                maker.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-130)
+            } else {
+                maker.bottom.equalTo(bottomLayoutGuide.snp.top).offset(-130)
+            }
             maker.height.equalTo(50)
         }
     }
@@ -109,12 +112,16 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
             .bind(to: rx.loading)
             .disposed(by: disposeBag)
         
-//        reactor.state
-//            .compactMap{ $0.squadDetail }
-//            .subscribe(onNext: { [unowned self] in
-//                self.showToast(message: $0.logoPath)
-//            })
-//            .disposed(by: disposeBag)
+        reactor.state
+            .map{ $0.squadDetail != nil }
+            .subscribe(onNext: { [unowned self] state in
+                if state {
+                    self.inputField.theme.textColor = UIColor.secondary
+                } else {
+                    self.inputField.theme.textColor = UIColor.textGray
+                }
+            })
+            .disposed(by: disposeBag)
         
         reactor.state
             .compactMap{ $0.joinSuccess }
@@ -124,34 +131,47 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
             })
             .disposed(by: disposeBag)
         
-        rx.viewWillAppear
-            .map{ Reactor.Action.requestSquadDetail }
+        let inputObservable: Observable<String> = inputField.rx.text.orEmpty.asObservable()
+        
+        inputObservable
+            .throttle(RxTimeInterval.milliseconds(500), scheduler: MainScheduler.instance)
+            .filter{ $0.count == 5 }
+            .map{ Reactor.Action.requestSquadDetail(code: $0) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
+          
+        inputObservable
+            .map { $0.count > 0 ? "Join Squad" : "Create New Squad" }
+            .bind(to: confirmBtn.rx.title(for: .normal))
+            .disposed(by: disposeBag)
         
-        let confirmBtnDidTapped: Observable<Reactor.Action?> = confirmBtn.rx.tap.map {
-            if let accountId = User.currentUser()?.id {
-                return Reactor.Action.joinSquad(accountId: accountId)
+        let confirmObservable: Observable<Void> = confirmBtn.rx.tap.asObservable()
+        
+        confirmObservable
+            .filter{ [unowned self] in self.inputField.text?.isEmpty == false }
+            .compactMap { _ in
+                if let accountId = User.currentUser()?.id {
+                    return Reactor.Action.joinSquad(accountId: accountId)
+                }
+                return nil
             }
-            return nil
-        }
-        
-        confirmBtnDidTapped
-            .compactMap{ $0 }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        confirmBtnDidTapped
-            .filter{ $0 == nil }
-            .trackAlertJustConfirm(title: "You are not logged in yet", target: self)
+        confirmObservable
+            .filter{ [unowned self] in self.inputField.text == nil || self.inputField.text?.isEmpty == true }
             .subscribe(onNext: { [unowned self] _ in
-                self.dismiss(animated: true)
+                let vc = CreateSquadViewController()
+                let nav = BaseNavigationController(rootViewController: vc)
+                nav.modalPresentationStyle = .fullScreen
+                self.present(nav, animated: true)
             })
             .disposed(by: disposeBag)
+
     }
     
     @objc
-    private func leftBtnDidTapped() {
-        dismiss(animated: true)
+    private func inputAccessoryDidTapped() {
+        inputField.resignFirstResponder()
     }
 }

@@ -9,27 +9,72 @@
 import UIKit
 
 // Frame.Origin.Y 固定为320
-class SingleChooseTimeView: BaseView {
+class SingleChooseTimeView: UIView {
 
-    var axisView = TimeLineAxisView()
-    var contentView = ActivityTimeLineView()
+    var axisView = TimeLineAxisControl()
+    private(set) var sectionView: ActivityTimeSectionView<TimeLineCollectionView>!
     
-    override func setupView() {
+    var currentSelectedTimes: TimePeriod? {
+        return sectionView.itemView.currentSelectedTimes
+    }
+    
+    init(cellStyle: TimeLineCollectionView.CellStyle) {
+        super.init(frame: .zero)
         
-        contentView.headerTitleStyle.textAlignment = .center
-        contentView.headerTitleStyle.textColor = UIColor.secondary
-        contentView.headerTitleStyle.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        let collectionView = TimeLineCollectionView()
+        switch cellStyle {
+        case .dash:
+            collectionView.canEdit = true
+            collectionView.cellStyle = .dash
+        case .num:
+            collectionView.canEdit = true
+            collectionView.cellStyle = .num
+            collectionView.adjustSelectedRect = true
+            collectionView.cancelChangedTimeWhenSelected = true
+            collectionView.insertSelectedRect = UIEdgeInsets(top: -10, left: -5, bottom: 10, right: -5)
+            
+            collectionView.foregroundView?.pendingEvent.layer.cornerRadius = 9
+            collectionView.foregroundView?.pendingEvent.layer.borderWidth = 8
+            collectionView.foregroundView?.pendingEvent.layer.borderColor = UIColor.white.cgColor
+            collectionView.foregroundView?.pendingEvent.layer.shadowColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25).cgColor
+            collectionView.foregroundView?.pendingEvent.layer.shadowOpacity = 1
+            collectionView.foregroundView?.pendingEvent.layer.shadowRadius = 4
+            collectionView.foregroundView?.pendingEvent.layer.shadowOffset = CGSize(width: 0, height: 4)
+        case .normal:
+            break
+        }
         
-        axisView.list = ["11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM"]
-        axisView.insert = UIEdgeInsets(top: 15, left: 5, bottom: 24, right: 0)
-        axisView.isHiddenLine = true
+        sectionView = ActivityTimeSectionView(itemView: collectionView)
+        sectionView.headerTitleStyle.textAlignment = .center
+        sectionView.headerTitleStyle.textColor = UIColor.secondary
+        sectionView.headerTitleStyle.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+
+        axisView.indicatorsMarginRight = 5
+        addSubviews(axisView, sectionView)
         
-        addSubviews(axisView, contentView)
+        axisView.scrollDidStop = { hour in
+            collectionView.scrollHalfHour(hour * 2)
+        }
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private var isFirstSetData: Bool = true
+    func setDataSource(originList: Array<TimePeriod>) {
+        
+        sectionView.itemView.setDataSource(originList)
+        
+        if isFirstSetData {
+            axisView.scrollToCurrentDate()
+            isFirstSetData = false
+        }
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        axisView.frame = CGRect(x: 0, y: 4, width: 45, height: 300)
-        contentView.frame = CGRect(x: axisView.frame.maxX, y: 0, width: bounds.width - axisView.frame.maxX, height: 320)
+        axisView.frame = CGRect(x: 0, y: 4, width: 50, height: 300)
+        sectionView.frame = CGRect(x: axisView.frame.maxX + 8, y: 0, width: bounds.width - axisView.frame.maxX, height: 320)
     }
 }

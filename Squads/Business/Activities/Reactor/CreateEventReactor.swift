@@ -10,14 +10,15 @@ import Foundation
 import ReactorKit
 import RxSwift
 import RxCocoa
+import MapKit
 
-enum EventCategory: CaseIterable, Equatable {
-    case food
-    case coffee
-    case hangout
-    case work
-    case exercise
-    case other
+enum EventCategory: Int, Codable, CaseIterable, Equatable {
+    case food = 1
+    case coffee = 2
+    case hangout = 3
+    case work = 4
+    case exercise = 5
+    case other = 6
     
     var themeColor: UIColor {
         switch self {
@@ -46,7 +47,7 @@ enum EventCategory: CaseIterable, Equatable {
     }
     
     static func == (lhs: EventCategory, rhs: EventCategory) -> Bool {
-        return lhs.title == rhs.title
+        return lhs.rawValue == rhs.rawValue
     }
 }
 
@@ -55,7 +56,7 @@ struct CreateEventLabels: CreateEventModelPrimaryKey {
     var selected: EventCategory?
 }
 
-struct SquadLocation: Equatable {
+struct SquadLocation: Codable, Equatable {
     // 地址
     var address: String
     // 经度
@@ -67,6 +68,24 @@ struct SquadLocation: Equatable {
         return lhs.address == rhs.address
             && lhs.longitude == rhs.longitude
             && lhs.latitude == rhs.latitude
+    }
+    
+    init(from decoder: Decoder) throws {
+        address = try decoder.decode("address")
+        longitude = try decoder.decode("longitude", as: String.self).asDouble()
+        latitude = try decoder.decode("latitude", as: String.self).asDouble()
+    }
+    
+    init(item: MKMapItem) {
+        self.address = item.name ?? "Unknown Address"
+        self.longitude = item.placemark.coordinate.longitude
+        self.latitude = item.placemark.coordinate.latitude
+    }
+    
+    init(address: String, longitude: Double, latitude: Double) {
+        self.address = address
+        self.longitude = longitude
+        self.latitude = latitude
     }
 }
 
@@ -95,19 +114,26 @@ enum CreateEventTextEditor: CreateEventModelPrimaryKey, Equatable {
         case .location: return false
         }
     }
+    
+    var toLocation: SquadLocation? {
+        switch self {
+        case .title: return nil
+        case let .location(value, _): return value
+        }
+    }
 }
 
 struct CreateEventCalendar: CreateEventModelPrimaryKey {
     // 选中的日期
     var selectedDate: Array<Date>
     
-    init(selectedDate: Array<Date> = []) {
+    init(selectedDate: Array<Date> = [Date()]) {
         self.selectedDate = selectedDate
     }
 }
 
 struct CreateEventAvailability: CreateEventModelPrimaryKey {
-    var dateList: Array<Date>!
+    var dateList: Array<TimePeriod>!
 }
 
 protocol CreateEventModelPrimaryKey { }
@@ -118,26 +144,41 @@ class CreateEventReactor: Reactor {
         case selectCategory(EventCategory)
         case selectedDates(Array<Date>)
         case selectedTextEditor(CreateEventTextEditor)
+        // 创建活动
+        case createActivity(Array<TimePeriod>?)
+        // 选择我的时间
+        case selectTime(TimePeriod)
     }
     
     enum Mutation {
         case setCategory(EventCategory)
         case setDates(Array<Date>)
         case setTextEditor(CreateEventTextEditor)
+        case setToast(String)
+        case setLoading(Bool)
+        case setActivityId(Int)
+        case setSelectedTimes(Array<TimePeriod>)
     }
     
     struct State {
-        var repos: Array<CreateEventModelPrimaryKey>
+        var repos: Array<CreateEventModelPrimaryKey> = [
+            CreateEventLabels(list: EventCategory.allCases, selected: nil),
+            CreateEventTextEditor.title(text: ""),
+            CreateEventTextEditor.location(value: nil, attachImageNamed: "CreateEvent Location"),
+            CreateEventCalendar(),
+            CreateEventAvailability()
+        ]
+        var activityId: Int?
+        var toast: String?
+        var isLoading: Bool?
     }
     
-    var initialState: State
+    var initialState = State()
+    var provider = OnlineProvider<SquadAPI>()
     
-    init() {
-        initialState = State(repos: [CreateEventLabels(list: EventCategory.allCases, selected: nil),
-                                     CreateEventTextEditor.title(text: ""),
-                                     CreateEventTextEditor.location(value: nil, attachImageNamed: "CreateEvent Location"),
-                                     CreateEventCalendar(),
-                                     CreateEventAvailability()])
+    let squadId: Int
+    init(squadId: Int) {
+        self.squadId = squadId
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -148,6 +189,36 @@ class CreateEventReactor: Reactor {
             return Observable.just(.setDates(list))
         case .selectedTextEditor(let model):
             return Observable.just(.setTextEditor(model))
+        case .selectTime(let time):
+            // 暂时只允许一个时间段
+            return Observable.just(.setSelectedTimes([time]))
+        case .createActivity(let myTime):
+            
+            guard let selectedType = (currentState.repos[0] as? CreateEventLabels)?.selected else {
+                return Observable.just(.setToast("Please select a category!"))
+            }
+            
+            guard case .title(let text) = (currentState.repos[1] as? CreateEventTextEditor) else {
+                return Observable.just(.setToast("Give it a name!"))
+            }
+            
+            guard let myTime = myTime, !myTime.isEmpty else {
+                return Observable.just(.setToast("Add your availability!"))
+            }
+            
+            let location = (currentState.repos[2] as? CreateEventTextEditor)?.toLocation
+            
+            return provider.request(target: .createActivity(type: selectedType, squadId: squadId, title: text, location: location), model: SquadActivity.self, atKeyPath: .data).asObservable().flatMap { [unowned self] result -> Observable<Mutation> in
+                switch result {
+                case .success(let model):
+                    return self.provider
+                        .request(target: .joinActivity(activityId: model.id, myTime: myTime), model: GeneralModel.Plain.self)
+                        .asObservable()
+                        .map { _ in Mutation.setActivityId(model.id)  }
+                case .failure(let error):
+                    return Observable.just(.setToast(error.message))
+                }
+            }.startWith(.setLoading(true))
         }
     }
     
@@ -160,7 +231,6 @@ class CreateEventReactor: Reactor {
             state.repos[0] = labels
         case .setDates(let listDate):
             state.repos[3] = CreateEventCalendar(selectedDate: listDate)
-            state.repos[4] = CreateEventAvailability(dateList: listDate)
         case .setTextEditor(let model):
             switch model {
             case let .location(value, attachImageNamed):
@@ -168,6 +238,17 @@ class CreateEventReactor: Reactor {
             case let .title(text):
                 state.repos[1] = CreateEventTextEditor.title(text: text)
             }
+        case .setToast(let s):
+            state.isLoading = false
+            state.toast = s
+        case .setLoading(let s):
+            state.toast = nil
+            state.isLoading = s
+        case .setActivityId(let s):
+            state.isLoading = false
+            state.activityId = s
+        case .setSelectedTimes(let list):
+            state.repos[4] = CreateEventAvailability(dateList: list)
         }
         return state
     }

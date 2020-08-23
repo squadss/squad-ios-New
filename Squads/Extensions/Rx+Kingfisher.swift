@@ -20,3 +20,15 @@ extension Reactive where Base: UIImageView {
         })
     }
 }
+
+
+extension Reactive where Base: UIButton {
+
+    public func imageURL(for state: UIControl.State = .normal,
+                         withPlaceholder placeholderImage: UIImage?,
+                         options: KingfisherOptionsInfo? = []) -> Binder<URL?> {
+        return Binder(self.base, binding: { (button: UIButton, url) in
+            button.kf.setImage(with: url, for: state, placeholder: placeholderImage, options: options, progressBlock: nil, completionHandler: nil)
+        })
+    }
+}

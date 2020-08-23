@@ -19,10 +19,10 @@ struct DataCenter {
         set { set(key: "userInfo", value: newValue) }
     }
     
-    static var topSquad: SquadDetail? {
-        get { return object(key: "squadDetail") }
-        set { set(key: "squadDetail", value: newValue) }
-    }
+//    static var topSquad: SquadDetail? {
+//        get { return object(key: "squadDetail") }
+//        set { set(key: "squadDetail", value: newValue) }
+//    }
 }
 
 extension DataCenter {
