@@ -14,6 +14,7 @@ PODS:
   - Kingfisher (4.10.1)
   - MessageKit (3.0.0):
     - InputBarAccessoryView (~> 4.2.2)
+  - MJRefresh (3.3.1)
   - MonkeyKing (1.16.0)
   - Moya (13.0.1):
     - Moya/Core (= 13.0.1)
@@ -46,6 +47,7 @@ PODS:
   - SwiftDate (6.1.0)
   - SwiftyUserDefaults (5.0.0)
   - Toast-Swift (5.0.1)
+  - TZImagePickerController (3.2.9)
 
 DEPENDENCIES:
   - Alamofire
@@ -60,6 +62,7 @@ DEPENDENCIES:
   - JXPhotoBrowser (from `https://github.com/JiongXing/PhotoBrowser.git`)
   - Kingfisher
   - MessageKit
+  - MJRefresh
   - MonkeyKing
   - Moya
   - "NSObject+Rx"
@@ -74,6 +77,7 @@ DEPENDENCIES:
   - SwiftDate
   - SwiftyUserDefaults
   - Toast-Swift
+  - TZImagePickerController
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -90,6 +94,7 @@ SPEC REPOS:
     - JTAppleCalendar
     - Kingfisher
     - MessageKit
+    - MJRefresh
     - MonkeyKing
     - Moya
     - "NSObject+Rx"
@@ -103,6 +108,7 @@ SPEC REPOS:
     - SwiftDate
     - SwiftyUserDefaults
     - Toast-Swift
+    - TZImagePickerController
 
 EXTERNAL SOURCES:
   JXPhotoBrowser:
@@ -143,6 +149,7 @@ SPEC CHECKSUMS:
   JXPhotoBrowser: 7f0bc11f02fbc84ae06829f922f32ce822aa9661
   Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
   MessageKit: e892a9ca49ebe6d82684d3a93ad84021fa23e2c6
+  MJRefresh: eeda70fbf0ad277f3178cef1cd0c3532591d6237
   MonkeyKing: dc5076dc206bf9e6eb427d618317eff1b44b0666
   Moya: f4a4b80ff2f8a4ffc208dfb31cd91636622fee6e
   "NSObject+Rx": 2eb2cf51fd1c554118449a7fbc36e4cd620b9e94
@@ -159,7 +166,8 @@ SPEC CHECKSUMS:
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
   SwiftyUserDefaults: 33fcb42bd1feb53a37d873feb62c82967db5f7f6
   Toast-Swift: 9b6a70f28b3bf0b96c40d46c0c4b9d6639846711
+  TZImagePickerController: 1f92968aa0e98a06b9e2eccca8560acc19254257
 
-PODFILE CHECKSUM: 4406c048fb69d5b7f80f29b05fb635cd6ea4ac34
+PODFILE CHECKSUM: d1a584a3c0f4c07364bb578f8b4845a6f4804056
 
 COCOAPODS: 1.9.1

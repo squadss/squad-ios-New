@@ -37,6 +37,21 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
         menuView.frame = CGRect(x: 50, y: infoView.frame.maxY + 45, width: headerView.frame.width - 100, height: 40)
         headerView.addSubviews(infoView, menuView)
         
+        #if DEBUG
+        // 点击三次获取SquadId, 便于进行邀请, 此功能只在DEBUG下生效
+        let tap = UITapGestureRecognizer()
+        tap.numberOfTapsRequired = 3
+        tap.rx.event
+            .subscribe(onNext: { _ in
+                if let id = self.reactor?.currentState.squadDetail?.id {
+                    UIPasteboard.general.string = "\(id)"
+                    self.showToast(message: "复制SquadId成功")
+                }
+            })
+            .disposed(by: disposeBag)
+        headerView.addGestureRecognizer(tap)
+        #endif
+        
         tableView.rowHeight = 55
         tableView.tableHeaderView = headerView
         tableView.tableFooterView = UIView()
@@ -118,6 +133,12 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
                     fatalError("未配置")
                 }
             })
+            .disposed(by: disposeBag)
+        
+        rx.viewDidLoad
+            .filter{ reactor.currentState.squadDetail == nil }
+            .map{ Reactor.Action.refreshSquadDetail }
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
     

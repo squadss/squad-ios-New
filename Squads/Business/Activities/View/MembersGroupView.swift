@@ -7,35 +7,38 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
-class MembersGroupView: BaseView {
+protocol MembersItemProtocol {
+    var url: URL? { get }
+}
 
-    var topTitle: String? {
+struct MembersSection<T: MembersItemProtocol> {
+    var title: String
+    var list: Array<T>
+}
+
+class MembersGroupView<T: MembersItemProtocol>: BaseView {
+
+    var topSection: MembersSection<T>! {
         didSet {
-            topLab.text = topTitle
+            topLab.text = topSection.title
+            topMemberView.members = topSection.list
         }
     }
-    var topList: Array<URL>? {
+    
+    var bottomSection: MembersSection<T>! {
         didSet {
-            guard let list = topList else { return }
-            topMemberView.members = list
+            bottomLab.text = bottomSection.title
+            bottomMembersView.members = bottomSection.list
         }
     }
-    var bottomTitle: String? {
-       didSet {
-           bottomLab.text = bottomTitle
-       }
-   }
-    var bottomList: Array<URL>?{
-        didSet {
-            guard let list = bottomList else { return }
-            bottomMembersView.members = list
-        }
-    }
+    
     private var topLab = UILabel()
-    private var topMemberView = SquadMembersView()
+    private var topMemberView = SquadMembersView<T>()
     private var bottomLab = UILabel()
-    private var bottomMembersView = SquadMembersView()
+    private var bottomMembersView = SquadMembersView<T>()
     
     override func setupView() {
         
@@ -72,4 +75,20 @@ class MembersGroupView: BaseView {
             maker.top.equalTo(bottomLab.snp.bottom).offset(8)
         }
     }
+}
+
+extension Reactive where Base: MembersGroupView<ActivityMember> {
+    
+    var topSection: Binder<MembersSection<ActivityMember>> {
+        return Binder(base) { refresh, model in
+            refresh.topSection = model
+        }
+    }
+    
+    var bottomSection: Binder<MembersSection<ActivityMember>> {
+        return Binder(base) { refresh, model in
+            refresh.bottomSection = model
+        }
+    }
+    
 }

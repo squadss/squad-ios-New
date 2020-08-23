@@ -58,7 +58,24 @@ extension String {
     }
     
     /// 插入空格(对手机号的操作)
-    public var insertSpacePhone: String {
+    public var insertSpacePhoneReferenceAmerica: String {
+        var insertPhone = scanToNumber
+        
+        if insertPhone.count > 3 {
+            let stringIndex = insertPhone.index(insertPhone.startIndex, offsetBy: 3)
+            insertPhone.insert(" ", at: stringIndex)
+        }
+        
+        if insertPhone.count > 7 {
+            let stringIndex = insertPhone.index(insertPhone.startIndex, offsetBy: 7)
+            insertPhone.insert(" ", at: stringIndex)
+        }
+        
+        return insertPhone
+    }
+    
+    /// 插入空格(对手机号的操作)
+    public var insertSpacePhoneReferenceChina: String {
         var insertPhone = scanToNumber
         
         if insertPhone.count > 3 {
@@ -105,5 +122,13 @@ extension String {
     
     var asFileURL: URL {
         return URL(fileURLWithPath: self)
+    }
+    
+    func asDouble(defaultValue: Double = 0) -> Double {
+        return Double(self) ?? defaultValue
+    }
+    
+    func asInt(defaultValue: Int = 0) -> Int {
+        return Int(self) ?? defaultValue
     }
 }

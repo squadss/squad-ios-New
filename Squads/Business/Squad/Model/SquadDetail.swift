@@ -18,6 +18,8 @@ struct SquadDetail: Codable {
     
     // 有得接口不返回此条数据
     var channels: Array<CreateChannel>?
+    var activities: Array<SquadActivity>?
+    var flicks: Array<FlickModel>?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -51,6 +53,18 @@ struct SquadDetail: Codable {
     func addChannels(_ list: Array<CreateChannel>) -> SquadDetail {
         var model = self
         model.channels = list
+        return model
+    }
+    
+    func addFlicks(_ list: Array<FlickModel>) -> SquadDetail {
+        var model = self
+        model.flicks = list
+        return model
+    }
+    
+    func addActivities(_ list: Array<SquadActivity>) -> SquadDetail {
+        var model = self
+        model.activities = list
         return model
     }
 }

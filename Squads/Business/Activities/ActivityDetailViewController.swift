@@ -12,13 +12,12 @@ import RxCocoa
 
 class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor> {
     
-    private var toolbar: ActivityDetailToolbar?
-    private var infoView: ActivityDetailInfoView?
-    private var chooseTimeView: MultipleChooseTimeView?
-    private var mapView: UIView?
-    private var membersView: MembersGroupView?
-    private var chattingView: ChattingCardView?
+    private var mapView = ActivityMapView()
     private let scrollView = UIScrollView()
+    private var toolbar = ActivityDetailToolbar()
+    private var infoView = ActivityDetailInfoView()
+    private var chooseTimeView = MultipleChooseTimeView()
+    private var membersView = MembersGroupView<ActivityMember>()
     
     override var allowedCustomBackBarItem: Bool {
         return false
@@ -26,278 +25,388 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        view.theme.backgroundColor = UIColor.background
+        
+        setupScrollView()
+        setupNavigationItem()
+        setupToolbarView()
+        setupInfoView()
+        setupChooseTimeView()
+        setupMapView()
+        setupMemberView()
+    }
+  
+    private func setupScrollView() {
         scrollView.showsHorizontalScrollIndicator = false
+        scrollView.alwaysBounceVertical = true
         view.addSubview(scrollView)
         scrollView.snp.safeFull(parent: self)
-        view.theme.backgroundColor = UIColor.background
+    }
+    
+    private func setupNavigationItem() {
         
         let leftBtn = UIButton()
         leftBtn.setTitle("Back", for: .normal)
         leftBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14)
         leftBtn.theme.titleColor(from: UIColor.text, for: .normal)
-        leftBtn.addTarget(self, action: #selector(leftBtnDidTapped), for: .touchUpInside)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: leftBtn)
         
         //自定义右导航按钮
         let rightBtn = UIButton()
         rightBtn.setImage(UIImage(named: "Navigation More"), for: .normal)
-        rightBtn.addTarget(self, action: #selector(rightBtnBtnDidTapped), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: rightBtn)
-    }
-    
-    @objc
-    private func leftBtnDidTapped() {
-        navigationController?.popViewController(animated: true)
-    }
-    
-    @objc
-    private func rightBtnBtnDidTapped() {
-        let scheduledVC = AvtivityConfirmScheduledViewController()
-        self.transitionPresent(scheduledVC, animated: true)
-    }
-
-    override func setupView() {
-        layoutUI()
-    }
-    
-    private func setupToolbar(reactor: ActivityDetailReactor) {
-        guard toolbar == nil else { return }
-        toolbar = ActivityDetailToolbar()
-        toolbar?.theme.backgroundColor = UIColor.secondary
-        toolbar?.didTapped.subscribe(onNext: { [unowned self] flag in
-            switch ActivityDetailReactor.ToolbarAction(rawValue: flag) {
-            case .setTime:
-                let settingViewController = AvtivityTimeSettingViewController()
-                self.transitionPresent(settingViewController, animated: true)
-                
-                settingViewController.contentView.respondedMembers = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
-
-                settingViewController.contentView.waitingMembers = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
-        //
-        //        timeSettingView.didTapped
-        //            .subscribe(onNext: {
-        //                print($0)
-        //            }).disposed(by: disposeBag)
-                
-            case .availabilityConfirm:
-                break
-            case .availabilityCancel:
-                break
-            case .goingConfirm:
-                break
-            case .goingCancel:
-                break
-            case .none:
-                break
-            }
+        
+        leftBtn.rx.tap.subscribe(onNext: { [unowned self] in
+            self.dismiss(animated: true)
         })
         .disposed(by: disposeBag)
-    }
-    
-    private func setupInfoView(reactor: ActivityDetailReactor) {
-        guard infoView == nil else { return }
-        infoView = ActivityDetailInfoView()
-        infoView?.titleBtn.theme.backgroundColor = UIColor.secondary
-        infoView?.titleBtn.theme.titleColor(from: UIColor.background, for: .normal)
-        infoView?.titleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        infoView?.titleBtn.layer.cornerRadius = 13
-        infoView?.titleBtn.setTitle("Saturday, April 4 at 1 PM", for: .normal)
         
-//        infoView?.titleBtn.theme.titleColor(from: UIColor.secondary, for: .normal)
-//        infoView?.titleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-//        infoView?.titleBtn.setTitle("TBD", for: .normal)
-        
-        infoView?.locationBtn.setTitle("Thai Basil", for: .normal)
-        infoView?.previewBtn.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"), for: .normal)
+        let action: Observable<Int> = rightBtn.rx.tap.flatMap{ [weak self] _ -> Observable<Int> in
+           let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+           let titleAction = RxAlertAction(title: "Change Title", type: 0, style: .default)
+           let locationAction = RxAlertAction(title: "Change Location", type: 1, style: .default)
+           let deleteAction = RxAlertAction(title: "Delete Event", type: 2, style: .default)
+           let cancelAction = RxAlertAction(title: "Cancel", type: -1, style: .cancel)
+           
+           return actionSheet
+               .addAction(actions: [titleAction, locationAction, deleteAction, cancelAction])
+               .map{ $0 }
+               .do(onSubscribed: {
+                   self?.present(actionSheet, animated: true, completion: nil)
+               })
+        }.share()
+
+        action.filter{ $0 == 0 }
+           .trackInputAlert(title: "Change Title", placeholder: "Please enter the Event name", default: "Confirm", target: self)
+           .map{ Reactor.Action.setDetail(nil, title: $0, location: nil) }
+           .bind(to: reactor!.action)
+           .disposed(by: disposeBag)
+
+        action.filter{ $0 == 2 }
+           .trackAlert(title: "Confirm that you want to delete this event?", target: self)
+           .map{ _ in Reactor.Action.deleteEvent }
+           .bind(to: reactor!.action)
+           .disposed(by: disposeBag)
+
+        action.filter{ $0 == 1 }
+           .subscribe(onNext: { [unowned self] type in
+               let locationVC = CreateEventLocationViewController()
+               locationVC.title = "Location"
+               locationVC.itemSelected.map { item in
+                   let location = SquadLocation(item: item)
+                   return Reactor.Action.setDetail(nil, title: nil, location: location)
+               }
+               .bind(to: self.reactor!.action)
+               .disposed(by: self.disposeBag)
+               let nav = UINavigationController(rootViewController: locationVC)
+               self.present(nav, animated: true)
+           })
+           .disposed(by: disposeBag)
     }
     
-    private func setupChooseTimeView(reactor: ActivityDetailReactor) {
-        guard chooseTimeView == nil else { return }
-        
-        chooseTimeView = MultipleChooseTimeView()
-        
-        let leftView = TimeLineDrawTapView()
-        chooseTimeView?.leftView.set(leftView)
-        chooseTimeView?.leftView.title = "SQUAD AVAILABILIT"
-        
-        let rightView = TimeLineDrawPageView()
-        chooseTimeView?.rightView.set(rightView)
-        chooseTimeView?.rightView.title = "CLICK YOUR TIME"
-    }
-    
-    private func setupMapView(reactor: ActivityDetailReactor) {
-        guard mapView == nil else { return }
-        mapView = UIView()
-    }
-    
-    private func setupMemberView(reactor: ActivityDetailReactor) {
-        guard membersView == nil else { return }
-        membersView = MembersGroupView()
-    }
-    
-    private func setupChattingView(reactor: ActivityDetailReactor) {
-        guard chattingView == nil else { return }
-        chattingView = ChattingCardView.hero()
-        chattingView?.headerView.switchBtn.rx.tap.subscribe(onNext: { [unowned self] in
-            let reactor = ChattingPreviewReactor()
-            let chattingVC = ChattingPreviewViewController(reactor: reactor)
-            let nav = BaseNavigationController(rootViewController: chattingVC)
-            nav.hero.isEnabled = true
-            nav.hero.modalAnimationType = .selectBy(presenting: .fade, dismissing: .fade)
-            nav.modalPresentationStyle = .fullScreen
-            self.present(nav, animated: true)
-        })
-        .disposed(by: disposeBag)
-    }
-    
-    private func layoutUI() {
+    private func layoutScrollSubviews() {
         
         var contentHeight: CGFloat = 0
-        scrollView.subviews.forEach{ $0.removeFromSuperview() }
         
-        if let unwrappedToolbar = toolbar {
-            toolbar?.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 48)
-            scrollView.addSubview(unwrappedToolbar)
-            contentHeight += unwrappedToolbar.frame.height
+        if !toolbar.isHidden {
+            contentHeight += toolbar.frame.height
         }
         
-        if let unwrappedInfoView = infoView {
+        if !infoView.isHidden {
             let offsetY: CGFloat = 14
-            infoView?.frame = CGRect(x: 33, y: contentHeight + offsetY, width: view.bounds.width - 64, height: 70)
-            scrollView.addSubview(unwrappedInfoView)
-            contentHeight += unwrappedInfoView.frame.height + offsetY
+            infoView.frame.origin.y = contentHeight + offsetY
+            contentHeight += infoView.frame.height + offsetY
         }
         
-        if let unwrappedView = chooseTimeView {
-            chooseTimeView?.frame = CGRect(x: 25, y: contentHeight, width: view.bounds.width - 55, height: 320)
-            scrollView.addSubview(unwrappedView)
-            contentHeight += unwrappedView.frame.height
+        if !chooseTimeView.isHidden {
+            chooseTimeView.frame.origin.y = contentHeight
+            contentHeight += chooseTimeView.frame.height
         }
         
-        if let unwrappedView = mapView {
-            mapView?.frame = CGRect(x: 33, y: contentHeight, width: view.bounds.width - 66, height: 300)
-            scrollView.addSubview(unwrappedView)
-            contentHeight += unwrappedView.frame.height
+        if !mapView.isHidden {
+            mapView.frame.origin.y = contentHeight
+            contentHeight += mapView.frame.height
         }
         
-        if let unwrappedView = membersView {
-            membersView?.frame = CGRect(x: 33, y: contentHeight, width: view.bounds.width  - 66, height: 135)
-            scrollView.addSubview(unwrappedView)
-            contentHeight += unwrappedView.frame.height
-        }
-        
-        if let unwrappedView = chattingView {
-            chattingView?.frame = CGRect(x: 0, y: contentHeight, width: view.bounds.width, height: 230)
-            scrollView.addSubviews(unwrappedView)
-            contentHeight += unwrappedView.frame.height
+        if !membersView.isHidden {
+            membersView.frame.origin.y = contentHeight
+            contentHeight += membersView.frame.height
         }
         
         scrollView.contentSize = CGSize(width: view.bounds.width, height: contentHeight)
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        // 根据activityState 来确定显示哪一种
-            toolbar?.dataSource = [.title("Know your squad's availability?"), .button(flag: "setTime", title: "Set Time", image: nil, showShadow: true)]
-//                toolbar.dataSource = [.title("Mark your availability!"),
-//                                      .button(flag: "confirmAvailability", title: nil, image: UIImage(named: "Activities Yes")),
-//                                      .button(flag: "cancelAvailability", title: nil, image: UIImage(named: "Activities No"))]
-//                toolbar.dataSource = [.title("Going?"),
-//                                      .button(flag: "confirmGoing", title: nil, image: UIImage(named: "Activities Yes")),
-//                                      .button(flag: "cancelGoing", title: nil, image: UIImage(named: "Activities No"))]
-        
-        // 加载消息
-        chattingView?.loadFirstMessages()
-        
-        // 显示成员信息
-        membersView?.topTitle = "RESPONDED"
-        membersView?.topList = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
-        membersView?.bottomTitle = "WAITING"
-        membersView?.bottomList = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
-        
-//        chooseTimeView?.rightView.axisXDates = []
-//
-//        chooseTimeView?.leftView.axisXDates = []
-    }
-    
     override func bind(reactor: ActivityDetailReactor) {
         
         reactor.state
-            .map{ $0.activityStatus }
-            .distinctUntilChanged()
-            .subscribe(onNext: { [unowned self] state in
-                switch state {
-                case .create:
-                    self.setupToolbar(reactor: reactor)
-                    self.setupInfoView(reactor: reactor)
-                    self.setupChooseTimeView(reactor: reactor)
-                    self.setupMemberView(reactor: reactor)
-//                    self.setupChattingView(reactor: reactor)
-                default: break
+            .compactMap{ $0.exitActivity }
+            .subscribe(onNext: { _ in
+                self.dismiss(animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap { $0.isLoading }
+            .bind(to: rx.loading)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap { $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+    
+        reactor.state
+            .compactMap { state -> (SquadActivity, ActivityMember)? in
+                guard state.repos != nil && state.currentMemberProfile != nil else { return nil }
+                return (state.repos!, state.currentMemberProfile!)
+            }
+            .distinctUntilChanged({ (arg0, arg1) -> Bool in
+                return arg0.0.isEquadTo(arg1.0) && arg0.1.isEquadTo(arg1.1)
+            })
+            .subscribe(onNext: { [unowned self] (detail, profile) in
+                // 设置标题
+                self.title = detail.title
+                
+                self.configToolbarView(detail: detail, currentMember: profile)
+                self.configInfoView(detail: detail, currentMember: profile)
+                self.configChooseTimeView(detail: detail, currentMember: profile)
+                self.configMapView(detail: detail, currentMember: profile)
+                self.configMemberView(detail: detail, currentMember: profile)
+                
+                self.layoutScrollSubviews()
+            })
+            .disposed(by: disposeBag)
+        
+        bindToolbarView(reactor: reactor)
+        bindInfoView(reactor: reactor)
+        bindChooseTimeView(reactor: reactor)
+        bindMapView(reactor: reactor)
+        bindMemberView(reactor: reactor)
+        
+        rx.viewDidLoad
+            .map { Reactor.Action.requestDetail }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+//        chooseTimeView.drawView.itemView.timePeriodObservable
+//            .map{ Reactor.Action.selectTime($0) }
+//            .bind(to: reactor.action)
+//            .disposed(by: disposeBag)
+    }
+    
+}
+
+//MARK: - Toolbar 相关
+extension ActivityDetailViewController {
+    
+    private func setupToolbarView()  {
+        toolbar.isHidden = true
+        toolbar.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 48)
+        toolbar.theme.backgroundColor = UIColor.secondary
+        scrollView.addSubview(toolbar)
+    }
+    
+    private func configToolbarView(detail: SquadActivity,currentMember: ActivityMember) {
+        toolbar.isHidden = false
+        switch detail.activityStatus {
+        case .prepare:
+            // 是否为创建者, 并且时间已经设置过了
+            if currentMember.accountId == detail.accountId && currentMember.isResponded {
+                toolbar.dataSource = [
+                    .title("Know your squad's availability?"),
+                    .button(flag: "setTime",
+                           title: "Set Time",
+                           showShadow: true)]
+            } else {
+                // 在创建者没有Set Time之前, 都可以变更时间
+                toolbar.dataSource = [.title("Add your availability!")]
+            }
+        case .setTime:
+            toolbar.dataSource = [
+                .title("Going?"),
+                .button(flag: "confirmGoing",
+                       image: UIImage(named: "Activity Confirm Normal"),
+                       disableImage: UIImage(named: "Activity Confirm Focus"),
+                       isEnabled: currentMember.isGoing == false),
+                .button(flag: "cancelGoing",
+                       image: UIImage(named: "Activity Reject Normal"),
+                       disableImage: UIImage(named: "Activity Reject Focus"),
+                       isEnabled: currentMember.isGoing == true)]
+        case .running:
+            break
+        }
+    }
+    
+    private func bindToolbarView(reactor: ActivityDetailReactor) {
+        
+        let didTapped: Observable<String> = toolbar.didTapped.share()
+        
+        didTapped
+            .compactMap { flag in
+                switch flag {
+                case "confirmGoing": return Reactor.Action.handlerGoing(isAccept: true)
+                case "cancelGoing": return Reactor.Action.handlerGoing(isAccept: false)
+                default: return nil
                 }
+            }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+            
+        didTapped
+            .filter{ $0 == "setTime" }
+            .subscribe(onNext: { [unowned self] _ in
+                let settingViewController = AvtivityTimeSettingViewController()
+                self.transitionPresent(settingViewController, animated: true)
+                if let activity = reactor.currentState.repos {
+                    settingViewController.activityType = activity.activityType
+                }
+                settingViewController.topSection = reactor.currentState.topMembers
+                settingViewController.bottomSection = reactor.currentState.bottomMembers
+                settingViewController.didSelectTime
+                    .map{ Reactor.Action.setDetail($0, title: nil, location: nil) }
+                    .bind(to: reactor.action)
+                    .disposed(by: self.disposeBag)
             })
             .disposed(by: disposeBag)
     }
     
-    @objc
-    private func btnDidTapped() {
+}
+
+//MARK: - ChooseTime 相关
+extension ActivityDetailViewController {
+    
+    private func setupChooseTimeView() {
+        chooseTimeView.isHidden = true
+        chooseTimeView.frame = CGRect(x: 15, y: 0, width: view.bounds.width - 55, height: 320)
+        scrollView.addSubview(chooseTimeView)
+    }
+    
+    private func configChooseTimeView(detail: SquadActivity, currentMember: ActivityMember) {
+        
+        guard detail.activityStatus == .prepare else {
+            chooseTimeView.isHidden = true
+            return
+        }
+        chooseTimeView.isHidden = false
+        
+        // 这里必须传个时间数组过来, 并且不能为空, 因为我们是根据myTime中的第一个元素, 来判断当前选择的日期是哪天
+        // 如果后面需求变更了, myTime可为空, 则必须在CreateEvent中增加一个日期的字段, 来表示活动选择的日期
+        if !currentMember.myTime.isEmpty, let members = reactor?.currentState.topMembers {
+            let originList = members.list.flatMap{ $0.myTime }
+            chooseTimeView.setDataSource(myTime: currentMember.myTime, originList: originList)
+        }
+    }
+    
+    private func bindChooseTimeView(reactor: ActivityDetailReactor) {
+        
+//        chooseTimeView.displayView.itemView
+//            .didEndSelectedTimeObservable
+//            .throttle(RxTimeInterval.seconds(2), scheduler: MainScheduler.instance)
+//            .map{ Reactor.Action. }
+        
+//        reactor.state
+//            .compactMap{ $0.selectedTimes }
+//            .bind(to: chooseTimeView.displayView.itemView.rx.setDataSource())
+//            .disposed(by: disposeBag)
+    }
+}
+
+//MARK: - Activity Info 相关
+extension ActivityDetailViewController {
+    
+    private func setupInfoView() {
+        infoView.isHidden = true
+        infoView.frame = CGRect(x: 33, y: 0, width: view.bounds.width - 64, height: 70)
+        scrollView.addSubview(infoView)
+    }
+    
+    private func configInfoView(detail: SquadActivity, currentMember: ActivityMember) {
+        switch detail.activityStatus {
+        case .prepare:
+            infoView.titleBtn.theme.backgroundColor = UIColor.secondary
+            infoView.titleBtn.theme.titleColor(from: UIColor.background, for: .normal)
+            infoView.titleBtn.frame.size.width = 74
+            infoView.titleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+            infoView.titleBtn.setTitle("TBD", for: .normal)
+            infoView.titleBtn.layer.cornerRadius = 13
+        case .setTime:
+            infoView.titleBtn.theme.backgroundColor = UIColor.background
+            infoView.titleBtn.theme.titleColor(from: UIColor.secondary, for: .normal)
+            infoView.titleBtn.frame.size.width = 200
+            infoView.titleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+            infoView.titleBtn.setTitle("Saturday, April 4 at 1 PM", for: .normal)
+            infoView.titleBtn.layer.cornerRadius = 0
+        case .running:
+            break
+        }
+        infoView.isHidden = false
+        infoView.locationBtn.setTitle("Thai Basil", for: .normal)
+        infoView.previewBtn.setImage(detail.activityType.image, for: .normal)
+    }
+    
+    private func bindInfoView(reactor: ActivityDetailReactor) {
         
     }
     
 }
 
-extension RxSwift.Reactive where Base: UIViewController {
-    public var viewDidLoad: Observable<Void> {
-        return methodInvoked(#selector(UIViewController.viewDidLoad))
-            .map { _ in return }
+//MARK: - Map 地图相关
+extension ActivityDetailViewController {
+    
+    private func setupMapView() {
+        let width: CGFloat = view.bounds.width - 66
+        mapView.frame = CGRect(x: 33, y: 0, width: width, height: 0.57 * width)
+        mapView.isHidden = true
+        scrollView.addSubview(mapView)
     }
     
-    public var viewWillAppear: Observable<Void> {
-        return methodInvoked(#selector(UIViewController.viewWillAppear))
-            .map { _ in return }
-    }
-}
-
-extension RxSwift.Reactive where Base: UIApplication {
-    
-    public var delegate: DelegateProxy<UIApplication, UIApplicationDelegate> {
-        return RxApplicationDelegateProxy.proxy(for: base)
+    private func configMapView(detail: SquadActivity, currentMember: ActivityMember) {
+        guard detail.activityStatus == .setTime else {
+            mapView.isHidden = true
+            return
+        }
+        mapView.isHidden = false
     }
     
-    public var applicationWillEnterForeground: Observable<Void> {
-        return delegate.methodInvoked(#selector(UIApplicationDelegate.applicationWillEnterForeground(_:))).map{ _ in () }
-    }
-    
-    public var applicationDidEnterBackground: Observable<Void> {
-        return delegate.methodInvoked(#selector(UIApplicationDelegate.applicationDidEnterBackground(_:)))
-            .map { _ in () }
+    private func bindMapView(reactor: ActivityDetailReactor) {
+        
     }
 }
 
-open class RxApplicationDelegateProxy: DelegateProxy<UIApplication, UIApplicationDelegate>, DelegateProxyType, UIApplicationDelegate {
+//MARK: - Members 成员相关
+extension ActivityDetailViewController {
     
-    // Typed parent object.
-    public weak private(set) var application: UIApplication?
-    
-    init(application: ParentObject) {
-        self.application = application
-        super.init(parentObject: application, delegateProxy: RxApplicationDelegateProxy.self)
+    private func setupMemberView() {
+        membersView.frame = CGRect(x: 33, y: 0, width: view.bounds.width  - 66, height: 135)
+        scrollView.addSubview(membersView)
     }
     
-    public static func registerKnownImplementations() {
-        self.register { RxApplicationDelegateProxy(application: $0) }
+    private func configMemberView(detail: SquadActivity, currentMember: ActivityMember) {
+//        guard detail.activityStatus == .setTime else {
+//            membersView.isHidden = true
+//            return
+//        }
+        membersView.isHidden = false
     }
     
-    public static func currentDelegate(for object: UIApplication) -> UIApplicationDelegate? {
-        return object.delegate
+    private func bindMemberView(reactor: ActivityDetailReactor) {
+        
+        reactor.state
+            .compactMap{ $0.topMembers }
+            .bind(to: membersView.rx.topSection)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.bottomMembers }
+            .bind(to: membersView.rx.bottomSection)
+            .disposed(by: disposeBag)
     }
-    
-    public static func setCurrentDelegate(_ delegate: UIApplicationDelegate?, to object: UIApplication) {
-        object.delegate = delegate
-    }
-    
-    override open func setForwardToDelegate(_ forwardToDelegate: UIApplicationDelegate?, retainDelegate: Bool) {
-        super.setForwardToDelegate(forwardToDelegate, retainDelegate: true)
-    }
-    
 }
+
+extension ActivityMember: MembersItemProtocol {
+    var url: URL? {
+        return avatar.asURL
+    }
+}
+

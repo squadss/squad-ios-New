@@ -19,6 +19,11 @@ enum RefreshChannelsAction {
     case insert(list: Array<V2TIMConversation>)
 }
 
+enum RefreshsPageAction {
+    case network
+    case cache
+}
+
 final class SquadViewController: ReactorViewController<SquadReactor>, UITableViewDelegate {
 
     private var stackView: UIStackView!
@@ -132,17 +137,32 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     }
     
     override func addTouchAction() {
-        guard let squadId = reactor?.currentSquadId else { return }
         tableView.rx.itemSelected
             .subscribe(onNext: { [unowned self] indexPath in
-                if indexPath.section == 1 {
-                    let activityReactor = ActivityDetailReactor()
-                    let activityDetailVC = ActivityDetailViewController(reactor: activityReactor)
-                    self.navigationController?.pushViewController(activityDetailVC, animated: true)
-                } else if indexPath.section == 2 {
-                    let model = self.dataSource[indexPath] as! SquadChannel
-                    let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId, groupName: model.title, squadId: squadId))
-                    self.navigationController?.pushViewController(chattingVC, animated: true)
+                let squadId = self.reactor!.currentSquadId
+                switch indexPath.section {
+                case 1:
+                    if let model = self.dataSource[indexPath] as? SquadActivity {
+                        let activityReactor = ActivityDetailReactor(activityId: model.id, squadId: squadId)
+                        let activityDetailVC = ActivityDetailViewController(reactor: activityReactor)
+                        let nav = BaseNavigationController(rootViewController: activityDetailVC)
+                        nav.modalPresentationStyle = .fullScreen
+                        self.present(nav, animated: true)
+                    } else {
+                        let reactor = CreateEventReactor(squadId: squadId)
+                        let vc = CreateEventViewController(reactor: reactor)
+                        vc.title = "Create Event"
+                        let nav = BaseNavigationController(rootViewController: vc)
+                        nav.modalPresentationStyle = .fullScreen
+                        self.present(nav, animated: true)
+                    }
+                case 2:
+                    if let model = self.dataSource[indexPath] as? SquadChannel {
+                        let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId, groupName: model.title, squadId: squadId))
+                        self.navigationController?.pushViewController(chattingVC, animated: true)
+                    }
+                default:
+                    break
                 }
             })
             .disposed(by: disposeBag)
@@ -187,13 +207,19 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                 return cell
             case is SquadActivity:
                 let cell = tableView.dequeue(Reusable.squadActivityCell)!
+                let model = model as! SquadActivity
                 cell.contentLab.text = "RSF"
-                cell.titleLab.text = "Lunch"
-                cell.dateLab.text = "TODAY AT 1:30 PM"
-                cell.pritureView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"))
-                cell.membersView.members = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
+                cell.titleLab.text = model.activityType.title
+                cell.pritureView.image = model.activityType.image
+                cell.dateLab.text = model.title
+//                cell.membersView.members = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"), URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
                 
-                cell.containterView.borderColor = .red
+                if model.activityStatus == .prepare {
+                    cell.containterView.borderColor = nil
+                } else {
+                    cell.containterView.borderColor = .red
+                }
+                
                 cell.selectionStyle = .none
                 return cell
             case is SquadChannel:
@@ -201,17 +227,18 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                 cell.selectionStyle = .none
                 cell.setData(model as! SquadChannel)
                 return cell
-            case is SquadSqroll:
+            case is FlickModel:
                 let cell = tableView.dequeue(Reusable.squadSqrollCell)!
-                let list = (model as! SquadSqroll).list
-                cell.dataSubject.onNext(list)
+                let model = (model as! FlickModel)
+                let list = model.pirtureList
+                cell.dataSource = list
                 cell.tapObservable
                     .subscribe(onNext: {
                         let browser = JXPhotoBrowser()
                         browser.numberOfItems = { list.count }
                         browser.reloadCellAtIndex = { context in
                             let cell = context.cell as? JXPhotoBrowserImageCell
-                            cell?.imageView.kf.setImage(with: list[context.index].asURL, placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+                            cell?.imageView.kf.setImage(with: list[context.index], placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
                         }
                         browser.cellClassAtIndex = { _ in JXPhotoBrowserImageCell.self }
                         browser.pageIndex = list.firstIndex(of: $0) ?? 0
@@ -255,6 +282,12 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             .map{ Reactor.Action.refreshChannels($0) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
+        
+        //FIXME: - 后期会更改这种方式
+        rx.viewWillAppear
+            .map{ Reactor.Action.refreshPage(.network) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
     }
     
     @objc
@@ -262,14 +295,16 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         let index = sender.tag - 200
         switch index {
         case 0: //Calendar
-            let reactor = CreateEventReactor()
+            let squadId = reactor!.currentSquadId
+            let reactor = CreateEventReactor(squadId: squadId)
             let vc = CreateEventViewController(reactor: reactor)
             vc.title = "Create Event"
             let nav = BaseNavigationController(rootViewController: vc)
             nav.modalPresentationStyle = .fullScreen
             present(nav, animated: true)
         case 1: // New Memory
-            let reactor = CreateFlickReactor()
+            let squadId = reactor!.currentSquadId
+            let reactor = CreateFlickReactor(squadId: squadId)
             let vc = CreateFlickViewController(reactor: reactor)
             let nav = BaseNavigationController(rootViewController: vc)
             nav.modalPresentationStyle = .fullScreen
@@ -277,7 +312,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             reactor.state
                 .filter{ $0.postSuccess == true }
                 .subscribe(onNext: { [unowned self] _ in
-                    let reactor = FlicksReactor()
+                    let reactor = FlicksReactor(squadId: squadId)
                     let vc = FlicksViewController(reactor: reactor)
                     vc.title = "Flicks"
                     self.navigationController?.pushViewController(vc, animated: true)
@@ -312,7 +347,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     
     @objc
     private func rightBtnBtnDidTapped() {
-        let reactor = FlicksReactor()
+        let squadId = reactor!.currentSquadId
+        let reactor = FlicksReactor(squadId: squadId)
         let vc = FlicksViewController(reactor: reactor)
         vc.title = "Flicks"
         navigationController?.pushViewController(vc, animated: true)
@@ -320,7 +356,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     
     @objc
     private func activitiesBtnDidTapped() {
-        let reactor = SquadActivitiesReactor()
+        guard let currentSquadId = reactor?.currentSquadId else { return }
+        let reactor = SquadActivitiesReactor(squadId: currentSquadId)
         let vc = SquadActivitiesViewController(reactor: reactor)
         vc.title = "Activities"
         navigationController?.pushViewController(vc, animated: true)
@@ -402,7 +439,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             return 81.0
         case is SquadChannel:
             return 70.0
-        case is SquadSqroll:
+        case is FlickModel:
             return 100.0
         default:
             fatalError("没有配置cell")

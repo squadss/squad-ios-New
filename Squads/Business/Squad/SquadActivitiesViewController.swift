@@ -14,7 +14,7 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
     private var searchView = UIInputView()
     private var tableView = UITableView(frame: .zero, style: .grouped)
     
-    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, String>>!
+    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadActivity>>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,10 +25,13 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
         
         view.addSubview(searchView)
         
+        let layoutInsets = UIApplication.shared.keyWindow?.layoutInsets ?? .zero
+        
         tableView.delegate = self
         tableView.separatorStyle = .none
         tableView.register(Reusable.activityCalendarCell)
         tableView.theme.backgroundColor = UIColor.background
+        tableView.contentInset.bottom = layoutInsets.bottom
         tableView.tableFooterView = UIView(frame: .zero)
         tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 20))
         
@@ -52,26 +55,28 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
         
         tableView.snp.makeConstraints { (maker) in
             maker.leading.trailing.equalToSuperview()
-            if #available(iOS 11, *) {
-                maker.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            } else {
-                maker.bottom.equalTo(bottomLayoutGuide.snp.top)
-            }
+            maker.bottom.equalToSuperview()
             maker.top.equalTo(searchView)
         }
     }
     
     override func bind(reactor: SquadActivitiesReactor) {
-        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
+        dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadActivity>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
+            
+            let timeFormmater = TimeFormatter(startTime: model.startTime, endTime: model.endTime)
             
             let cell = tableView.dequeue(Reusable.activityCalendarCell)!
             cell.contentLab.text = "RSF"
-            cell.titleLab.text = "Lunch"
-            cell.dateLab.text = "TODAY AT 1:30 PM"
-            cell.pritureView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"))
-            cell.membersView.members = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
+            cell.titleLab.text = model.title
+            cell.dateLab.text = timeFormmater?.dayFormat ?? ""
             cell.ownerLab.text = "Suggested by Daniel"
-            cell.containterView.borderColor = .red
+            cell.pritureView.image = model.activityType.image
+//            cell.membersView.members = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
+            if model.activityStatus == .prepare {
+                cell.containterView.borderColor = nil
+            } else {
+                cell.containterView.borderColor = .red
+            }
             cell.calendayView.day = "8"
             cell.calendayView.month = "Apr"
             cell.selectionStyle = .none
@@ -83,11 +88,17 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
             .map{ [SectionModel(model: "", items: $0.repos)] }
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
+        
+        rx.viewDidLoad
+            .map{ Reactor.Action.requestList }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
     }
     
     @objc
     private func rightBarItemDidTapped() {
-        let reactor = CreateEventReactor()
+        let squadId = reactor!.squadId
+        let reactor = CreateEventReactor(squadId: squadId)
         let vc = CreateEventViewController(reactor: reactor)
         vc.title = "Create Event"
         let nav = BaseNavigationController(rootViewController: vc)

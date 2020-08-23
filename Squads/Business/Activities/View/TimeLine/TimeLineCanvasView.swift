@@ -12,6 +12,7 @@ class TimeLineCanvasView: BaseView {
     
     // 每一项的行高
     var gridHeight: CGFloat = 25
+    
     // 每一项的行宽
     var gridWidth: CGFloat {
         return bounds.width / CGFloat(max(column, 1))
@@ -46,6 +47,7 @@ class TimeLineCanvasView: BaseView {
         borderLayer.theme.strokeColor = UIColor.textGray.map{ $0?.cgColor }
         borderLayer.fillColor = UIColor.clear.cgColor
         layer.addSublayer(borderLayer)
+        layer.masksToBounds = true
     }
     
     private func drawBorderPath() {
@@ -118,8 +120,8 @@ class TimeLineCanvasView: BaseView {
     
     private func getLayerFromCache(key: String?) -> TimeLineLayer {
         if let layer = backgroundLayers.last {
-            layer.key = key
             backgroundLayers.removeLast()
+            layer.key = key
             return layer
         }
         let layer = TimeLineLayer()

@@ -10,11 +10,9 @@ import UIKit
 
 class TimeLineLayer: CAShapeLayer {
     
-    var rect: CGRect? {
-        didSet {
-            guard let unwrappedRect = rect else { return }
-            path = UIBezierPath(rect: unwrappedRect).cgPath
-        }
+    var rect: CGRect {
+        set { path = UIBezierPath(rect: newValue).cgPath }
+        get { return path?.boundingBox ?? .zero }
     }
     
     var key: String?
@@ -22,5 +20,11 @@ class TimeLineLayer: CAShapeLayer {
     override func removeFromSuperlayer() {
         super.removeFromSuperlayer()
         key = nil
+    }
+    
+    // 设置内容偏移
+    func contentOffsetY(_ value: CGFloat) {
+        guard !rect.isEmpty else { return }
+        rect.origin.y += value
     }
 }

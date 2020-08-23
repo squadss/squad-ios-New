@@ -9,9 +9,12 @@
 import UIKit
 import Photos
 import RxSwift
+import RxRelay
 import RxDataSources
+import JXPhotoBrowser
+import TZImagePickerController
 
-class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICollectionViewDelegateFlowLayout {
+class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICollectionViewDelegateFlowLayout, TZImagePickerControllerDelegate {
     
     // 纵横比
     let aspectRatio: CGFloat = 1.12
@@ -43,7 +46,9 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
     private var imageManager: PHCachingImageManager!
     private var contentDataSource: RxCollectionViewSectionedReloadDataSource<SectionModel<String, PHAsset>>!
     private var photoDataSource: RxCollectionViewSectionedReloadDataSource<SectionModel<String, CreateFlickReactor.CellType>>!
+    private var didFinishPickingPhotos = PublishRelay<Array<PHAsset>>()
     
+    private let rightBtn = UIButton()
     private lazy var inputBar = CreateFlickInputView()
     override var inputAccessoryView: UIView? {
         return inputBar
@@ -51,6 +56,8 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
     override var canBecomeFirstResponder: Bool {
         return true
     }
+    
+    private let picker = AvatarPicker()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -93,11 +100,9 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: leftBtn)
         
         //自定义右导航按钮
-        let rightBtn = UIButton()
         rightBtn.setTitle("Post", for: .normal)
         rightBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         rightBtn.setTitleColor(UIColor(red: 0.925, green: 0.384, blue: 0.337, alpha: 1), for: .normal)
-        rightBtn.addTarget(self, action: #selector(rightBtnBtnDidTapped), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: rightBtn)
     }
     
@@ -106,7 +111,7 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
         inputBar.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 54 + insetsBottom)
         inputBar.insert.bottom = insetsBottom
         inputBar.backgroundColor = UIColor(hexString: "#F1F1F1")
-        inputBar.textField.text = "Add a name..."
+        inputBar.textField.placeholder = "Add a name..."
         inputBar.textField.font = UIFont.systemFont(ofSize: 16)
         inputBar.textField.theme.textColor = UIColor.textGray
         inputBar.textField.returnKeyType = .done
@@ -213,8 +218,17 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
             
             cell.pirtureView.rx.tap
                 .subscribe(onNext: { [unowned self] in
-                    //TODO: 图片预览
-                    self.showToast(message: "PirtureView")
+                    let browser = JXPhotoBrowser()
+                    browser.numberOfItems = { reactor.currentState.selectedPhotos?.count ?? 0 }
+                    browser.reloadCellAtIndex = { context in
+                        let browerCell = context.cell as? JXPhotoBrowserImageCell
+                        self.imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: nil) { (image, nfo) in
+                            browerCell?.imageView.image = image
+                        }
+                    }
+                    browser.cellClassAtIndex = { _ in JXPhotoBrowserImageCell.self }
+                    browser.pageIndex = reactor.currentState.selectedPhotos?.firstIndex(of: asset) ?? 0
+                    browser.show()
                 })
                 .disposed(by: cell.disposeBag)
             
@@ -227,6 +241,16 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
             .bind(to: contentView.rx.items(dataSource: contentDataSource))
             .disposed(by: disposeBag)
         
+        reactor.state
+            .compactMap{ $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.isLoading }
+            .bind(to: rx.loading)
+            .disposed(by: disposeBag)
+        
         requestAuthorization()
             .subscribeOn(MainScheduler.instance)
             .map{ Reactor.Action.loadPhotos(count: $0, status: $1) }
@@ -234,10 +258,58 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
             .disposed(by: disposeBag)
         
         photoView.rx.itemSelected
+            .filter{ [unowned self] in self.photoDataSource[$0] == .pirture }
             .map { [unowned self] indexPath in
                 let asset = self.assetsFetchResults[indexPath.row]
                 return Reactor.Action.addPhoto(asset)
             }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        photoView.rx.itemSelected
+            .filter{ [unowned self] in self.photoDataSource[$0] == .photos }
+            .subscribe(onNext: { [unowned self] _ in
+                if let pickerController = TZImagePickerController(maxImagesCount: 9, delegate: self) {
+                    let assets: [PHAsset] = reactor.currentState.selectedPhotos ?? []
+                    pickerController.selectedAssets = NSMutableArray(array: assets)
+                    pickerController.modalPresentationStyle = .fullScreen
+                    self.present(pickerController, animated: true)
+                } else {
+                    self.showToast(message: "Unknown")
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        photoView.rx.itemSelected
+            .filter{ [unowned self] in self.photoDataSource[$0] == .camera }
+            .flatMap{ [unowned self] _ in self.picker.camera(delegate: self) }
+            .compactMap {
+                if let asset = $0.2 { return Reactor.Action.addPhoto(asset) }
+                return nil
+            }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        rightBtn.rx.tap
+            .map{ [unowned self] in
+                let text = self.inputBar.textField.text ?? ""
+                return Reactor.Action.uploadFlick(title: text, url: "")
+            }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        inputBar.textField.rx.text.orEmpty
+            .map{
+                if reactor.currentState.selectedPhotos?.isEmpty == false {
+                    return !$0.isEmpty
+                }
+                return false
+            }
+            .bind(to: rightBtn.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
+        didFinishPickingPhotos
+            .map { Reactor.Action.setPhoto($0) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
@@ -321,5 +393,10 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionView.bounds.width / 3
         return CGSize(width: width, height: width * aspectRatio + 10)
+    }
+    
+    func imagePickerController(_ picker: TZImagePickerController!, didFinishPickingPhotos photos: [UIImage]!, sourceAssets assets: [Any]!, isSelectOriginalPhoto: Bool) {
+        guard let assetsList = assets as? [PHAsset] else { return }
+        didFinishPickingPhotos.accept(assetsList)
     }
 }

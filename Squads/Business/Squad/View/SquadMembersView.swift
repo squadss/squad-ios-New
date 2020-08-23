@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SquadMembersView: BaseView {
+class SquadMembersView<T: MembersItemProtocol>: BaseView {
     
     var memberWidth: CGFloat = 16
     var maxIndex: Int = 10
@@ -20,7 +20,7 @@ class SquadMembersView: BaseView {
     private var stackView = UIStackView()
     private var listView = Array<UIImageView>()
     
-    var members = Array<URL>() {
+    var members = Array<T>() {
         didSet {
             // 布局子视图
             setupMemberListView(from: members)
@@ -56,10 +56,10 @@ class SquadMembersView: BaseView {
     }
     
     // 根据数据源创建成员列表视图
-    private func setupMemberListView(from list: [URL]) {
+    private func setupMemberListView(from list: [T]) {
         
         let count = stackView.arrangedSubviews.count
-        list.enumerated().forEach{ (index, url) in
+        list.enumerated().forEach{ (index, model) in
             var imageView: UIImageView?
             if index < count {
                 imageView = stackView.arrangedSubviews[index] as? UIImageView
@@ -69,7 +69,7 @@ class SquadMembersView: BaseView {
                     stackView.addArrangedSubview(_imageView)
                 }
             }
-            imageView?.kf.setImage(with: url, placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+            imageView?.kf.setImage(with: model.url, placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
         }
         
         if list.count < count {

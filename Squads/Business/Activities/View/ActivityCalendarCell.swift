@@ -23,7 +23,7 @@ class ActivityCalendarCell: BaseTableViewCell {
     // Suggested by Daniel
     var ownerLab = UILabel()
     // 成员列表
-    var membersView = SquadMembersView()
+    var membersView = SquadMembersView<ActivityMember>()
     
     var containterView = ActivityShadowView()
     

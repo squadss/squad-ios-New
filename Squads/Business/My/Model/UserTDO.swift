@@ -67,7 +67,10 @@ struct UserTDO {
         if properties.contains(.phoneNumber) && (phoneNumber == nil || phoneNumber?.isEmpty == true) {
             return .failure(.custom("The cell phone number cannot be empty"))
         }
-        if properties.contains(.phoneNumber) && (phoneNumber?.count != 11) {
+        if properties.contains(.phoneNumber) && (nationCode == "+1" && phoneNumber?.count != 10) {
+            return .failure(.custom("Incorrect phone number format!"))
+        }
+        if properties.contains(.phoneNumber) && (nationCode == "+86" && phoneNumber?.count != 11) {
             return .failure(.custom("Incorrect phone number format!"))
         }
         if properties.contains(.verificationcode) && (verificationcode == nil || verificationcode?.isEmpty == true) {

@@ -14,7 +14,7 @@ import RxCocoa
 class WelcomeReactor: Reactor {
     
     enum Action {
-        case requestSquadDetail
+        case requestSquadDetail(code: String)
         case joinSquad(accountId: Int)
     }
     
@@ -34,28 +34,25 @@ class WelcomeReactor: Reactor {
     
     var initialState = State()
     
-    let inviteCode: String
-    
     var provider = OnlineProvider<SquadAPI>()
     
-    init(inviteCode: String) {
-        self.inviteCode = inviteCode
-    }
+    init() { }
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .requestSquadDetail:
+        case .requestSquadDetail(let inviteCode):
             return provider.request(target: .querySquadByInviteCode(code: inviteCode), model: SquadDetail.self, atKeyPath: .data).asObservable()
                 .map { result in
                     switch result {
                     case .success(let model): return .setSquadDetail(model)
-                    case .failure(let error): return .setToast(error.message)
+                    case .failure: return .setLoading(false)
                     }
                 }
                 .startWith(.setLoading(true))
         case .joinSquad(let accountId):
-            //FIXME: 这里需要做非空判断
-            let squadId = currentState.squadDetail!.id
+            guard let squadId = currentState.squadDetail?.id else {
+                return Observable.just(.setToast("No available squad was found!"))
+            }
             let addMember = provider.request(target: .addMember(squadId: squadId, accountId: accountId), model: GeneralModel.Plain.self).asObservable()
             let channels = provider.request(target: .getSquadChannel(squadId: squadId), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable()
             

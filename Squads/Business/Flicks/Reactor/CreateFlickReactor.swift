@@ -27,13 +27,20 @@ class CreateFlickReactor: Reactor {
         case deletePhoto(PHAsset)
         // 添加选中的照片
         case addPhoto(PHAsset)
+        // 设置
+        case setPhoto(Array<PHAsset>)
+        // 创建flick
+        case uploadFlick(title: String, url: String)
     }
     
     enum Mutation {
         case setPhotos(Array<CellType>?, isDenied: Bool)
         case setDeletePhoto(PHAsset)
         case setAddPhoto(PHAsset)
+        case setPhoto(Array<PHAsset>)
         case setToast(String)
+        case setUploadSuccess(state: Bool, toast: String)
+        case setLoading(Bool)
     }
     
     struct State {
@@ -47,11 +54,15 @@ class CreateFlickReactor: Reactor {
         var isDenied: Bool?
         // 提示
         var toast: String?
+        //
+        var isLoading: Bool?
     }
     
     var initialState: State
-    
-    init() {
+    var provider = OnlineProvider<SquadAPI>()
+    let squadId: Int
+    init(squadId: Int) {
+        self.squadId = squadId
         initialState = State()
     }
     
@@ -72,6 +83,8 @@ class CreateFlickReactor: Reactor {
             } else {
                 return Observable.just(.setToast("Wrong operation!"))
             }
+        case .setPhoto(let assets):
+            return Observable.just(.setPhoto(assets))
         case .addPhoto(let asset):
             if currentState.selectedPhotos == nil
             || currentState.selectedPhotos!.count < 9
@@ -79,6 +92,19 @@ class CreateFlickReactor: Reactor {
                 return Observable.just(.setAddPhoto(asset))
             }
             return Observable.empty()
+        case let .uploadFlick(title, url):
+            guard let media = currentState.selectedPhotos else {
+                return .empty()
+            }
+            
+            return assets2Datas(media).flatMap { [unowned self] in
+                return self.provider.request(target: .addMediaWithFlick(squadId: self.squadId, mediaType: .priture, media: $0, title: title, url: url), model: GeneralModel.Plain.self)
+            }.asObservable().map{ result -> Mutation in
+                switch result {
+                case .success(let plain): return .setUploadSuccess(state: true, toast: plain.message)
+                case .failure(let error): return .setToast(error.message)
+                }
+            }.startWith(.setLoading(true))
         }
     }
     
@@ -93,6 +119,10 @@ class CreateFlickReactor: Reactor {
                 state.photos = nil
                 state.isDenied = isDenied
             }
+        case .setPhoto(let list):
+            if state.selectedPhotos?.elementsEqual(list) == false {
+                state.selectedPhotos = list
+            }
         case .setDeletePhoto(let asset):
             var photos = state.selectedPhotos
             photos?.removeAll(where: { $0.localIdentifier == asset.localIdentifier })
@@ -102,8 +132,93 @@ class CreateFlickReactor: Reactor {
             photos.append(asset)
             state.selectedPhotos = photos
         case .setToast(let s):
+            state.isLoading = false
             state.toast = s
+        case let .setUploadSuccess(s, toast):
+            state.isLoading = false
+            state.toast = toast
+            state.postSuccess = s
+        case .setLoading(let s):
+            state.toast = nil
+            state.isLoading = s
         }
         return state
+    }
+    
+    // 将PHAsset 转为 Data对象
+    private func asset2Data(_ asset: PHAsset) -> Observable<Data> {
+        
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.deliveryMode = .highQualityFormat
+        return Observable.create { (observer) -> Disposable in
+            var id: PHImageRequestID
+            if #available(iOS 13, *) {
+                id = PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { (data, _, _, _) in
+                    if let data = data {
+                        observer.onNext(data)
+                    }
+                    observer.onCompleted()
+                }
+            } else {
+                id = PHImageManager.default().requestImageData(for: asset, options: options) { (data, _, orientation, _) in
+                    if let data = data {
+                        //FIXME: - 需要处理图片旋转问题
+                        observer.onNext(data)
+                    }
+                    observer.onCompleted()
+                }
+            }
+            return Disposables.create {
+                PHImageManager.default().cancelImageRequest(id)
+            }
+        }
+    }
+    
+    // 将PHAsset 转为 Data对象
+    private func assets2Datas(_ assets: Array<PHAsset>) -> Observable<Array<Data>> {
+        return Observable.create { (observer) -> Disposable in
+            
+            let options = PHImageRequestOptions()
+            options.isNetworkAccessAllowed = true
+            options.deliveryMode = .highQualityFormat
+            
+            // 使用多线程下载图片
+            var resultDatas = Array<Data>()
+            var ids = Array<PHImageRequestID>()
+            DispatchQueue.global(qos: .userInitiated).async {
+                
+                let asyncGroup = DispatchGroup()
+                for asset in assets {
+                    asyncGroup.enter()
+                    
+                    if #available(iOS 13, *) {
+                        ids.append(PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { (data, _, _, _) in
+                            if let data = data {
+                                resultDatas.append(data)
+                            }
+                            asyncGroup.leave()
+                        })
+                    } else {
+                        ids.append(PHImageManager.default().requestImageData(for: asset, options: options) { (data, _, orientation, _) in
+                            if let data = data {
+                                //FIXME: - 需要处理图片旋转问题
+                                resultDatas.append(data)
+                            }
+                            asyncGroup.leave()
+                        })
+                    }
+                }
+            
+                asyncGroup.notify(queue: .main, execute: {
+                    observer.onNext(resultDatas)
+                    observer.onCompleted()
+                })
+            }
+            
+            return Disposables.create {
+                ids.forEach{ PHImageManager.default().cancelImageRequest($0) }
+            }
+        }
     }
 }

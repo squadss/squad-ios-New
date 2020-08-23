@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class TimeLineDrawTapView: TimeLineDrawView {
     
@@ -28,6 +30,34 @@ class TimeLineDrawTapView: TimeLineDrawView {
             break
         default:
             break
+        }
+    }
+}
+
+extension Reactive where Base: TimeLineDrawTapView {
+    var dataSource: Binder<Array<TimePeriod>> {
+        return Binder(base) { drawView, timePeriods in
+            //绘制前, 先清空画板
+            drawView.clearColors()
+            
+            var firstTime: TimePeriod?
+            var dateList = Array<Date>()
+            for time in timePeriods.sorted(by: { $0.middleDate < $1.middleDate }) {
+                if let unwrappedFirstTime = firstTime {
+                    if !unwrappedFirstTime.middleDate.isSameDay(with: time.middleDate) {
+                        dateList.append(time.middleDate)
+                    }
+                } else {
+                    firstTime = time
+                    dateList.append(time.middleDate)
+                }
+            }
+            
+            drawView.dateList = dateList
+            
+            timePeriods.forEach{
+                drawView.draw(period: $0)
+            }
         }
     }
 }

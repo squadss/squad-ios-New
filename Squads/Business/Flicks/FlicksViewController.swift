@@ -8,20 +8,17 @@
 
 import UIKit
 import RxDataSources
-
-//FIXME: - Test Mock
-struct FlickModel {
-    var pirtureList: Array<URL>
-    var content: String
-    var dateString: String
-    var likeNum: String
-    var commonNum: String
-}
+import MJRefresh
+import RxSwift
+import JXPhotoBrowser
 
 class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDelegate {
 
     var tableView = UITableView(frame: .zero, style: .grouped)
     var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, FlicksReactor.Model<FlickModel>>>!
+    
+    let header = MJRefreshNormalHeader()
+    let footer = MJRefreshBackStateFooter()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,28 +49,71 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
         searchView.backgroundColor = UIColor(red: 0.917, green: 0.917, blue: 0.917, alpha: 1)
         searchView.addSubview(searchBtn)
         
+        footer.stateLabel?.isHidden = true
+        footer.isAutomaticallyChangeAlpha = true
+        footer.mj_h = 30
+        tableView.mj_footer = footer
+        
+        tableView.mj_header = header
+        
+        let layoutInsets = UIApplication.shared.keyWindow?.layoutInsets ?? .zero
+        
         tableView.delegate = self
         tableView.tableHeaderView = searchView
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
+        tableView.contentInset.bottom = layoutInsets.bottom
         tableView.register(Reusable.flicksListViewCell)
         view.addSubview(tableView)
     }
     
+    override func addTouchAction() {
+        header.rx.loading
+            .startWith(())
+            .map{ Reactor.Action.refreshData(keyword: "") }
+            .bind(to: reactor!.action)
+            .disposed(by: disposeBag)
+    }
+    
     override func setupConstraints() {
-        tableView.snp.safeFull(parent: self)
+        tableView.snp.makeConstraints { (maker) in
+            if #available(iOS 11, *) {
+                maker.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            } else {
+                maker.top.equalTo(topLayoutGuide.snp.bottom)
+            }
+            maker.leading.trailing.equalToSuperview()
+            maker.bottom.equalToSuperview()
+        }
     }
     
     override func bind(reactor: FlicksReactor) {
         dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, FlicksReactor.Model<FlickModel>>>(configureCell: { data, tableView, indexPath, model in
             let cell = tableView.dequeue(Reusable.flicksListViewCell)!
+            let list = model.data.pirtureList
             cell.contentWidth = model.contentWidth
-            cell.pirtureList = model.data.pirtureList
+            cell.pirtureList = list
             cell.contentLab.text = model.data.content
             cell.dateBtn.setTitle(model.data.dateString, for: .normal)
             cell.likeBtn.setTitle(model.data.likeNum, for: .normal)
             cell.commonBtn.setTitle(model.data.commonNum, for: .normal)
             cell.selectionStyle = .none
+            
+            cell.pirtureDidTapped
+                .subscribe(onNext: { pageIndex in
+                    let browser = JXPhotoBrowser()
+                    browser.numberOfItems = { list.count }
+                    browser.reloadCellAtIndex = { context in
+                        let cell = context.cell as? JXPhotoBrowserImageCell
+                        cell?.imageView.kf.setImage(with: list[context.index], placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+                    }
+                    browser.cellClassAtIndex = { _ in JXPhotoBrowserImageCell.self }
+                    browser.pageIndex = pageIndex
+                    browser.show()
+                    print(pageIndex)
+                })
+                .disposed(by: cell.disposeBag)
+            
             return cell
         })
         
@@ -94,8 +134,8 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
     
     @objc
     private func rightBarItemDidTapped() {
-        let reactor = CreateFlickReactor()
-        let vc = CreateFlickViewController(reactor: reactor)
+        let flickReactor = CreateFlickReactor(squadId: reactor!.squadId)
+        let vc = CreateFlickViewController(reactor: flickReactor)
         let nav = BaseNavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .fullScreen
         present(nav, animated: true)

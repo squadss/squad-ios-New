@@ -127,4 +127,31 @@ extension ObservableType {
             .map{ $0.1 }
     }
     
+    func trackInputAlert(title: String?,
+                    placeholder: String? = nil,
+                    default defaultTitle: String = "Confirm",
+                    cancel cancelTitle: String = "Cancel",
+                    target: UIViewController) -> Observable<String> {
+       
+        return flatMap{ [weak target] _ -> Observable<String> in
+        
+            let actionSheet = UIAlertController(title: title, message: nil, preferredStyle: .alert)
+            
+            actionSheet.addTextField { (textField) in
+                textField.placeholder = placeholder
+            }
+            
+            let confirmAction = RxAlertAction(title: defaultTitle, type: 1, style: .default)
+            let cancelAction = RxAlertAction(title: cancelTitle, type: 0, style: .cancel)
+            
+            return actionSheet
+                .addAction(actions: [confirmAction, cancelAction])
+                .do(onSubscribed: {
+                    target?.present(actionSheet, animated: true, completion: nil)
+                })
+                .filter{ $0 == 1 }
+                .compactMap { _ in actionSheet.textFields?.first?.text }
+                .filter{ !$0.isEmpty }
+            }
+    }
 }

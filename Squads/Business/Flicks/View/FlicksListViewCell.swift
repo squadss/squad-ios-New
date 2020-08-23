@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class FlicksListViewCell: BaseTableViewCell {
     
@@ -18,7 +20,7 @@ class FlicksListViewCell: BaseTableViewCell {
                 let imageView = listView[i]
                 if i < pirtureList.count {
                     let url = pirtureList[i]
-                    imageView.kf.setImage(with: url)
+                    imageView.kf.setImage(with: url, for: .normal)
                     imageView.isHidden = false
                 } else {
                     imageView.isHidden = true
@@ -26,6 +28,12 @@ class FlicksListViewCell: BaseTableViewCell {
             }
             setNeedsLayout()
         }
+    }
+    
+    var disposeBag = DisposeBag()
+    private var pirtureDidTappedSubject = PublishSubject<Int>()
+    var pirtureDidTapped: Observable<Int> {
+        return pirtureDidTappedSubject.asObservable()
     }
     
     var contentLab = UILabel()
@@ -40,16 +48,18 @@ class FlicksListViewCell: BaseTableViewCell {
     static let itemWidth: CGFloat = (UIScreen.main.bounds.width - 2 * margin - insert.left - insert.right)/3
     
     private var stackView: UIStackView!
-    private var listView = Array<CornersImageView>()
+    private var listView = Array<UIButton>()
     
     override func setupView() {
         
-        for _ in 0..<9 {
-            let imageView = CornersImageView()
+        for i in 0..<9 {
+            let imageView = UIButton()
             imageView.isHidden = true
-            imageView.radius = 8
+            imageView.imageView?.layer.cornerRadius = 8
+            imageView.imageView?.layer.masksToBounds = true
             imageView.contentMode = .scaleAspectFill
-            imageView.clipsToBounds = true
+            imageView.tag = i + 200
+            imageView.addTarget(self, action: #selector(pritureBtnDidTapped(sender:)), for: .touchUpInside)
             contentView.addSubview(imageView)
             listView.append(imageView)
         }
@@ -69,6 +79,8 @@ class FlicksListViewCell: BaseTableViewCell {
         stackView.distribution = .fillEqually
         stackView.alignment = .fill
         stackView.spacing = 5
+        //FIXME: - 这一版没有加喜欢/评论的功能, 暂时隐藏
+        stackView.isHidden = true
         
         contentLab.font = FlicksListViewCell.font
         contentLab.theme.textColor = UIColor.text
@@ -101,6 +113,16 @@ class FlicksListViewCell: BaseTableViewCell {
         stackView.frame = CGRect(x: bounds.width - insert.right - 100, y: bounds.height - 38, width: 100, height: 36)
         contentLab.frame = CGRect(x: insert.left, y: bounds.height - 30, width: contentWidth, height: 17)
         dateBtn.frame = CGRect(x: contentLab.frame.maxX + 5, y: contentLab.frame.minY, width: stackView.frame.minX - contentLab.frame.maxX - 5, height: 17)
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
+    }
+    
+    @objc
+    private func pritureBtnDidTapped(sender: UIButton) {
+        pirtureDidTappedSubject.onNext(sender.tag - 200)
     }
     
     static func calcTotalHeight(pirtureNums: Int) -> CGFloat {
