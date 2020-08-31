@@ -139,9 +139,10 @@ final class TimeLineForegroundView: BaseView {
                 newRect.origin.y = round(newRect.origin.y / gridHeight) * gridHeight
                 newRect.size.height = round(newRect.size.height / gridHeight) * gridHeight
                 pendingEvent.frame = newRect
-                delegate?.foregroundView(self, didSelectedArea: pendingEvent.frame)
-                delegate?.foregroundView(self, didEndTouch: pendingEvent.frame)
             }
+            
+            delegate?.foregroundView(self, didSelectedArea: pendingEvent.frame)
+            delegate?.foregroundView(self, didEndTouch: pendingEvent.frame)
             
             lockSlideDirection = nil
         }

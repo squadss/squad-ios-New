@@ -36,5 +36,10 @@ class ActivityDetailInfoView: BaseView {
         super.layoutSubviews()
         previewBtn.frame = CGRect(x: bounds.width - 36, y: (bounds.height - 36)/2, width: 36, height: 36)
         locationBtn.frame = CGRect(x: 0, y: bounds.height - 44, width: previewBtn.frame.minX - 10, height: 40)
+        if locationBtn.isHidden {
+            titleBtn.frame.origin.y = (bounds.height - titleBtn.frame.height)/2
+        } else {
+            titleBtn.frame.origin.y = 0
+        }
     }
 }

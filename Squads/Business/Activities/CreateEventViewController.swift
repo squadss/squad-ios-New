@@ -115,7 +115,12 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
 
                 if let dateList = (reactor.currentState.repos[3] as? CreateEventCalendar)?.selectedDate {
                     cell.chooseTimeView.sectionView.axisXDates.dateList = dateList
-                    cell.chooseTimeView.sectionView.itemView.setDataSource([], startOffTime: dateList.first)
+                    if let refreshDate = dateList.first {
+                        let calendar = Calendar.current
+                        let components = calendar.dateComponents([.year, .month, .day], from: refreshDate)
+                        let startOffTime = calendar.date(from: components)
+                        cell.chooseTimeView.sectionView.itemView.setDataSource([], startOffTime: startOffTime)
+                    }
                 }
                 
                 if let selectTime = self.currentSelectedTime {
@@ -151,7 +156,7 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
             .compactMap{ $0.activityId }
             .subscribe(onNext: { [unowned self] activityId in
                 let squadId = reactor.squadId
-                let detailReactor = ActivityDetailReactor(activityId: activityId, squadId: squadId)
+                let detailReactor = ActivityDetailReactor(activityId: activityId, squadId: squadId, initialActivityStatus: .prepare)
                 let detailViewController = ActivityDetailViewController(reactor: detailReactor)
                 self.navigationController?.pushViewController(detailViewController, animated: true)
             })

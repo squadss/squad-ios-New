@@ -17,7 +17,7 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
     private var toolbar = ActivityDetailToolbar()
     private var infoView = ActivityDetailInfoView()
     private var chooseTimeView = MultipleChooseTimeView()
-    private var membersView = MembersGroupView<ActivityMember>()
+    private var membersView = MembersGroupView()
     
     override var allowedCustomBackBarItem: Bool {
         return false
@@ -62,20 +62,26 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
         })
         .disposed(by: disposeBag)
         
-        let action: Observable<Int> = rightBtn.rx.tap.flatMap{ [weak self] _ -> Observable<Int> in
-           let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-           let titleAction = RxAlertAction(title: "Change Title", type: 0, style: .default)
-           let locationAction = RxAlertAction(title: "Change Location", type: 1, style: .default)
-           let deleteAction = RxAlertAction(title: "Delete Event", type: 2, style: .default)
-           let cancelAction = RxAlertAction(title: "Cancel", type: -1, style: .cancel)
-           
-           return actionSheet
-               .addAction(actions: [titleAction, locationAction, deleteAction, cancelAction])
-               .map{ $0 }
-               .do(onSubscribed: {
-                   self?.present(actionSheet, animated: true, completion: nil)
-               })
-        }.share()
+        let action: Observable<Int> = rightBtn.rx.tap
+            .compactMap{ [unowned self] in self.reactor?.currentState.repos }
+            .flatMap{ [weak self] detail -> Observable<Int> in
+                
+                let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+                var actions = Array<RxAlertAction>()
+                actions.append(RxAlertAction(title: "Change Title", type: 0, style: .default))
+                if detail.activityType != .virtual {
+                    actions.append(RxAlertAction(title: "Change Location", type: 1, style: .default))
+                }
+                actions.append(RxAlertAction(title: "Delete Event", type: 2, style: .default))
+                actions.append(RxAlertAction(title: "Cancel", type: -1, style: .cancel))
+                return actionSheet
+                    .addAction(actions: actions)
+                    .map{ $0 }
+                    .do(onSubscribed: {
+                       self?.present(actionSheet, animated: true, completion: nil)
+                    })
+            }
+            .share()
 
         action.filter{ $0 == 0 }
            .trackInputAlert(title: "Change Title", placeholder: "Please enter the Event name", default: "Confirm", target: self)
@@ -188,11 +194,6 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
             .map { Reactor.Action.requestDetail }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
-        
-//        chooseTimeView.drawView.itemView.timePeriodObservable
-//            .map{ Reactor.Action.selectTime($0) }
-//            .bind(to: reactor.action)
-//            .disposed(by: disposeBag)
     }
     
 }
@@ -207,7 +208,7 @@ extension ActivityDetailViewController {
         scrollView.addSubview(toolbar)
     }
     
-    private func configToolbarView(detail: SquadActivity,currentMember: ActivityMember) {
+    private func configToolbarView(detail: SquadActivity, currentMember: ActivityMember) {
         toolbar.isHidden = false
         switch detail.activityStatus {
         case .prepare:
@@ -233,8 +234,6 @@ extension ActivityDetailViewController {
                        image: UIImage(named: "Activity Reject Normal"),
                        disableImage: UIImage(named: "Activity Reject Focus"),
                        isEnabled: currentMember.isGoing == true)]
-        case .running:
-            break
         }
     }
     
@@ -258,11 +257,19 @@ extension ActivityDetailViewController {
             .subscribe(onNext: { [unowned self] _ in
                 let settingViewController = AvtivityTimeSettingViewController()
                 self.transitionPresent(settingViewController, animated: true)
+                
                 if let activity = reactor.currentState.repos {
                     settingViewController.activityType = activity.activityType
                 }
-                settingViewController.topSection = reactor.currentState.topMembers
-                settingViewController.bottomSection = reactor.currentState.bottomMembers
+                
+                if let members = reactor.currentState.repos?.responsedMembers {
+                    settingViewController.topSection(section: MembersSection<ActivityMember>(title: "RESPONDED", list: members))
+                }
+                
+                if let members = reactor.currentState.repos?.waitingMembers {
+                    settingViewController.bottomSection(section: MembersSection<User>(title: "WAITING", list: members))
+                }
+                
                 settingViewController.didSelectTime
                     .map{ Reactor.Action.setDetail($0, title: nil, location: nil) }
                     .bind(to: reactor.action)
@@ -292,23 +299,19 @@ extension ActivityDetailViewController {
         
         // 这里必须传个时间数组过来, 并且不能为空, 因为我们是根据myTime中的第一个元素, 来判断当前选择的日期是哪天
         // 如果后面需求变更了, myTime可为空, 则必须在CreateEvent中增加一个日期的字段, 来表示活动选择的日期
-        if !currentMember.myTime.isEmpty, let members = reactor?.currentState.topMembers {
-            let originList = members.list.flatMap{ $0.myTime }
+        if !currentMember.myTime.isEmpty, let members = detail.responsedMembers {
+            let originList = members.flatMap{ $0.myTime }
             chooseTimeView.setDataSource(myTime: currentMember.myTime, originList: originList)
         }
     }
     
     private func bindChooseTimeView(reactor: ActivityDetailReactor) {
         
-//        chooseTimeView.displayView.itemView
-//            .didEndSelectedTimeObservable
-//            .throttle(RxTimeInterval.seconds(2), scheduler: MainScheduler.instance)
-//            .map{ Reactor.Action. }
-        
-//        reactor.state
-//            .compactMap{ $0.selectedTimes }
-//            .bind(to: chooseTimeView.displayView.itemView.rx.setDataSource())
-//            .disposed(by: disposeBag)
+        chooseTimeView.didEndSelectedTimeObservable
+            .throttle(RxTimeInterval.seconds(2), scheduler: MainScheduler.instance)
+            .map{ Reactor.Action.selectTimes($0) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
     }
 }
 
@@ -330,18 +333,36 @@ extension ActivityDetailViewController {
             infoView.titleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
             infoView.titleBtn.setTitle("TBD", for: .normal)
             infoView.titleBtn.layer.cornerRadius = 13
+            infoView.titleBtn.contentHorizontalAlignment = .center
         case .setTime:
+            let startTime = detail.startTime?.toDate("yyyy-MM-dd HH:mm:ss", region: .current)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .medium
+            dateFormatter.timeStyle = .short
+            dateFormatter.locale = .init(identifier: "en_US")
+            var dateString = ""
+            if let date = startTime?.date {
+                dateString = dateFormatter.string(from: date)
+            }
+            //"Saturday, April 4 at 1 PM"
+            
+            infoView.titleBtn.contentHorizontalAlignment = .left
             infoView.titleBtn.theme.backgroundColor = UIColor.background
             infoView.titleBtn.theme.titleColor(from: UIColor.secondary, for: .normal)
             infoView.titleBtn.frame.size.width = 200
             infoView.titleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-            infoView.titleBtn.setTitle("Saturday, April 4 at 1 PM", for: .normal)
+            infoView.titleBtn.setTitle(dateString, for: .normal)
             infoView.titleBtn.layer.cornerRadius = 0
-        case .running:
-            break
         }
+        
         infoView.isHidden = false
-        infoView.locationBtn.setTitle("Thai Basil", for: .normal)
+        
+        if let address = detail.position?.address {
+            infoView.locationBtn.isHidden = false
+            infoView.locationBtn.setTitle(address, for: .normal)
+        } else {
+            infoView.locationBtn.isHidden = true
+        }
         infoView.previewBtn.setImage(detail.activityType.image, for: .normal)
     }
     
@@ -356,7 +377,7 @@ extension ActivityDetailViewController {
     
     private func setupMapView() {
         let width: CGFloat = view.bounds.width - 66
-        mapView.frame = CGRect(x: 33, y: 0, width: width, height: 0.57 * width)
+        mapView.frame = CGRect(x: 33, y: 0, width: width, height: 0.57 * width + 20)
         mapView.isHidden = true
         scrollView.addSubview(mapView)
     }
@@ -367,6 +388,11 @@ extension ActivityDetailViewController {
             return
         }
         mapView.isHidden = false
+        if let position = detail.position {
+            mapView.showAddress(position: position)
+        } else {
+            mapView.showPlaceholder()
+        }
     }
     
     private func bindMapView(reactor: ActivityDetailReactor) {
@@ -378,35 +404,40 @@ extension ActivityDetailViewController {
 extension ActivityDetailViewController {
     
     private func setupMemberView() {
+        membersView.isHidden = false
         membersView.frame = CGRect(x: 33, y: 0, width: view.bounds.width  - 66, height: 135)
         scrollView.addSubview(membersView)
     }
     
     private func configMemberView(detail: SquadActivity, currentMember: ActivityMember) {
-//        guard detail.activityStatus == .setTime else {
-//            membersView.isHidden = true
-//            return
-//        }
-        membersView.isHidden = false
+        switch detail.activityStatus {
+        case .prepare:
+            if let members = detail.responsedMembers {
+                membersView.setTopSection(section: MembersSection<ActivityMember>(title: "RESPONDED", list: members))
+            }
+            if let members = detail.waitingMembers {
+                membersView.setBottomSection(section: MembersSection<User>(title: "WAITING", list: members))
+            }
+        case .setTime:
+            if let members = detail.goingMembers {
+                membersView.setTopSection(section: MembersSection<User>(title: "GOING", list: members))
+            }
+            if let members = detail.rejectMembers {
+                membersView.setBottomSection(section: MembersSection<User>(title: "CAN'T MAKE IT", list: members))
+            }
+        }
     }
     
     private func bindMemberView(reactor: ActivityDetailReactor) {
-        
-        reactor.state
-            .compactMap{ $0.topMembers }
-            .bind(to: membersView.rx.topSection)
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .compactMap{ $0.bottomMembers }
-            .bind(to: membersView.rx.bottomSection)
-            .disposed(by: disposeBag)
+//
+//        reactor.state
+//            .compactMap{ $0.topMembers }
+//            .bind(to: membersView.rx.topSection(type: ActivityMember.self))
+//            .disposed(by: disposeBag)
+//
+//        reactor.state
+//            .compactMap{ $0.bottomMembers }
+//            .bind(to: membersView.rx.bottomSection(type: ActivityMember.self))
+//            .disposed(by: disposeBag)
     }
 }
-
-extension ActivityMember: MembersItemProtocol {
-    var url: URL? {
-        return avatar.asURL
-    }
-}
-

@@ -14,12 +14,13 @@ struct SquadDetail: Codable {
     let logoPath: String
     let createRemark: String
     let squadCode: String
-    let gmtCreate: String
     
     // 有得接口不返回此条数据
     var channels: Array<CreateChannel>?
     var activities: Array<SquadActivity>?
     var flicks: Array<FlickModel>?
+    // 存在更多的, 首页只允许存在两条数据, 所以根据此值判断是否有更多活动
+    var hasMoreActivities: Bool = false
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -27,7 +28,6 @@ struct SquadDetail: Codable {
         case logoPath
         case createRemark
         case squadCode
-        case gmtCreate
         case channels
     }
     
@@ -37,7 +37,6 @@ struct SquadDetail: Codable {
         logoPath = try decoder.decode("logoPath")
         createRemark = try decoder.decode("createRemark")
         squadCode = try decoder.decode("squadCode")
-        gmtCreate = try decoder.decode("gmtCreate")
         channels = try decoder.decodeIfPresent("channels")
     }
     
@@ -47,24 +46,5 @@ struct SquadDetail: Codable {
         try encoder.encode(logoPath, for: "logoPath")
         try encoder.encode(createRemark, for: "createRemark")
         try encoder.encode(squadCode, for: "squadCode")
-        try encoder.encode(gmtCreate, for: "gmtCreate")
-    }
-    
-    func addChannels(_ list: Array<CreateChannel>) -> SquadDetail {
-        var model = self
-        model.channels = list
-        return model
-    }
-    
-    func addFlicks(_ list: Array<FlickModel>) -> SquadDetail {
-        var model = self
-        model.flicks = list
-        return model
-    }
-    
-    func addActivities(_ list: Array<SquadActivity>) -> SquadDetail {
-        var model = self
-        model.activities = list
-        return model
     }
 }

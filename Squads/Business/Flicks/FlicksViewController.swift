@@ -8,21 +8,25 @@
 
 import UIKit
 import RxDataSources
-import MJRefresh
+import SwiftPullToRefresh
 import RxSwift
 import JXPhotoBrowser
 
 class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDelegate {
 
-    var tableView = UITableView(frame: .zero, style: .grouped)
-    var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, FlicksReactor.Model<FlickModel>>>!
-    
-    let header = MJRefreshNormalHeader()
-    let footer = MJRefreshBackStateFooter()
+    private let tableView = UITableView(frame: .zero, style: .grouped)
+    private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, FlicksReactor.Model<FlickModel>>>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        
+        //self.tableView.spr_endRefreshing()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
     }
 
     override func setupView() {
@@ -49,30 +53,12 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
         searchView.backgroundColor = UIColor(red: 0.917, green: 0.917, blue: 0.917, alpha: 1)
         searchView.addSubview(searchBtn)
         
-        footer.stateLabel?.isHidden = true
-        footer.isAutomaticallyChangeAlpha = true
-        footer.mj_h = 30
-        tableView.mj_footer = footer
-        
-        tableView.mj_header = header
-        
-        let layoutInsets = UIApplication.shared.keyWindow?.layoutInsets ?? .zero
-        
         tableView.delegate = self
         tableView.tableHeaderView = searchView
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
-        tableView.contentInset.bottom = layoutInsets.bottom
         tableView.register(Reusable.flicksListViewCell)
         view.addSubview(tableView)
-    }
-    
-    override func addTouchAction() {
-        header.rx.loading
-            .startWith(())
-            .map{ Reactor.Action.refreshData(keyword: "") }
-            .bind(to: reactor!.action)
-            .disposed(by: disposeBag)
     }
     
     override func setupConstraints() {
@@ -88,6 +74,7 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
     }
     
     override func bind(reactor: FlicksReactor) {
+        
         dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, FlicksReactor.Model<FlickModel>>>(configureCell: { data, tableView, indexPath, model in
             let cell = tableView.dequeue(Reusable.flicksListViewCell)!
             let list = model.data.pirtureList
@@ -121,6 +108,33 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
             .map{ $0.repos.map{ SectionModel(model: "", items: [$0]) } }
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.isLoading }
+            .bind(to: tableView.rx.loading)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter{ $0.isLoading == false }
+            .subscribe(onNext: { [unowned self] _ in
+                self.tableView.spr_endRefreshing()
+            })
+            .disposed(by: disposeBag)
+        
+        rx.viewDidLoad
+            .map{ _ in Reactor.Action.refreshData(keyword: "") }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        tableView.rx.autoFooter
+            .map{ _ in Reactor.Action.loadData(keyword: "") }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
     }
     
     @objc
@@ -139,6 +153,11 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
         let nav = BaseNavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .fullScreen
         present(nav, animated: true)
+        flickReactor.state
+            .filter{ $0.postSuccess == true }
+            .map{ _ in Reactor.Action.refreshData(keyword: "") }
+            .bind(to: reactor!.action)
+            .disposed(by: disposeBag)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

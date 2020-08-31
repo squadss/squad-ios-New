@@ -23,10 +23,10 @@ struct SquadChannel: SquadPrimaryKey, Comparable {
     var title: String = ""
     var content: String = ""
     var unreadCount: Int = 0
-    var timeStamp: Date
+    var timeStamp: Date?
     
     var dateString: String {
-        return timeStamp.chatTimeToString
+        return timeStamp?.chatTimeToString ?? ""
     }
     
     static func == (lhs: SquadChannel, rhs: SquadChannel) -> Bool {
@@ -34,7 +34,10 @@ struct SquadChannel: SquadPrimaryKey, Comparable {
     }
     
     static func < (lhs: SquadChannel, rhs: SquadChannel) -> Bool {
-        return lhs.timeStamp > rhs.timeStamp
+        guard let l_t = lhs.timeStamp, let r_t = rhs.timeStamp else {
+            return false
+        }
+        return l_t > r_t
     }
 }
 
@@ -43,7 +46,7 @@ struct SquadPlaceholder: SquadPrimaryKey {
 }
 
 extension SquadActivity: SquadPrimaryKey {}
-extension FlickModel: SquadPrimaryKey {}
+extension Array: SquadPrimaryKey where Element == URL {}
 
 class SquadReactor: Reactor {
     
@@ -56,6 +59,8 @@ class SquadReactor: Reactor {
         case requestSquad(id: Int)
         // 获取登录状态
         case connectStatus(ConnectStatus)
+        // cell已经显示
+        case didDisplayCell(SquadActivity)
     }
     
     enum Mutation {
@@ -65,6 +70,10 @@ class SquadReactor: Reactor {
         case setOneOrTheOther(loginStateDidExpired: Bool?, toast: String?)
         case setToast(String)
         case setLoading(Bool)
+        case setPrepareMembers(Array<ActivityMember>, detail: SquadActivity)
+        case setSetTimeMembers(Array<User>, detail: SquadActivity)
+        // 标记为正在请求中状态
+        case flagRequestStatus(detail: SquadActivity)
     }
     
     struct State {
@@ -97,6 +106,25 @@ class SquadReactor: Reactor {
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
+        case .didDisplayCell(let detail):
+            switch detail.activityStatus {
+            case .prepare:
+                guard detail.responsedMembers == nil && !detail.requestStatus else { return .empty() }
+                return provider.request(target: .getResponded(activityId: detail.id), model: Array<ActivityMember>.self, atKeyPath: .data).asObservable().map { result in
+                    switch result {
+                    case .success(let list): return .setPrepareMembers(list, detail: detail)
+                    case .failure: return .setPrepareMembers([], detail: detail)
+                    }
+                }.startWith(.flagRequestStatus(detail: detail))
+            case .setTime:
+                guard detail.goingMembers == nil && !detail.requestStatus else { return .empty() }
+                return provider.request(target: .queryMembersActivityGoingStatus(activityId: detail.id, isAccept: true), model: Array<User>.self, atKeyPath: .data).asObservable().map { result in
+                    switch result {
+                    case .success(let list): return .setSetTimeMembers(list, detail: detail)
+                    case .failure: return .setSetTimeMembers([], detail: detail)
+                    }
+                }.startWith(.flagRequestStatus(detail: detail))
+            }
         case .refreshChannels(let _action):
             let channels = currentState.repos[2] as! Array<SquadChannel>
             switch _action {
@@ -122,7 +150,7 @@ class SquadReactor: Reactor {
                     let isContains = channels.contains(where: { $0.sessionId == conversation.groupID })
                     if !isContains {
                         
-                        var timeStamp: Date = Date.distantFuture
+                        var timeStamp: Date?
                         var content: String = ""
                         // 创建完群后生成的会话会包括一条空的message, 所以要根据msgID过滤掉
                         if let lastMessage = conversation.lastMessage, lastMessage.msgID != nil {
@@ -142,7 +170,7 @@ class SquadReactor: Reactor {
                 
                 let acitivityObservable: Observable<Result<[SquadActivity], GeneralError>> = provider.request(target: .queryActivities(squadId: currentSquadId), model: Array<SquadActivity>.self, atKeyPath: .data).asObservable()
                 
-                let flickObservable: Observable<Result<GeneralModel.List<FlickModel>, GeneralError>> = provider.request(target: .getPageListWithFlick(pageIndex: 1, pageSize: 1, keyword: ""), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable()
+                let flickObservable: Observable<Result<GeneralModel.List<FlickModel>, GeneralError>> = provider.request(target: .getPageListWithFlick(pageIndex: 1, pageSize: 10, keyword: ""), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable()
                 
                 return Observable.zip(acitivityObservable, flickObservable).map { (aR, fR) in
                     switch (aR, fR) {
@@ -156,11 +184,9 @@ class SquadReactor: Reactor {
                         return .setPage(activitys: [], flicks: [])
                     }
                 }
-                //setPage
             case .cache:
                 return .empty()
             }
-        
         case .requestSquad(let id):
             return self.querySquad(id: id).do(onNext: { [unowned self] mutation in
                 // 切换squad成功后, 将currentSquadId更新为最新的squadId
@@ -207,12 +233,21 @@ class SquadReactor: Reactor {
             if activities.isEmpty {
                 state.repos[1] = [SquadPlaceholder(content: "No activities currently planned. Create one!")]
             } else {
-                state.repos[1] = activities
+                state.repos[1] = Array(activities.prefix(2))
+                state.currentSquadDetail?.activities = activities
+                state.currentSquadDetail?.hasMoreActivities = activities.count > 2
             }
             if flicks.isEmpty {
                 state.repos[0] = [SquadPlaceholder(content: "No flicks currently planned. ")]
             } else {
-                state.repos[0] = flicks
+                // 筛选出所有照片, 只取前10张
+                let pritureList = flicks.reduce([], { (total, model) -> Array<URL> in
+                    total + model.pirtureList
+                })
+                let list = pritureList.count > 9 ? [Array(pritureList.prefix(9))] : [pritureList]
+                state.repos[0] = list
+                state.currentSquadDetail?.flicks = flicks
+                state.currentSquadDetail?.hasMoreActivities = activities.count > 2
             }
         case let .setOneOrTheOther(loginStateDidExpired, toast):
             state.isLoading = false
@@ -234,14 +269,30 @@ class SquadReactor: Reactor {
                     state.repos[1] = $0
                 }
             }
-            detail.flicks.flatMap {
-                if $0.isEmpty {
-                    state.repos[0] = [SquadPlaceholder(content: "No flicks currently planned. ")]
-                } else {
-                    state.repos[0] = $0
-                }
+            if let list = detail.flicks, !list.isEmpty {
+                // 筛选出所有照片, 只取前10张
+                let pritureList = list.reduce([], { (total, model) -> Array<URL> in
+                    total + model.pirtureList
+                })
+                state.repos[0] = pritureList.count > 9 ? [Array(pritureList.prefix(through: 9))] : [pritureList]
+            } else {
+                state.repos[0] = [SquadPlaceholder(content: "No flicks currently planned. ")]
             }
             state.currentSquadDetail = detail
+        case let .setPrepareMembers(list, detail):
+            if let activities = state.repos[1] as? [SquadActivity],
+                let index = activities.firstIndex(of: detail) {
+                state.repos[1][index] = detail.fromPrepareMembers(responede: list, waiting: nil)
+            }
+        case let .setSetTimeMembers(list, detail):
+            if let activities = state.repos[1] as? [SquadActivity],
+                let index = activities.firstIndex(of: detail) {
+                state.repos[1][index] = detail.fromGoingMembers(accept: list, reject: nil)
+            }
+        case .flagRequestStatus(let detail):
+            if let activities = state.repos[1] as? [SquadActivity], let index = activities.firstIndex(of: detail) {
+                state.repos[1][index] = detail.requestingStatus()
+            }
         }
         return state
     }
@@ -255,35 +306,36 @@ class SquadReactor: Reactor {
                 switch result {
                 case .success(let detail):
                     // 根据详情, 去查询当前squad下存在的所有channel, 后期开发可以只使用一个接口, 现在需要查三次浪费资源
-                    let channedl: Observable<Result<SquadDetail, GeneralError>> = self.provider.request(target: .getSquadChannel(squadId: detail.id), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable().map {
+                    let channelObservable: Observable<[CreateChannel]> = self.provider.request(target: .getSquadChannel(squadId: detail.id), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable().map {
                         switch $0 {
-                        case .success(let list):
-                            return .success(detail.addChannels(list))
-                        case .failure(let error):
-                            return .failure(error)
+                        case .success(let list): return list
+                        case .failure: return []
                         }
                     }
                     
-                    let activities: Observable<Result<SquadDetail, GeneralError>> = self.provider.request(target: .queryActivities(squadId: detail.id), model: Array<SquadActivity>.self, atKeyPath: .data).asObservable().map {
+                    let activitiesObservable: Observable<[SquadActivity]> = self.provider.request(target: .queryActivities(squadId: detail.id), model: Array<SquadActivity>.self, atKeyPath: .data).asObservable().map {
                         switch $0 {
-                        case .success(let list):
-                            return .success(detail.addActivities(list))
-                        case .failure(let error):
-                            return .failure(error)
+                        case .success(let list): return list
+                        case .failure: return []
                         }
                     }
                     
-                    let flicks: Observable<Result<SquadDetail, GeneralError>> = self.provider.request(target: .getPageListWithFlick(pageIndex: 1, pageSize: 1, keyword: ""), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable().map {
+                    let flicksObservable: Observable<[FlickModel]> = self.provider.request(target: .getPageListWithFlick(pageIndex: 1, pageSize: 10, keyword: ""), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable().map {
                         switch $0 {
-                        case .success(let page):
-                            return .success(detail.addFlicks(page.records))
-                        case .failure(let error):
-                            return .failure(error)
+                        case .success(let page): return page.records
+                        case .failure: return []
                         }
                     }
                     
-                    return channedl.concat(activities).concat(flicks)
-                    
+                    return Observable.zip(channelObservable, activitiesObservable, flicksObservable).map {
+                        (channels, activities, flicks) -> Result<SquadDetail, GeneralError> in
+                        var newDetail = detail
+                        newDetail.activities = Array(activities.prefix(2))
+                        newDetail.hasMoreActivities = activities.count > 2
+                        newDetail.channels = channels
+                        newDetail.flicks = flicks
+                        return .success(newDetail)
+                    }
                 case .failure(let error):
                     return Observable.just(.failure(error))
                 }
@@ -355,7 +407,7 @@ class SquadReactor: Reactor {
                     channelsList.append(channel)
                 } else {
                     // 获取群信息
-                    let channel = SquadChannel(sessionId: groupInfo.groupID, avatar: groupInfo.faceURL, title: groupInfo.groupName, content: "", unreadCount: Int(conversation?.unreadCount ?? 0), timeStamp: Date.distantFuture)
+                    let channel = SquadChannel(sessionId: groupInfo.groupID, avatar: groupInfo.faceURL, title: groupInfo.groupName, content: "", unreadCount: Int(conversation?.unreadCount ?? 0), timeStamp: nil)
                     channelsList.append(channel)
                 }
             }

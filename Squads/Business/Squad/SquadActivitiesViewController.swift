@@ -9,11 +9,10 @@
 import UIKit
 import RxDataSources
 
-final class SquadActivitiesViewController: ReactorViewController<SquadActivitiesReactor>, UITableViewDelegate {
+final class SquadActivitiesViewController: ReactorViewController<SquadActivitiesReactor> {
 
     private var searchView = UIInputView()
     private var tableView = UITableView(frame: .zero, style: .grouped)
-    
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadActivity>>!
     
     override func viewDidLoad() {
@@ -27,7 +26,7 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
         
         let layoutInsets = UIApplication.shared.keyWindow?.layoutInsets ?? .zero
         
-        tableView.delegate = self
+        tableView.rowHeight = 110
         tableView.separatorStyle = .none
         tableView.register(Reusable.activityCalendarCell)
         tableView.theme.backgroundColor = UIColor.background
@@ -61,36 +60,107 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
     }
     
     override func bind(reactor: SquadActivitiesReactor) {
+        
+        let user: User? = User.currentUser()
+        
         dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadActivity>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
             
-            let timeFormmater = TimeFormatter(startTime: model.startTime, endTime: model.endTime)
-            
             let cell = tableView.dequeue(Reusable.activityCalendarCell)!
-            cell.contentLab.text = "RSF"
             cell.titleLab.text = model.title
-            cell.dateLab.text = timeFormmater?.dayFormat ?? ""
-            cell.ownerLab.text = "Suggested by Daniel"
+            cell.dateLab.text = model.startDate
             cell.pritureView.image = model.activityType.image
-//            cell.membersView.members = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!, URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
+            
             if model.activityStatus == .prepare {
+                cell.menuView.isHidden = true
+                cell.statusView.isHidden = false
                 cell.containterView.borderColor = nil
+                if let members = model.responsedMembers, !members.isEmpty {
+                    if let owner = members.first(where: { $0.accountId == model.accountId }) {
+                        cell.ownerLab.text = "Created by " + owner.nickname
+                    }
+                    if let mine = members.first(where: { $0.accountId == user?.id }) {
+                        let title = mine.isResponded ? "Time TBD" : "ADD AVAILABILITY"
+                        cell.statusView.setTitle(title, for: .normal)
+                    }
+                    cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
+                }
             } else {
+                cell.menuView.isHidden = false
+                cell.statusView.isHidden = true
                 cell.containterView.borderColor = .red
+                if let members = model.goingMembers, !members.isEmpty {
+                    if members.contains(where: { $0.id == user?.id }) {
+                        (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = true
+                        (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = false
+                    }
+                    cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
+                } else if let members = model.rejectMembers, !members.isEmpty {
+                    if members.contains(where: { $0.id == user?.id }) {
+                        (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = false
+                        (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
+                    }
+                } else {
+                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
+                    (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = true
+                }
             }
-            cell.calendayView.day = "8"
-            cell.calendayView.month = "Apr"
+            
+            if case .virtual = model.activityType {
+                cell.contentLab.text = "Virtual"
+            } else if let address = model.position?.address {
+                cell.contentLab.text = address
+            }
+            
+            cell.calendayView.day = model.startDay
+            cell.calendayView.month = model.startMonth
             cell.selectionStyle = .none
-            cell.setData("")
+            
+            cell.tapObservable
+                .map{ Reactor.Action.handlerGoing(isAccept: $0 == 0, activityId: model.id) }
+                .bind(to: reactor.action)
+                .disposed(by: cell.disposeBag)
+            
             return cell
         })
+        
+        reactor.state
+            .compactMap { $0.isLoading }
+            .bind(to: rx.loading)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap { $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
         
         reactor.state
             .map{ [SectionModel(model: "", items: $0.repos)] }
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
+        tableView.rx.itemSelected
+            .subscribe(onNext: { [unowned self] indexPath in
+                let model = self.dataSource[indexPath]
+                let activityReactor = ActivityDetailReactor(activityId: model.id, squadId: model.squadId, initialActivityStatus: model.activityStatus)
+                let activityDetailVC = ActivityDetailViewController(reactor: activityReactor)
+                let nav = BaseNavigationController(rootViewController: activityDetailVC)
+                nav.modalPresentationStyle = .fullScreen
+                self.present(nav, animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+//        tableView.rx.setDelegate(self)
+//            .disposed(by: disposeBag)
+        
         rx.viewDidLoad
             .map{ Reactor.Action.requestList }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        tableView.rx.willDisplayCell
+            .map{ [unowned self] (_, indexPath) in self.dataSource[indexPath] }
+            .distinctUntilChanged({ $0.isEquadTo($1) })
+            .map{ Reactor.Action.didDisplayCell($0) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
@@ -106,8 +176,4 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
         present(nav, animated: true)
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let model = dataSource[indexPath]
-        return 110
-    }
 }

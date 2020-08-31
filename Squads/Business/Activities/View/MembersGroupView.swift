@@ -7,8 +7,6 @@
 //
 
 import UIKit
-import RxSwift
-import RxCocoa
 
 protocol MembersItemProtocol {
     var url: URL? { get }
@@ -19,26 +17,24 @@ struct MembersSection<T: MembersItemProtocol> {
     var list: Array<T>
 }
 
-class MembersGroupView<T: MembersItemProtocol>: BaseView {
+extension ActivityMember: MembersItemProtocol {
+    var url: URL? {
+        return avatar.asURL
+    }
+}
 
-    var topSection: MembersSection<T>! {
-        didSet {
-            topLab.text = topSection.title
-            topMemberView.members = topSection.list
-        }
+extension User: MembersItemProtocol {
+    var url: URL? {
+        return avatar.asURL
     }
-    
-    var bottomSection: MembersSection<T>! {
-        didSet {
-            bottomLab.text = bottomSection.title
-            bottomMembersView.members = bottomSection.list
-        }
-    }
+}
+
+class MembersGroupView: BaseView {
     
     private var topLab = UILabel()
-    private var topMemberView = SquadMembersView<T>()
+    private var topMemberView = SquadMembersView()
     private var bottomLab = UILabel()
-    private var bottomMembersView = SquadMembersView<T>()
+    private var bottomMembersView = SquadMembersView()
     
     override func setupView() {
         
@@ -75,20 +71,19 @@ class MembersGroupView<T: MembersItemProtocol>: BaseView {
             maker.top.equalTo(bottomLab.snp.bottom).offset(8)
         }
     }
+    
+    func setTopSection<T: MembersItemProtocol>(section: MembersSection<T>) {
+        topLab.text = section.title
+        if !section.list.isEmpty {
+            topMemberView.setMembers(members: section.list.map{ $0.url })
+        }
+    }
+    
+    func setBottomSection<T: MembersItemProtocol>(section: MembersSection<T>) {
+        bottomLab.text = section.title
+        if !section.list.isEmpty {
+            bottomMembersView.setMembers(members: section.list.map{ $0.url })
+        }
+    }
 }
 
-extension Reactive where Base: MembersGroupView<ActivityMember> {
-    
-    var topSection: Binder<MembersSection<ActivityMember>> {
-        return Binder(base) { refresh, model in
-            refresh.topSection = model
-        }
-    }
-    
-    var bottomSection: Binder<MembersSection<ActivityMember>> {
-        return Binder(base) { refresh, model in
-            refresh.bottomSection = model
-        }
-    }
-    
-}

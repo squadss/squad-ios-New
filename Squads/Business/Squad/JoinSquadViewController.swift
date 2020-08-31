@@ -31,7 +31,6 @@ class JoinSquadViewController: ReactorViewController<JoinSquadReactor> {
         titleLab.theme.textColor = UIColor.text
         titleLab.font = UIFont.systemFont(ofSize: 36, weight: .medium)
         
-        descriptionLab.text = "Mark has invitited you to his squad!"
         descriptionLab.textAlignment = .center
         descriptionLab.theme.textColor = UIColor.textGray
         descriptionLab.font = UIFont.systemFont(ofSize: 16, weight: .regular)
@@ -132,6 +131,12 @@ class JoinSquadViewController: ReactorViewController<JoinSquadReactor> {
         reactor.state
             .compactMap{ $0.toast }
             .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.user?.nickname }
+            .map{ "\($0) has invitited you to his squad!" }
+            .bind(to: descriptionLab.rx.text)
             .disposed(by: disposeBag)
         
         let detail: Observable<SquadDetail?> = reactor.state.map{ $0.squadDetail }

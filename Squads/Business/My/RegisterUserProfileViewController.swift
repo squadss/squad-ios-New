@@ -94,18 +94,15 @@ class RegisterUserProfileViewController: BaseViewController, BrickInputFieldStyl
     
     override func addTouchAction() {
         
-        avatarView.canEditTap
+        Observable.merge(avatarView.canEditTap, avatarView.imageBtnTap)
             .flatMap { [unowned self] in
                 self.picker.image(optionSet: [.camera, .photo], delegate: self)
             }
-            .map{
-                if let image = $0.1 { return image }
-                return $0.0
-            }
+            .map{ $0.0 }
             .do(onNext: { image in
-                UserTDO.instance.avatar = image.pngData()
+                UserTDO.instance.avatar = image.compressImage(toByte: 200000)
             })
-            .bind(to: avatarView.imageBtn.rx.image(for: .normal))
+            .bind(to: avatarView.rx.setImage(for: .normal))
             .disposed(by: rx.disposeBag)
         
         nicknameField.rx.text.orEmpty

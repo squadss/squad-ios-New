@@ -18,12 +18,20 @@ struct User: Codable {
     var gender: Gender
     var avatar: String
 
+    // 下面这几条信息, 需要查询个人详情接口才会有数据
+    var phoneNumber: String?        //"17771865607"
+    var nationCode: String?         //"+86"
+    var purePhoneNumber: String?    //"+8617771865607"
+    
     init(from decoder: Decoder) throws {
         id = try decoder.decode("id")
         username = try decoder.decode("username")
         gender = try decoder.decode("gender")
         nickname = try decoder.decode("nickname")
         avatar = try decoder.decode("headimgurl")
+        phoneNumber = try decoder.decodeIfPresent("phoneNumber")
+        nationCode = try decoder.decodeIfPresent("nationCode")
+        purePhoneNumber = try decoder.decodeIfPresent("purePhoneNumber")
     }
     
     func encode(to encoder: Encoder) throws {
@@ -32,6 +40,9 @@ struct User: Codable {
         try encoder.encode(gender, for: "gender")
         try encoder.encode(nickname, for: "nickname")
         try encoder.encode(avatar, for: "headimgurl")
+        try encoder.encode(gender, for: "phoneNumber")
+        try encoder.encode(nickname, for: "nationCode")
+        try encoder.encode(avatar, for: "purePhoneNumber")
     }
 }
 
@@ -46,7 +57,7 @@ extension User: Hashable {
     }
     
     static func == (lhs: User, rhs: User) -> Bool {
-        return lhs.username == rhs.username
+        return lhs.id == rhs.id
     }
 }
 

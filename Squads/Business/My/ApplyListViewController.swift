@@ -62,7 +62,7 @@ class ApplyListViewController: ReactorViewController<ApplyListReactor>, UITableV
             cell.avatarView.kf.setImage(with: model.inviteSquadLogoPath?.asURL, for: .normal)
             cell.selectionStyle = .none
             cell.nicknameLab.text = model.inviterNickname
-            cell.contentLab.text = model.inviteeNickname
+            cell.contentLab.text = "Invited by " + model.inviterNickname
             
             switch model.inviteStatus {
             case .accepted:     //已接受

@@ -166,11 +166,15 @@ extension UIImage {
     ///
     /// - Parameter maxLength: 最大的字节尺寸 bt为单位
     /// - Returns: 新的图片大小
-    func compressImage(toByte maxLength: Int) -> UIImage {
+    func compressImage(toByte maxLength: Int) -> Data? {
         var compression: CGFloat = 1
+        
+        guard var data = jpegData(compressionQuality: compression) else {
+            return pngData()
+        }
+        
         //先判断当前质量是否满足要求,不满足才进行压缩
-        guard var data = jpegData(compressionQuality: compression),
-            data.count > maxLength else { return self }
+        if data.count < maxLength { return data }
         
         // Compress by size
         var max: CGFloat = 1
@@ -187,7 +191,7 @@ extension UIImage {
             }
         }
         var resultImage: UIImage = UIImage(data: data)!
-        if data.count < maxLength { return resultImage }
+        if data.count < maxLength { return data }
         
         // Compress by size
         var lastDataLength: Int = 0
@@ -202,9 +206,30 @@ extension UIImage {
             UIGraphicsEndImageContext()
             data = resultImage.jpegData(compressionQuality: compression)!
         }
-        return resultImage
+        return data
     }
     
+    // 二分法压缩图片
+//    func compressImageQuality(toByte maxLength: Int) -> Data? {
+//        var compression: CGFloat = 1
+//        guard var data: Data = jpegData(compressionQuality: compression), data.count > maxLength else {
+//            return nil
+//        }
+//        var max: CGFloat = 1
+//        var min: CGFloat = 0
+//        for _ in 0..<6 {
+//            compression = (max + min) / 2
+//            data = jpegData(compressionQuality: compression)!
+//            if CGFloat(data.count) < CGFloat(maxLength) * 0.9 {
+//                min = compression
+//            } else if data.count > maxLength {
+//                max = compression
+//            } else {
+//                break
+//            }
+//        }
+//        return data
+//    }
 }
 
 // 翻转图片

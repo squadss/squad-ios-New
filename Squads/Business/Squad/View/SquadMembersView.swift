@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SquadMembersView<T: MembersItemProtocol>: BaseView {
+class SquadMembersView: BaseView {
     
     var memberWidth: CGFloat = 16
     var maxIndex: Int = 10
@@ -19,22 +19,6 @@ class SquadMembersView<T: MembersItemProtocol>: BaseView {
     
     private var stackView = UIStackView()
     private var listView = Array<UIImageView>()
-    
-    var members = Array<T>() {
-        didSet {
-            // 布局子视图
-            setupMemberListView(from: members)
-            // 计算自身宽度
-            let count = CGFloat(members.count)
-            width = count * memberWidth + stackView.spacing * max(count - 1, 0)
-            // 布局子视图
-            stackView.snp.remakeConstraints { (maker) in
-                maker.width.equalTo(width)
-                maker.height.equalTo(memberWidth)
-                maker.leading.trailing.top.bottom.equalToSuperview()
-            }
-        }
-    }
     
     private(set) var width: CGFloat = 0 {
         didSet {
@@ -52,14 +36,27 @@ class SquadMembersView<T: MembersItemProtocol>: BaseView {
         stackView.distribution = .fillEqually
         stackView.spacing = 2
         addSubview(stackView)
-        
+    }
+    
+    func setMembers(members: Array<URL?>) {
+        // 布局子视图
+        setupMemberListView(from: members)
+        // 计算自身宽度
+        let count = CGFloat(members.count)
+        width = count * memberWidth + stackView.spacing * max(count - 1, 0)
+        // 布局子视图
+        stackView.snp.remakeConstraints { (maker) in
+            maker.width.equalTo(width)
+            maker.height.equalTo(memberWidth)
+            maker.leading.trailing.top.bottom.equalToSuperview()
+        }
     }
     
     // 根据数据源创建成员列表视图
-    private func setupMemberListView(from list: [T]) {
+    private func setupMemberListView(from list: Array<URL?>) {
         
         let count = stackView.arrangedSubviews.count
-        list.enumerated().forEach{ (index, model) in
+        list.enumerated().forEach{ (index, url) in
             var imageView: UIImageView?
             if index < count {
                 imageView = stackView.arrangedSubviews[index] as? UIImageView
@@ -69,7 +66,7 @@ class SquadMembersView<T: MembersItemProtocol>: BaseView {
                     stackView.addArrangedSubview(_imageView)
                 }
             }
-            imageView?.kf.setImage(with: model.url, placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+            imageView?.kf.setImage(with: url)
         }
         
         if list.count < count {
@@ -91,8 +88,9 @@ class SquadMembersView<T: MembersItemProtocol>: BaseView {
             return listView[index]
         } else {
             let imageView = UIImageView()
-            imageView.contentMode = .scaleAspectFit
-            imageView.layer.maskCorners(memberWidth/2, rect: CGRect(origin: .zero, size: CGSize(width: memberWidth, height: memberWidth)))
+            imageView.contentMode = .scaleAspectFill
+            imageView.layer.cornerRadius = memberWidth/2
+            imageView.layer.masksToBounds = true
             imageView.clipsToBounds = true
             listView.append(imageView)
             return imageView

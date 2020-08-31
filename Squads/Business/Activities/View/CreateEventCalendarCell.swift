@@ -88,7 +88,7 @@ class CreateEventCalendarCell: BaseTableViewCell {
         let year = calendar.component(.year, from: startDate)
         
         headerView.titleLab.text = monthName + " " + String(year)
-        
+
 //        let dateBelongsTo = calendarView.cellStatus(for: startDate)?.dateBelongsTo
 //        switch dateBelongsTo {
 //        case .followingMonthOutsideBoundary:
