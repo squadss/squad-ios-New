@@ -29,7 +29,6 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     private var stackView: UIStackView!
     private var separatorLine = SeparatorLine()
     private var tableView = UITableView(frame: .zero, style: .grouped)
-    private var sideMenuManager = SideMenuManager()
     
     private var titleBarView: UIButton = {
         let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 150, height: 44))
@@ -39,9 +38,6 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     
     private var onConversationChangedRelay = PublishRelay<RefreshChannelsAction>()
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, SquadPrimaryKey>>!
-    override var allowedCustomBackBarItem: Bool {
-        return false
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +46,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     }
     
     override func setupView() {
+        
         //自定义导航栏按钮
         let leftBtn = UIButton()
         leftBtn.setImage(UIImage(named: "navigation_back"), for: .normal)
@@ -87,7 +84,6 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         view.addSubview(separatorLine)
         
-        tableView.delegate = self
         tableView.separatorStyle = .none
         tableView.register(Reusable.squadActivityCell)
         tableView.register(Reusable.squadChannelsCell)
@@ -96,6 +92,9 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         tableView.theme.backgroundColor = UIColor.background
         tableView.tableFooterView = UIView(frame: .zero)
         tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0.001))
+        tableView.rx
+            .setDelegate(self)
+            .disposed(by: disposeBag)
         
         view.addSubview(tableView)
         
@@ -127,45 +126,15 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         let style = SideMenuPresentationStyle.menuSlideIn
         style.presentingEndAlpha = 0.6
         menu.presentationStyle = style
-        sideMenuManager.leftMenuNavigationController = menu
+        SideMenuManager.default.leftMenuNavigationController = menu
+        SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
+        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: view)
     }
     
     private func setupTitleView() {
         titleBarView.theme.titleColor(from: UIColor.text, for: .normal)
         titleBarView.addTarget(self, action: #selector(titleBtnDidTapped), for: .touchUpInside)
         addToTitleView(titleBarView)
-    }
-    
-    override func addTouchAction() {
-        tableView.rx.itemSelected
-            .subscribe(onNext: { [unowned self] indexPath in
-                let squadId = self.reactor!.currentSquadId
-                switch indexPath.section {
-                case 1:
-                    if let model = self.dataSource[indexPath] as? SquadActivity {
-                        let activityReactor = ActivityDetailReactor(activityId: model.id, squadId: squadId)
-                        let activityDetailVC = ActivityDetailViewController(reactor: activityReactor)
-                        let nav = BaseNavigationController(rootViewController: activityDetailVC)
-                        nav.modalPresentationStyle = .fullScreen
-                        self.present(nav, animated: true)
-                    } else {
-                        let reactor = CreateEventReactor(squadId: squadId)
-                        let vc = CreateEventViewController(reactor: reactor)
-                        vc.title = "Create Event"
-                        let nav = BaseNavigationController(rootViewController: vc)
-                        nav.modalPresentationStyle = .fullScreen
-                        self.present(nav, animated: true)
-                    }
-                case 2:
-                    if let model = self.dataSource[indexPath] as? SquadChannel {
-                        let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId, groupName: model.title, squadId: squadId))
-                        self.navigationController?.pushViewController(chattingVC, animated: true)
-                    }
-                default:
-                    break
-                }
-            })
-            .disposed(by: disposeBag)
     }
     
     override func setupConstraints() {
@@ -208,16 +177,26 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             case is SquadActivity:
                 let cell = tableView.dequeue(Reusable.squadActivityCell)!
                 let model = model as! SquadActivity
-                cell.contentLab.text = "RSF"
-                cell.titleLab.text = model.activityType.title
+                cell.titleLab.text = model.title
                 cell.pritureView.image = model.activityType.image
-                cell.dateLab.text = model.title
-//                cell.membersView.members = [URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"), URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg")!]
+                cell.dateLab.text = model.startDate
+                
+                if case .virtual = model.activityType {
+                    cell.contentLab.text = "Virtual"
+                } else if let address = model.position?.address {
+                    cell.contentLab.text = address
+                }
                 
                 if model.activityStatus == .prepare {
                     cell.containterView.borderColor = nil
+                    if let members = model.responsedMembers, !members.isEmpty {
+                        cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
+                    }
                 } else {
                     cell.containterView.borderColor = .red
+                    if let members = model.goingMembers, !members.isEmpty {
+                        cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
+                    }
                 }
                 
                 cell.selectionStyle = .none
@@ -227,10 +206,9 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                 cell.selectionStyle = .none
                 cell.setData(model as! SquadChannel)
                 return cell
-            case is FlickModel:
+            case is Array<URL>:
                 let cell = tableView.dequeue(Reusable.squadSqrollCell)!
-                let model = (model as! FlickModel)
-                let list = model.pirtureList
+                let list = (model as! Array<URL>)
                 cell.dataSource = list
                 cell.tapObservable
                     .subscribe(onNext: {
@@ -245,6 +223,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                         browser.show()
                     })
                     .disposed(by: cell.disposeBag)
+                cell.backgroundColor = .white
                 cell.selectionStyle = .none
                 return cell
             default:
@@ -280,6 +259,44 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         onConversationChangedRelay
             .map{ Reactor.Action.refreshChannels($0) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        tableView.rx.itemSelected
+            .subscribe(onNext: { [unowned self] indexPath in
+                let squadId = reactor.currentSquadId
+                switch indexPath.section {
+                case 1:
+                    if let model = self.dataSource[indexPath] as? SquadActivity {
+                        let activityReactor = ActivityDetailReactor(activityId: model.id, squadId: squadId, initialActivityStatus: model.activityStatus)
+                        let activityDetailVC = ActivityDetailViewController(reactor: activityReactor)
+                        let nav = BaseNavigationController(rootViewController: activityDetailVC)
+                        nav.modalPresentationStyle = .fullScreen
+                        self.present(nav, animated: true)
+                    } else {
+                        let reactor = CreateEventReactor(squadId: squadId)
+                        let vc = CreateEventViewController(reactor: reactor)
+                        vc.title = "Create Event"
+                        let nav = BaseNavigationController(rootViewController: vc)
+                        nav.modalPresentationStyle = .fullScreen
+                        self.present(nav, animated: true)
+                    }
+                case 2:
+                    if let model = self.dataSource[indexPath] as? SquadChannel {
+                        let chattingVC = ChattingViewController(action: .load(groupId: model.sessionId, groupName: model.title, squadId: squadId))
+                        self.navigationController?.pushViewController(chattingVC, animated: true)
+                    }
+                default:
+                    break
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        tableView.rx.willDisplayCell
+            .filter{ $1.section == 1 }
+            .compactMap{ [unowned self] in self.dataSource[$1] as? SquadActivity }
+            .distinctUntilChanged({ $0.isEquadTo($1) })
+            .map{ Reactor.Action.didDisplayCell($0) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -342,7 +359,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     
     @objc
     private func leftBtnDidTapped() {
-        present(sideMenuManager.leftMenuNavigationController!, animated: true)
+        let vc = SideMenuManager.default.leftMenuNavigationController
+        vc.flatMap { present($0, animated: true) }
     }
     
     @objc
@@ -380,16 +398,23 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             titleView.titleLab.text = "Sqroll"
             return titleView
         case 1: //Activities
-            
+            let color = UIColor(red: 0.93, green: 0.38, blue: 0.34, alpha: 1.0)
             let attachBtn = UIButton()
-            attachBtn.setTitleColor(UIColor(red: 0.93, green: 0.38, blue: 0.34, alpha: 1.0), for: .normal)
+            attachBtn.setTitleColor(color, for: .normal)
             attachBtn.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
             attachBtn.setTitle("See All ", for: .normal)
             attachBtn.addTarget(self, action: #selector(activitiesBtnDidTapped), for: .touchUpInside)
             attachBtn.contentHorizontalAlignment = .right
             
+            if reactor?.currentState.currentSquadDetail?.hasMoreActivities == true {
+                let size = CGSize(width: 2, height: 2)
+                let offset = CGPoint(x: 1, y: 0)
+                let image = UIImage(color: color, size: size, offset: offset, radius: 1)
+                attachBtn.setImage(image, for: .normal)
+            }
+            
             var layout = SquadSectionTitleLayout()
-            layout.btnWidth = 60
+            layout.btnWidth = 70
             layout.marginRight = 14
             
             let rect = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 36)
@@ -439,7 +464,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
             return 81.0
         case is SquadChannel:
             return 70.0
-        case is FlickModel:
+        case is Array<URL>:
             return 100.0
         default:
             fatalError("没有配置cell")

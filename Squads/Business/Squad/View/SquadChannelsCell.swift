@@ -72,7 +72,7 @@ class SquadChannelsCell: BaseTableViewCell {
         let unreadMarginTop: CGFloat = 5
         
         pritureView.frame = CGRect(origin: CGPoint(x: marginHorizontal, y: (bounds.height - pritureSize.height)/2), size: pritureSize)
-        dateLab.frame = CGRect(x: bounds.width - marginHorizontal - 60, y: pritureView.frame.minY, width: 60, height: 15)
+        dateLab.frame = CGRect(x: bounds.width - marginHorizontal - 80, y: pritureView.frame.minY, width: 80, height: 15)
         titleLab.frame = CGRect(x: pritureView.frame.maxX + titleMarginLeft, y: pritureView.frame.minY, width: dateLab.frame.minX - pritureView.frame.maxX - titleMarginLeft, height: 18)
         unreadLab.frame = CGRect(origin: CGPoint(x: bounds.width - marginHorizontal - unreadSize.width, y: dateLab.frame.maxY + unreadMarginTop), size: unreadSize)
         line.frame = CGRect(x: titleLab.frame.minX, y: bounds.height - 0.5, width: bounds.width - titleLab.frame.minX - marginHorizontal, height: 0.5)

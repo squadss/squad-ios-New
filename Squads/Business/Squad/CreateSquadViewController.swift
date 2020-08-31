@@ -94,22 +94,51 @@ class CreateSquadViewController: BaseViewController {
     
     override func addTouchAction() {
         
+        guard let accountId = User.currentUser()?.id else {
+            return
+        }
+        
         let rightTap = navigationItem.rightBarButtonItem?.rx.tap
         
         rightTap?.subscribe(onNext: { [unowned self] in
+            self.view.endEditing(true)
             self.showLoading(offsetY: 0)
         })
         .disposed(by: disposeBag)
         
-        rightTap?
-            .flatMap { [unowned self] _ -> Observable<Result<SquadDetail, GeneralError>> in
-            guard let data = self.imageView.highlightedImage?.pngData() else {
+        rightTap?.flatMap { [unowned self] _ -> Observable<Result<SquadDetail, GeneralError>> in
+            guard let data = self.imageView.highlightedImage?.compressImage(toByte: 200000) else {
                 return .just(.failure(.custom("Please upload squad avatar!")))
             }
             guard let name = self.inputField.text, !name.isEmpty else {
                 return .just(.failure(.custom("Please fill in the name of squad!")))
             }
             return self.provider.request(target: .createSquad(name: name, avator: data, remark: ""), model: SquadDetail.self, atKeyPath: .data).asObservable()
+        }
+        .flatMap { [unowned self] result -> Observable<Result<SquadDetail, GeneralError>> in
+            switch result {
+            case .success(let detail):
+                
+                // 使用本地图片(😁表情), 上传到服务器作为群的默认头像
+//                let urlPath = Bundle.main.path(forResource: "normal_channel_avatar", ofType: "jpg")
+//                let url = URL(fileURLWithPath: urlPath!)
+//                let avatarData = try! Data(contentsOf: url)
+                let image = UIImage(named: "Normal Channel")!
+                let avatarData = image.jpegData(compressionQuality: 1.0)!
+                
+                return self.provider.request(target: .createChannel(squadId: detail.id, name: "Main", avatar: avatarData, ownerAccountId: accountId), model: CreateChannel.self, atKeyPath: .data).asObservable().flatMap { result -> Observable<Void> in
+                    switch result {
+                    case .success(let channel):
+                        return self.createGroupsFromTIM(groupId: String(channel.id), groupName: channel.channelName, faceURL: channel.headImgUrl)
+                    case .failure:
+                        return .empty()
+                    }
+                }.map{
+                    return .success(detail)
+                }
+            case .failure(let error):
+                return Observable.just(.failure(error))
+            }
         }
         .subscribe(onNext: { [unowned self] result in
             switch result {
@@ -124,7 +153,21 @@ class CreateSquadViewController: BaseViewController {
                 self.navigationController?.pushViewController(vc, animated: true)
             case .failure(let error):
                 self.hideLoading()
-                self.showToast(message: error.message)
+                if case .loginStatusDidExpired = error {
+                    let alert = UIAlertController(title: "Authentication has expired, please log in again", message: nil, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { _ in
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            User.removeCurrentUser()
+                            AuthManager.removeToken()
+                            UserDefaults.standard.topSquad = nil
+                            Application.shared.presentInitialScreent()
+                        }
+                    }))
+                    self.present(alert, animated: true)
+                } else {
+                    self.showToast(message: error.message)
+                }
+                
             }
         })
         .disposed(by: disposeBag)
@@ -149,5 +192,33 @@ class CreateSquadViewController: BaseViewController {
     @objc
     private func backBarButtonItemDidTapped() {
         self.dismiss(animated: true)
+    }
+    
+    /// 从TIM中创建一个群
+    /// - Parameter groupId: 自定义群组id
+    /// - Parameter groupName: 群名称
+    /// - Parameter faceURL: 群头像
+    /// - Parameter inviteMembers: 准备受邀加入的成员列表
+    private func createGroupsFromTIM(groupId: String,
+                                     groupName: String,
+                                     faceURL: String) -> Observable<Void> {
+        return Observable.create { (observer) -> Disposable in
+            
+            let info = V2TIMGroupInfo()
+            info.groupID = groupId
+            info.groupType = "Work"
+            info.faceURL = faceURL
+            info.groupName = groupName
+            
+            V2TIMManager.sharedInstance()?.createGroup(info, memberList: [], succ: { _ in
+                observer.onNext(())
+                observer.onCompleted()
+            }, fail: { (code, message) in
+                observer.onNext(())
+                observer.onCompleted()
+            })
+            
+            return Disposables.create()
+        }
     }
 }

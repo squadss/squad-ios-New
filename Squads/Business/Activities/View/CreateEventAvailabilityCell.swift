@@ -12,7 +12,7 @@ import RxSwift
 class CreateEventAvailabilityCell: BaseTableViewCell {
     
     var disposeBag = DisposeBag()
-    var chooseTimeView = SingleChooseTimeView(cellStyle: .dash)
+    var chooseTimeView = SingleChooseTimeView(cellStyle: .dash(level: .level5))
     
     override func setupView() {
         

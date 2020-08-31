@@ -123,7 +123,6 @@
 		179E373324B8A41D000DD595 /* MessagesContentView+Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179E373224B8A41D000DD595 /* MessagesContentView+Keyboard.swift */; };
 		17A1513F24D3C0F800E441DE /* CreateEventLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1513E24D3C0F800E441DE /* CreateEventLocationViewController.swift */; };
 		17A1514124D3FDEA00E441DE /* CreateEventLocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */; };
-		17A1514324D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A1514224D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift */; };
 		17B5DAB124D9AB6800A2A33F /* BasicAudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B5DAB024D9AB6800A2A33F /* BasicAudioController.swift */; };
 		17B5DAB324DA501A00A2A33F /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B5DAB224DA501900A2A33F /* Array+Extension.swift */; };
 		17B5ED7A24CECFB4009FA969 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B5ED7924CECFB4009FA969 /* App.swift */; };
@@ -342,7 +341,6 @@
 		179E373224B8A41D000DD595 /* MessagesContentView+Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MessagesContentView+Keyboard.swift"; sourceTree = "<group>"; };
 		17A1513E24D3C0F800E441DE /* CreateEventLocationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventLocationViewController.swift; sourceTree = "<group>"; };
 		17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventLocationCell.swift; sourceTree = "<group>"; };
-		17A1514224D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvtivityConfirmScheduledViewController.swift; sourceTree = "<group>"; };
 		17B5DAB024D9AB6800A2A33F /* BasicAudioController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicAudioController.swift; sourceTree = "<group>"; };
 		17B5DAB224DA501900A2A33F /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
 		17B5ED7524CECEC8009FA969 /* Squads-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Squads-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -497,7 +495,6 @@
 				171E07B624B31E6F00603F76 /* View */,
 				178FCB8F24B4AEAF0054212F /* ActivityDetailViewController.swift */,
 				171B0F3524C298030020DF15 /* AvtivityTimeSettingViewController.swift */,
-				17A1514224D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift */,
 				17F1721F24B9A54E0081E4C0 /* CreateEventViewController.swift */,
 				17A1513E24D3C0F800E441DE /* CreateEventLocationViewController.swift */,
 			);
@@ -1232,7 +1229,6 @@
 				17D9AF4F24AF1ECF00FEF4DA /* BaseTableView.swift in Sources */,
 				17E5FA5E24B41FF900E8B819 /* SquadPreReactor.swift in Sources */,
 				17F1722A24B9A7FE0081E4C0 /* CreateEventAvailabilityCell.swift in Sources */,
-				17A1514324D46CA200E441DE /* AvtivityConfirmScheduledViewController.swift in Sources */,
 				17E5FA5C24B41FD600E8B819 /* SquadPreViewController.swift in Sources */,
 				175D1EE724D6DC7500DBC483 /* WelcomeReactor.swift in Sources */,
 				179536B424B192BE00FE1185 /* UIButton+Extension.swift in Sources */,

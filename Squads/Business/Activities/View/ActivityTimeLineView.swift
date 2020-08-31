@@ -129,6 +129,6 @@ class ActivityTimeSectionView<T: UIView>: UIView {
         titleLab.frame = CGRect(x: 0, y: 0, width: bounds.width, height: 17)
         itemView?.frame = CGRect(x: 0, y: titleLab.frame.maxY + 5, width: bounds.width, height: 250)
         let contentFrame = itemView?.frame ?? CGRect(x: 0, y: titleLab.frame.maxY + 5, width: 0, height: 0)
-        bottomStackView.frame = CGRect(x: 0, y: contentFrame.maxY, width: bounds.width, height: 45)
+        bottomStackView.frame = CGRect(x: 0, y: contentFrame.maxY, width: bounds.width, height: bounds.height - contentFrame.maxY)
     }
 }

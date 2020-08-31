@@ -19,7 +19,7 @@ class JoinSquadReactor: Reactor {
     }
     
     enum Mutation {
-        case setSquadDetail(SquadDetail)
+        case setSquadDetail(SquadDetail, User?)
         case setToast(String)
         case setLoading(Bool)
         case setJoinState(Bool, String)
@@ -29,25 +29,38 @@ class JoinSquadReactor: Reactor {
         var toast: String?
         var isLoading: Bool?
         var squadDetail: SquadDetail?
+        var user: User?
         var joinSuccess: Bool?
     }
     
     let inviteCode: String
+    let inviterAccountId: Int
     var initialState = State()
     var provider = OnlineProvider<SquadAPI>()
+    var _userProvider = OnlineProvider<UserAPI>()
     
-    init(inviteCode: String) {
+    init(inviteCode: String, inviterAccountId: Int) {
         self.inviteCode = inviteCode
+        self.inviterAccountId = inviterAccountId
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .requestSquadDetail:
-            return provider.request(target: .querySquadByInviteCode(code: inviteCode), model: SquadDetail.self, atKeyPath: .data).asObservable()
-                .map { result in
-                    switch result {
-                    case .success(let model): return .setSquadDetail(model)
-                    case .failure(let error): return .setToast(error.message)
+            
+            let userObservable = _userProvider.request(target: .account(id: inviterAccountId), model: User.self, atKeyPath: .data).asObservable()
+            
+            let squadObservable = provider.request(target: .querySquadByInviteCode(code: inviteCode), model: SquadDetail.self, atKeyPath: .data).asObservable()
+            
+            return Observable.zip(userObservable, squadObservable)
+                .map { (userResult, squadResult) in
+                    switch (userResult, squadResult) {
+                    case (.success(let user), .success(let squad)):
+                        return .setSquadDetail(squad, user)
+                    case (.failure, .failure(let error)), (.success, .failure(let error)):
+                        return .setToast(error.message)
+                    case (.failure, .success(let squad)):
+                        return .setSquadDetail(squad, nil)
                     }
                 }
                 .startWith(.setLoading(true))
@@ -89,8 +102,9 @@ class JoinSquadReactor: Reactor {
         case .setLoading(let s):
             state.toast = nil
             state.isLoading = s
-        case .setSquadDetail(let detail):
+        case let .setSquadDetail(detail, user):
             state.isLoading = false
+            state.user = user
             state.squadDetail = detail
         case let .setJoinState(s, toast):
             state.isLoading = false

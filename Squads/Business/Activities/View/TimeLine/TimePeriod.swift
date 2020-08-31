@@ -57,6 +57,12 @@ struct TimePeriod: Hashable, Codable {
         return Date(timeIntervalSince1970: max(end - beginning, 0)/2 + beginning)
     }
     
+    var startOffTime: Date? {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: middleDate)
+        return calendar.date(from: components)
+    }
+    
     var beginning: TimeInterval
     var end: TimeInterval
     var color: TimeColor

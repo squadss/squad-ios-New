@@ -59,7 +59,7 @@ class SquadMembersViewController: ReactorViewController<SquadMembersReactor> {
             cell.avatarView.kf.setImage(with: model.avatar.asURL, for: .normal)
             cell.selectionStyle = .none
             cell.nicknameLab.text = model.nickname
-            cell.contentLab.text = "Alex, Hannah, Mari and 2 others"
+//            cell.contentLab.text = "Alex, Hannah, Mari and 2 others"
             cell.actionBtn.setTitle("Add", for: .normal)
             return cell
         }, canEditRowAtIndexPath: { _,_ in

@@ -14,7 +14,7 @@ import MapKit
 
 enum EventCategory: Int, Codable, CaseIterable, Equatable {
     case food = 1
-    case coffee = 2
+    case virtual = 2
     case hangout = 3
     case work = 4
     case exercise = 5
@@ -23,7 +23,7 @@ enum EventCategory: Int, Codable, CaseIterable, Equatable {
     var themeColor: UIColor {
         switch self {
         case .food: return UIColor(red: 0.925, green: 0.384, blue: 0.337, alpha: 1)
-        case .coffee: return UIColor(red: 0.616, green: 0.89, blue: 0.796, alpha: 1)
+        case .virtual: return UIColor(red: 0.616, green: 0.89, blue: 0.796, alpha: 1)
         case .hangout: return UIColor(red: 1, green: 0.664, blue: 0.438, alpha: 1)
         case .work: return UIColor(red: 0.157, green: 0.31, blue: 0.522, alpha: 1)
         case .exercise: return UIColor(red: 0.302, green: 0.69, blue: 0.78, alpha: 1)
@@ -34,7 +34,7 @@ enum EventCategory: Int, Codable, CaseIterable, Equatable {
     var title: String {
         switch self {
         case .food: return "Food"
-        case .coffee: return "Coffee"
+        case .virtual: return "Virtual"
         case .hangout: return "Hangout"
         case .work: return "Work"
         case .exercise: return "Exercise"

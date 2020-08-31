@@ -44,10 +44,10 @@ enum UserAPI {
     case getAccountInfo
     
     // 获取账号id获取用户详情
-    case account(id: String)
+    case account(id: Int)
     
     /// 修改用户信息
-    case update(phoneNumber: String?, nationCode: String?, password: String?, nickname: String?, gender: Gender?, avatar: Data?)
+    case update(accountId: Int, phoneNumber: String?, nationCode: String?, username: String?, nickname: String?, gender: Gender?, avatar: Data?)
 }
 
 extension UserAPI: TargetType {
@@ -66,7 +66,7 @@ extension UserAPI: TargetType {
         case .getAccountInfo:
             return "user/getLoginUserInfo"
         case .account(let id):
-            return "user/account/" + id
+            return "user/account/\(id)"
         case .update:
             return "user/update"
         case .verificationcode:
@@ -118,11 +118,14 @@ extension UserAPI: TargetType {
         case .getverificationcode(let nationCode, let phoneNumber, let purePhoneNumber):
             let params = ["nationCode": nationCode, "phoneNumber": phoneNumber, "purePhoneNumber": purePhoneNumber]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
-        case .update(let phoneNumber, let nationCode, let password, let nickname, let gender, let avatar):
-            var params = Dictionary<String, Any>()
+        case .update(let accountId, let phoneNumber, let nationCode, let username, let nickname, let gender, let avatar):
+            var params: [String: Any] = ["id": accountId]
             phoneNumber.flatMap{ params["phoneNumber"] = $0 }
             nationCode.flatMap{ params["nationCode"] = $0 }
-            password.flatMap{ params["password"] = $0 }
+            if let number = phoneNumber, let code = nationCode {
+                params["purePhoneNumber"] = code + number
+            }
+            username.flatMap{ params["username"] = $0 }
             nickname.flatMap{ params["nickname"] = $0 }
             gender.flatMap{ params["gender"] = $0.rawValue }
             avatar.flatMap{ params["headimgurl"] = $0.base64EncodedString(options: .lineLength64Characters) }

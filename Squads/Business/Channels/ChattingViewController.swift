@@ -138,12 +138,12 @@ extension MessageElem: MessageType {
     }
 }
 
-final class ChattingViewController: MessagesViewController, CustomNavigationBarItem {
+final class ChattingViewController: MessagesViewController {
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .default
     }
-    
+
     private var provider = OnlineProvider<SquadAPI>()
     private var disposeBag = DisposeBag()
     private var currentGroupAction: BehaviorRelay<ConversationAction>!
@@ -256,6 +256,13 @@ final class ChattingViewController: MessagesViewController, CustomNavigationBarI
         messageInputBar.sendButton.theme.titleColor(from: UIColor.secondary.map{ $0?.withAlphaComponent(0.3) }, for: .highlighted)
     }
     
+    private func setupBackBarItem() {
+        let backImage = UIImage(named:"gener_navigation_back")?.withRenderingMode(.alwaysOriginal)
+        let backItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        navigationController?.navigationBar.backIndicatorImage = backImage
+        navigationController?.navigationBar.backIndicatorTransitionMaskImage = backImage
+        navigationItem.backBarButtonItem = backItem
+    }
     //MARK: - Input Bar
     
     var isInputBarHidden: Bool = false {
@@ -362,9 +369,15 @@ extension ChattingViewController: MessagesDataSource {
 extension ChattingViewController: MessageCellDelegate {
     
     func didTapAvatar(in cell: MessageCollectionViewCell) {
-        let friendReactor = FriendProfileReactor()
-        let friendVC = FriendProfileViewController(reactor: friendReactor)
-        navigationController?.pushViewController(friendVC, animated: true)
+        guard let indexPath = messagesCollectionView.indexPath(for: cell) else {
+            return
+        }
+        let model = messageList[indexPath.section]
+        if let accountId = Int(model.sender.senderId) {
+            let friendReactor = FriendProfileReactor(accountId: accountId)
+            let friendVC = FriendProfileViewController(reactor: friendReactor)
+            navigationController?.pushViewController(friendVC, animated: true)
+        }
     }
     
     func didTapMessage(in cell: MessageCollectionViewCell) {
@@ -656,7 +669,7 @@ extension ChattingViewController {
         
         let createView = CreateChannelsView()
         createView.bounds = CGRect(x: 0, y: 0, width: navView.bounds.width - 32, height: 357)
-        createView.center = CGPoint(x: navView.bounds.midX, y: navView.bounds.midY)
+        createView.center = CGPoint(x: navView.bounds.midX, y: navView.bounds.midY - 100)
         createView.backgroundColor = .white
         createView.layer.cornerRadius = 8
         createView.layer.shadowOpacity = 1

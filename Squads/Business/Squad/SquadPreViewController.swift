@@ -8,6 +8,7 @@
 
 import UIKit
 import RxDataSources
+import JXPhotoBrowser
 
 class SquadPreViewController: ReactorViewController<SquadPreReactor> {
 
@@ -84,18 +85,18 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
         reactor.state
             .compactMap{ $0.squadDetail }
             .subscribe(onNext: { [unowned self] detail in
-                self.infoView.dateString = detail.gmtCreate
+//                self.infoView.dateString = detail.gmtCreate
                 self.infoView.title = detail.squadName
                 self.infoView.canEdit = true
                 self.infoView.imageURL = detail.logoPath.asURL
                 
-                self.menuView.daysView.numLab.text = "624"
+                self.menuView.daysView.numLab.text = "0"
                 self.menuView.daysView.titleLab.text = "DAYS"
                 
-                self.menuView.textsView.numLab.text = "23K"
+                self.menuView.textsView.numLab.text = "0"
                 self.menuView.textsView.titleLab.text = "TEXTS"
                 
-                self.menuView.flicksView.numLab.text = "32"
+                self.menuView.flicksView.numLab.text = "0"
                 self.menuView.flicksView.titleLab.text = "FLICKS"
             })
             .disposed(by: disposeBag)
@@ -140,6 +141,19 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
             .map{ Reactor.Action.refreshSquadDetail }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
+        
+        infoView.imageTap.subscribe(onNext: { url in
+            let browser = JXPhotoBrowser()
+            browser.numberOfItems = { 1 }
+            browser.reloadCellAtIndex = { context in
+                let cell = context.cell as? JXPhotoBrowserImageCell
+                cell?.imageView.kf.setImage(with: url)
+            }
+            browser.cellClassAtIndex = { _ in JXPhotoBrowserImageCell.self }
+            browser.pageIndex = 0
+            browser.show()
+        })
+        .disposed(by: disposeBag)
     }
     
     @objc

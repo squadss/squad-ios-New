@@ -27,7 +27,7 @@ class FlicksReactor: Reactor {
     enum Mutation {
         case setLoading(Bool)
         case setToast(String)
-        case setRepos(Array<Model<FlickModel>>)
+        case setRepos(Array<Model<FlickModel>>, isRefresh: Bool)
     }
     
     struct State {
@@ -44,17 +44,32 @@ class FlicksReactor: Reactor {
         self.squadId = squadId
     }
     
-    private var pageIndex: Int = 1
-    private var pageSize: Int = 10
+    struct Paging {
+        var size: Int = 10
+        var index: Int = 1
+        var total: Int = 0
+        
+        mutating func reset() {
+            index = 1
+            size = 10
+        }
+        
+        mutating func nextPage() {
+            index += 1
+            size = 10
+        }
+    }
+    
+    private var paging = Paging()
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .refreshData(let keyword):
-            self.pageIndex = 1
-            self.pageSize = 10
-            return self.requestData(keyword: keyword)
+            self.paging.reset()
+            return self.requestData(keyword: keyword, isRefresh: true)
         case .loadData(let keyword):
-            return self.requestData(keyword: keyword)
+            self.paging.nextPage()
+            return self.requestData(keyword: keyword, isRefresh: false)
         }
     }
     
@@ -67,26 +82,33 @@ class FlicksReactor: Reactor {
         case .setToast(let s):
             state.isLoading = false
             state.toast = s
-        case .setRepos(let list):
+        case .setRepos(let list, let isRefresh):
             state.isLoading = false
-            state.repos = list
+            if isRefresh {
+                state.repos = list
+            } else {
+                state.repos += list
+            }
         }
         return state
     }
     
-    private func requestData(keyword: String) -> Observable<Mutation> {
-        return provider.request(target: .getPageListWithFlick(pageIndex: pageIndex, pageSize: pageSize, keyword: keyword), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data)
+    private func requestData(keyword: String, isRefresh: Bool) -> Observable<Mutation> {
+        return provider.request(target: .getPageListWithFlick(pageIndex: self.paging.index, pageSize: self.paging.size, keyword: keyword), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data)
         .asObservable()
         .map { [unowned self] result in
             switch result {
             case .success(let pagation):
-                self.pageIndex = pagation.pageIndex
-                self.pageSize = pagation.pageSize
+                
+                self.paging.index = pagation.pageIndex
+                self.paging.size = pagation.pageSize
+                self.paging.total = pagation.total
+                
                 return .setRepos(pagation.records.map{ (model) in
                     return Model(data: model,
                                  totalHeight: FlicksListViewCell.calcTotalHeight(pirtureNums: model.pirtureList.count),
                                  contentWidth: FlicksListViewCell.calcContentWidth(string: model.content))
-                })
+                }, isRefresh: isRefresh)
             case .failure(let error):
                 return .setToast(error.message)
             }

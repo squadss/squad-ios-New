@@ -158,40 +158,40 @@ extension Application: V2TIMSDKListener {
     }
 }
 
-class TestVC: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        let timeLine = TimeLineCollectionView(frame: CGRect(x: 20, y: 100, width: 200, height: 300))
-//        timeLine.allowMutilSelected = false
-        timeLine.canEdit = true
-        timeLine.cellStyle = .num
-//        timeLine.adjustSelectedRect = true
-        timeLine.cancelChangedTimeWhenSelected = true
-        timeLine.insertSelectedRect = UIEdgeInsets(top: -10, left: -5, bottom: 10, right: -5)
-        timeLine.backgroundColor = UIColor(hexString: "#f2f2f2")
-        view.addSubview(timeLine)
-        view.backgroundColor = .white
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            /*
-             0:30am 1598027400
-             1:30am 1598031000
-             2am    1598032800
-             3am    1598036400
-             */
-            let list = [TimePeriod(beginning: 1598027400, end: 1598031000),
-                        TimePeriod(beginning: 1598068800, end: 1598072400),
-                        TimePeriod(beginning: 1598070600, end: 1598074200),
-                        TimePeriod(beginning: 1598070600, end: 1598076000)]
-            timeLine.setDataSource(list)
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            print(timeLine.getDataSource())
-        }
-        
-    }
-}
+//class TestVC: UIViewController {
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        let timeLine = TimeLineCollectionView(frame: CGRect(x: 20, y: 100, width: 200, height: 300))
+////        timeLine.allowMutilSelected = false
+//        timeLine.canEdit = true
+//        timeLine.cellStyle = .num
+////        timeLine.adjustSelectedRect = true
+//        timeLine.cancelChangedTimeWhenSelected = true
+//        timeLine.insertSelectedRect = UIEdgeInsets(top: -10, left: -5, bottom: 10, right: -5)
+//        timeLine.backgroundColor = UIColor(hexString: "#f2f2f2")
+//        view.addSubview(timeLine)
+//        view.backgroundColor = .white
+//        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+//            /*
+//             0:30am 1598027400
+//             1:30am 1598031000
+//             2am    1598032800
+//             3am    1598036400
+//             */
+//            let list = [TimePeriod(beginning: 1598027400, end: 1598031000),
+//                        TimePeriod(beginning: 1598068800, end: 1598072400),
+//                        TimePeriod(beginning: 1598070600, end: 1598074200),
+//                        TimePeriod(beginning: 1598070600, end: 1598076000)]
+//            timeLine.setDataSource(list)
+//        }
+//        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//            print(timeLine.getDataSource())
+//        }
+//        
+//    }
+//}
 
 @available(iOS 13, *)
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -247,8 +247,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let webpageURL = userActivity.webpageURL {
             if webpageURL.host == App.AssociatedDomains {
                 //获取邀请码
-                if let code = pathComponentsParse(url: webpageURL, key: "invite") {
-                    let reactor = JoinSquadReactor(inviteCode: code)
+                if let (accountId, code) = pathComponentsParse(url: webpageURL, key: "invite") {
+                    if User.currentUser()?.id == accountId { return }
+                    let reactor = JoinSquadReactor(inviteCode: code, inviterAccountId: accountId)
                     let vc = JoinSquadViewController(reactor: reactor)
                     let nav = BaseNavigationController(rootViewController: vc)
                     nav.modalPresentationStyle = .fullScreen
@@ -263,13 +264,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
     
-    private func pathComponentsParse(url: URL, key: String) -> String? {
+    private func pathComponentsParse(url: URL, key: String) -> (Int, String)? {
         let pathComponents = url.pathComponents
-        guard pathComponents.count >= 2 else { return nil }
+        guard pathComponents.count >= 3 else { return nil }
         for i in 0..<pathComponents.count {
             let pathComponent = pathComponents[i]
-            if key == pathComponent && i != pathComponents.count - 1 {
-                return pathComponents[i + 1]
+            if key == pathComponent && i < pathComponents.count - 2 {
+                let code = pathComponents[i + 2]
+                if let accountId = Int(pathComponents[i + 1]) {
+                    return (accountId, code)
+                }
             }
         }
         return nil

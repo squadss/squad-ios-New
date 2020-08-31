@@ -57,7 +57,7 @@ class FlicksListViewCell: BaseTableViewCell {
             imageView.isHidden = true
             imageView.imageView?.layer.cornerRadius = 8
             imageView.imageView?.layer.masksToBounds = true
-            imageView.contentMode = .scaleAspectFill
+            imageView.imageView?.contentMode = .scaleAspectFill
             imageView.tag = i + 200
             imageView.addTarget(self, action: #selector(pritureBtnDidTapped(sender:)), for: .touchUpInside)
             contentView.addSubview(imageView)

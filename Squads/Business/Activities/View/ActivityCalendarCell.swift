@@ -23,40 +23,81 @@ class ActivityCalendarCell: BaseTableViewCell {
     // Suggested by Daniel
     var ownerLab = UILabel()
     // 成员列表
-    var membersView = SquadMembersView<ActivityMember>()
+    var membersView = SquadMembersView()
     
     var containterView = ActivityShadowView()
     
+    var disposeBag = DisposeBag()
     private var tapSubject = PublishSubject<Int>()
     var tapObservable: Observable<Int> {
         return tapSubject.asObservable()
     }
     
     // 表示状态的视图  ADD AVAILABILITY
-    private var statusView: UIButton?
+    var statusView: UIButton!
     // 菜单按钮视图
-    private var menuView: UIStackView?
+    var menuView: UIStackView!
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
+    }
     
     override func setupView() {
         
         dateLab.textColor = UIColor(red: 0.925, green: 0.384, blue: 0.337, alpha: 1)
         dateLab.font = UIFont.systemFont(ofSize: 9, weight: .medium)
         
+        titleLab.numberOfLines = 1
         titleLab.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         titleLab.theme.textColor = UIColor.text
         
-        contentLab.font = UIFont.systemFont(ofSize: 12)
+        contentLab.numberOfLines = 1
+        contentLab.font = UIFont.systemFont(ofSize: 10)
         contentLab.theme.textColor = UIColor.textGray
         
-        ownerLab.font = UIFont.systemFont(ofSize: 9)
+        ownerLab.numberOfLines = 1
+        ownerLab.font = UIFont.systemFont(ofSize: 10)
         ownerLab.theme.textColor = UIColor.textGray
+        
+        membersView.margin = 3
+        membersView.memberWidth = 18
         
         containterView.contentView.addSubviews(membersView, ownerLab, contentLab, titleLab, dateLab, pritureView)
         contentView.addSubviews(calendayView, containterView)
         
+        let imageNames = ["Activity Confirm Focus", "Activity Reject Focus"]
+        let btnViews: [UIView] = imageNames.enumerated().map{ (arg) in
+            let (index, name) = arg
+            let btn = UIButton()
+            btn.tag = 300 + index
+            btn.setImage(UIImage(named: name)?.drawColor(UIColor(hexString: "#DADADA")), for: .normal)
+            btn.setImage(UIImage(named: name)?.drawColor(UIColor(hexString: "#EF7C72")), for: .selected)
+            btn.addTarget(self, action: #selector(menuBtnDidTapped(sender:)), for: .touchUpInside)
+            return btn
+        }
+        menuView = UIStackView(arrangedSubviews: btnViews)
+        menuView.axis = .horizontal
+        menuView.distribution = .fillEqually
+        menuView.alignment = .fill
+        menuView.isHidden = true
+        containterView.contentView.addSubview(menuView)
+        
+        statusView = UIButton()
+        statusView.isHidden = true
+        statusView.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .medium)
+        statusView.theme.titleColor(from: UIColor.text, for: .normal)
+        statusView.contentHorizontalAlignment = .right
+        containterView.contentView.addSubview(statusView)
+        
+        setupConstraint()
+    }
+    
+    private func setupConstraint() {
+        
         pritureView.snp.makeConstraints { (maker) in
-            maker.bottom.equalTo(dateLab.snp.top).offset(-9)
-            maker.size.equalTo(CGSize(width: 25, height: 25))
+            maker.bottom.equalTo(dateLab.snp.top).offset(-6)
+            maker.size.equalTo(CGSize(width: 30, height: 30))
             maker.leading.equalTo(dateLab)
         }
         
@@ -66,13 +107,15 @@ class ActivityCalendarCell: BaseTableViewCell {
         
         titleLab.snp.makeConstraints { (maker) in
             maker.leading.equalTo(dateLab)
-            maker.top.equalTo(dateLab.snp.bottom)
+            maker.top.equalTo(dateLab.snp.bottom).offset(2)
         }
         
         contentLab.snp.makeConstraints { (maker) in
             maker.leading.equalTo(dateLab)
             maker.top.equalTo(titleLab.snp.bottom)
-            maker.bottom.equalToSuperview().offset(-10)
+            maker.height.equalTo(12)
+            maker.width.equalTo(150)
+            maker.bottom.equalToSuperview().offset(-8)
         }
         
         membersView.snp.makeConstraints { (maker) in
@@ -86,43 +129,9 @@ class ActivityCalendarCell: BaseTableViewCell {
         }
     }
     
-    func setData(_ data: String) {
-//        lazySetupMenuView()
-        lazySetupStatusView()
-    }
-    
-    // 构建操作面板视图
-    private func lazySetupMenuView() {
-        guard menuView?.superview == nil else { return }
-        let imageNames = ["Activities Yes", "Activities No", "Activities Maybe"]
-        let btnViews: [UIView] = imageNames.enumerated().map{ (arg) in
-            let (index, name) = arg
-            let btn = UIButton()
-            btn.tag = 300 + index
-            btn.setImage(UIImage(named: name), for: .normal)
-            btn.addTarget(self, action: #selector(menuBtnDidTapped(sender:)), for: .touchUpInside)
-            return btn
-        }
-        menuView = UIStackView(arrangedSubviews: btnViews)
-        menuView?.axis = .horizontal
-        menuView?.distribution = .fillEqually
-        menuView?.alignment = .fill
-        containterView.contentView.addSubview(menuView!)
-    }
-    
-    // 构建状态视图
-    private func lazySetupStatusView() {
-        guard statusView?.superview == nil else { return }
-        statusView = UIButton()
-        statusView?.setTitle("ADD AVAILABILITY", for: .normal)
-        statusView?.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .bold)
-        statusView?.setTitleColor(UIColor(red: 0.93, green: 0.38, blue: 0.34, alpha: 1.0), for: .normal)
-        statusView?.contentHorizontalAlignment = .right
-        containterView.contentView.addSubview(statusView!)
-    }
-    
     @objc
     private func menuBtnDidTapped(sender: UIButton) {
+        guard !sender.isSelected else { return }
         tapSubject.onNext(sender.tag - 300)
     }
     
@@ -130,7 +139,7 @@ class ActivityCalendarCell: BaseTableViewCell {
         super.layoutSubviews()
         calendayView.frame = CGRect(x: 0, y: 0, width: 73, height: bounds.height)
         containterView.frame = CGRect(x: calendayView.frame.maxX, y: 0, width: bounds.width - calendayView.frame.maxX, height: bounds.height)
-        menuView?.frame = CGRect(x: containterView.contentView.frame.width - 90 - 10, y: 3, width: 90, height: 40)
-        statusView?.frame = CGRect(x: containterView.contentView.frame.width - 200 - 13, y: 14, width: 200, height: 14)
+        menuView.frame = CGRect(x: containterView.contentView.frame.width - 90 - 10, y: 8, width: 90, height: 45)
+        statusView.frame = CGRect(x: containterView.contentView.frame.width - 200 - 13, y: 14, width: 200, height: 14)
     }
 }
