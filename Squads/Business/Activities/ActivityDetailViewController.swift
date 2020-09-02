@@ -68,12 +68,12 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
                 
                 let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
                 var actions = Array<RxAlertAction>()
-                actions.append(RxAlertAction(title: "Change Title", type: 0, style: .default))
+                actions.append(RxAlertAction(title: NSLocalizedString("squadDetail.alertChangeTitle", comment: ""), type: 0, style: .default))
                 if detail.activityType != .virtual {
-                    actions.append(RxAlertAction(title: "Change Location", type: 1, style: .default))
+                    actions.append(RxAlertAction(title: NSLocalizedString("squadDetail.alertChangeLocation", comment: ""), type: 1, style: .default))
                 }
-                actions.append(RxAlertAction(title: "Delete Event", type: 2, style: .default))
-                actions.append(RxAlertAction(title: "Cancel", type: -1, style: .cancel))
+                actions.append(RxAlertAction(title: NSLocalizedString("squadDetail.alertChangeDelete", comment: ""), type: 2, style: .default))
+                actions.append(RxAlertAction(title: NSLocalizedString("squadDetail.alertCancel", comment: ""), type: -1, style: .cancel))
                 return actionSheet
                     .addAction(actions: actions)
                     .map{ $0 }
@@ -84,13 +84,13 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
             .share()
 
         action.filter{ $0 == 0 }
-           .trackInputAlert(title: "Change Title", placeholder: "Please enter the Event name", default: "Confirm", target: self)
+           .trackInputAlert(title: NSLocalizedString("squadDetail.changeTitle", comment: ""), placeholder: NSLocalizedString("squadDetail.changeMessage", comment: ""), default: NSLocalizedString("squadDetail.changeConfirm", comment: ""), target: self)
            .map{ Reactor.Action.setDetail(nil, title: $0, location: nil) }
            .bind(to: reactor!.action)
            .disposed(by: disposeBag)
 
         action.filter{ $0 == 2 }
-           .trackAlert(title: "Confirm that you want to delete this event?", target: self)
+           .trackAlert(title: NSLocalizedString("squadDetail.confirmDeleteTitle", comment: ""), target: self)
            .map{ _ in Reactor.Action.deleteEvent }
            .bind(to: reactor!.action)
            .disposed(by: disposeBag)
@@ -215,13 +215,13 @@ extension ActivityDetailViewController {
             // 是否为创建者, 并且时间已经设置过了
             if currentMember.accountId == detail.accountId && currentMember.isResponded {
                 toolbar.dataSource = [
-                    .title("Know your squad's availability?"),
+                    .title(NSLocalizedString("squadDetail.prepareSetTimeTitle", comment: "")),
                     .button(flag: "setTime",
                            title: "Set Time",
                            showShadow: true)]
             } else {
                 // 在创建者没有Set Time之前, 都可以变更时间
-                toolbar.dataSource = [.title("Add your availability!")]
+                toolbar.dataSource = [.title(NSLocalizedString("squadDetail.prepareTitle", comment: ""))]
             }
         case .setTime:
             toolbar.dataSource = [
@@ -263,11 +263,11 @@ extension ActivityDetailViewController {
                 }
                 
                 if let members = reactor.currentState.repos?.responsedMembers {
-                    settingViewController.topSection(section: MembersSection<ActivityMember>(title: "RESPONDED", list: members))
+                    settingViewController.topSection(section: MembersSection<ActivityMember>(title: NSLocalizedString("squadDetail.respondedMembersTitle", comment: ""), list: members))
                 }
                 
                 if let members = reactor.currentState.repos?.waitingMembers {
-                    settingViewController.bottomSection(section: MembersSection<User>(title: "WAITING", list: members))
+                    settingViewController.bottomSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.waitingMembersTitle", comment: ""), list: members))
                 }
                 
                 settingViewController.didSelectTime
@@ -413,17 +413,17 @@ extension ActivityDetailViewController {
         switch detail.activityStatus {
         case .prepare:
             if let members = detail.responsedMembers {
-                membersView.setTopSection(section: MembersSection<ActivityMember>(title: "RESPONDED", list: members))
+                membersView.setTopSection(section: MembersSection<ActivityMember>(title: NSLocalizedString("squadDetail.respondedMembersTitle", comment: ""), list: members))
             }
             if let members = detail.waitingMembers {
-                membersView.setBottomSection(section: MembersSection<User>(title: "WAITING", list: members))
+                membersView.setBottomSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.waitingMembersTitle", comment: ""), list: members))
             }
         case .setTime:
             if let members = detail.goingMembers {
-                membersView.setTopSection(section: MembersSection<User>(title: "GOING", list: members))
+                membersView.setTopSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.goingMembersTitle", comment: ""), list: members))
             }
             if let members = detail.rejectMembers {
-                membersView.setBottomSection(section: MembersSection<User>(title: "CAN'T MAKE IT", list: members))
+                membersView.setBottomSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.rejectMembersTitle", comment: ""), list: members))
             }
         }
     }

@@ -85,7 +85,7 @@ class JoinSquadReactor: Reactor {
                 }
                 .map { result in
                     switch result {
-                    case .success: return .setJoinState(true, "Join the success!")
+                    case .success: return .setJoinState(true, NSLocalizedString("squadDetail.joinSquadSuccessTip", comment: ""))
                     case .failure(let error): return .setToast(error.message)
                     }
                 }

@@ -1,0 +1,37 @@
+
+
+system.loginSuccess = "Login successful!";
+system.loginExpired = "Authentication has expired!";
+system.relogin = "To log in";
+system.wrongOperation = "Wrong operation!";
+
+createEvent.categoryTip = "Please select a category!";
+createEvent.titleTip = "Give it a name!";
+createEvent.selectTimeTip = "Add your availability!";
+
+squadDetail.prepareSetTimeTitle = "Know your squad's availability?";
+squadDetail.prepareTitle = "Add your availability!";
+squadDetail.respondedMembersTitle = "RESPONDED";
+squadDetail.waitingMembersTitle = "WAITING";
+squadDetail.goingMembersTitle = "GOING";
+squadDetail.rejectMembersTitle = "CAN'T MAKE IT";
+
+squadDetail.alertChangeTitle = "Change Title";
+squadDetail.alertChangeLocation = "Change Location";
+squadDetail.alertChangeDelete = "Delete Event";
+squadDetail.alertCancel = "Cancel";
+
+squadDetail.changeTitle = "Change Title";
+squadDetail.changeMessage = "Please enter the Event name";
+squadDetail.changeConfirm = "Confirm";
+
+squadDetail.confirmDeleteTitle = "Confirm that you want to delete this event?";
+squadDetail.deleteSuccess = "Delete Success!";
+squadDetail.joinSquadSuccessTip = "Join the success!";
+squadDetail.notFoundSquadTip = "No available squad was found!";
+squadDetail.activityPlaceholder = "No activities currently planned. Create one!";
+squadDetail.flicksPlaceholder = "No flicks currently planned. ";
+squadInvite.successTip = "Invitation Success";
+squadInvite.failureTip = "Invitation failed";
+
+squadSettingTime.neverChosenTip = "No time has been chosen";

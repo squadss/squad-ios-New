@@ -195,15 +195,15 @@ class CreateEventReactor: Reactor {
         case .createActivity(let myTime):
             
             guard let selectedType = (currentState.repos[0] as? CreateEventLabels)?.selected else {
-                return Observable.just(.setToast("Please select a category!"))
+                return Observable.just(.setToast(NSLocalizedString("createEvent.categoryTip", comment: "")))
             }
             
             guard case .title(let text) = (currentState.repos[1] as? CreateEventTextEditor) else {
-                return Observable.just(.setToast("Give it a name!"))
+                return Observable.just(.setToast(NSLocalizedString("createEvent.titleTip", comment: "")))
             }
             
             guard let myTime = myTime, !myTime.isEmpty else {
-                return Observable.just(.setToast("Add your availability!"))
+                return Observable.just(.setToast(NSLocalizedString("createEvent.selectTimeTip", comment: "")))
             }
             
             let location = (currentState.repos[2] as? CreateEventTextEditor)?.toLocation

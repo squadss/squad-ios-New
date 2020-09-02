@@ -213,7 +213,7 @@ class ActivityDetailReactor: Reactor {
             state.isLoading = false
         case .setExitActivity:
             state.isLoading = false
-            state.toast = "Delete Success!"
+            state.toast = NSLocalizedString("squadDetail.deleteSuccess", comment: "")
             state.exitActivity = true
         }
         return state

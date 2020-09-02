@@ -96,7 +96,7 @@ class SquadInvithNewReactor: Reactor {
                     return total || result.error == nil
                 }
                 .map { state in
-                    return state ? .setInviteSuccess("Invitation Success") : .setToast("Invitation failed")
+                    return state ? .setInviteSuccess(NSLocalizedString("squadInvite.successTip", comment: "")) : .setToast(NSLocalizedString("squadInvite.failureTip", comment: ""))
                 }
                 .startWith(.setLoading(true))
         case let .visibleContacts(phoneList, isDenied):

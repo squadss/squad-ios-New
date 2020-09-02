@@ -51,9 +51,15 @@ class AvtivityTimeSettingViewController: BaseViewController, OverlayTransitionin
                     // 打开确认弹窗
                     self.contentView.isHidden = true
                     self.confirmView.isHidden = false
+                    self.confirmView.alpha = 0
+                    self.confirmView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+                    UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut, animations: {
+                        self.confirmView.alpha = 1
+                        self.confirmView.transform = .identity
+                    })
                     self.confirmView.config(activityType: self.activityType, timeperiod: timePeriod)
                 } else {
-                    self.showToast(message: "No time has been chosen")
+                    self.contentView.showToast(message: NSLocalizedString("squadSettingTime.neverChosenTip", comment: ""))
                     return
                 }
             default:
