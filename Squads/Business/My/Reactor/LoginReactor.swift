@@ -144,7 +144,7 @@ class LoginReactor: Reactor {
         case .setSuccess(let s):
             state.loading = false
             state.success = s
-            state.toast = "Login successful!"
+            state.toast = NSLocalizedString("system.loginSuccess", comment: "")
         case .setToast(let t):
             state.loading = false
             state.toast = t

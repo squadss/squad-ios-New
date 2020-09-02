@@ -300,7 +300,9 @@ extension TimeLineCollectionView: UICollectionViewDelegateFlowLayout, UICollecti
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.bounds.width, height: gridHeight)
     }
-
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//
+//    }
 }
 
 extension TimeLineCollectionView: TimeLineForegroundViewDelegate {
@@ -330,11 +332,6 @@ extension TimeLineCollectionView: TimeLineForegroundViewDelegate {
                 if isCeil(rect1: _rect, rect2: cell.frame) {
                     if let index = collection.indexPath(for: cell)?.row {
                         
-                        if timeList[index] == 0 {
-                            minIndex = nil
-                            maxIndex = nil
-                        }
-                        
                         if let unwrappedMin = minIndex {
                             minIndex = min(unwrappedMin, index)
                         } else {
@@ -354,9 +351,9 @@ extension TimeLineCollectionView: TimeLineForegroundViewDelegate {
             if let unwrappedMin = minIndex,
                 let unwrappedMax = maxIndex,
                 let originTimestamp = startOffTime?.timeIntervalSince1970,
-                unwrappedMin != unwrappedMax {
+                unwrappedMin != unwrappedMax + 1 {
                 currentSelectedTimes = TimePeriod(beginning: Double(unwrappedMin * 1800) + originTimestamp,
-                                                  end: Double(unwrappedMax * 1800) + originTimestamp)
+                                                  end: Double((unwrappedMax + 1) * 1800) + originTimestamp)
             } else {
                 currentSelectedTimes = nil
             }

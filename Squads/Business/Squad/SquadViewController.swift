@@ -233,7 +233,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         
         reactor.state
             .filter{ $0.loginStateDidExpired }
-            .trackAlertJustConfirm(title: "Authentication has expired!", default: "To log in", target: self)
+            .trackAlertJustConfirm(title: NSLocalizedString("system.loginExpired", comment: ""), default: NSLocalizedString("system.relogin", comment: ""), target: self)
             .subscribe(onNext: { _ in
                 User.removeCurrentUser()
                 AuthManager.removeToken()

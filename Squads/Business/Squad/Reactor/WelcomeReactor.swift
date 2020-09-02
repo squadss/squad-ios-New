@@ -51,7 +51,7 @@ class WelcomeReactor: Reactor {
                 .startWith(.setLoading(true))
         case .joinSquad(let accountId):
             guard let squadId = currentState.squadDetail?.id else {
-                return Observable.just(.setToast("No available squad was found!"))
+                return Observable.just(.setToast(NSLocalizedString("squadDetail.notFoundSquadTip", comment: "")))
             }
             let addMember = provider.request(target: .addMember(squadId: squadId, accountId: accountId), model: GeneralModel.Plain.self).asObservable()
             let channels = provider.request(target: .getSquadChannel(squadId: squadId), model: Array<CreateChannel>.self, atKeyPath: .data).asObservable()
@@ -72,7 +72,7 @@ class WelcomeReactor: Reactor {
                 }
                 .map { result in
                     switch result {
-                    case .success: return .setJoinState(true, "Join the success!")
+                    case .success: return .setJoinState(true, NSLocalizedString("squadDetail.joinSquadSuccessTip", comment: ""))
                     case .failure(let error): return .setToast(error.message)
                     }
                 }

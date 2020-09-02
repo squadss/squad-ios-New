@@ -81,7 +81,7 @@ class CreateFlickReactor: Reactor {
             if currentState.selectedPhotos?.contains(asset) == true {
                 return Observable.just(.setDeletePhoto(asset))
             } else {
-                return Observable.just(.setToast("Wrong operation!"))
+                return Observable.just(.setToast(NSLocalizedString("system.wrongOperation", comment: "")))
             }
         case .setPhoto(let assets):
             return Observable.just(.setPhoto(assets))

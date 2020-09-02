@@ -231,14 +231,14 @@ class SquadReactor: Reactor {
             state.repos[2] = channelds
         case let .setPage(activities, flicks):
             if activities.isEmpty {
-                state.repos[1] = [SquadPlaceholder(content: "No activities currently planned. Create one!")]
+                state.repos[1] = [SquadPlaceholder(content: NSLocalizedString("squadDetail.activityPlaceholder", comment: ""))]
             } else {
                 state.repos[1] = Array(activities.prefix(2))
                 state.currentSquadDetail?.activities = activities
                 state.currentSquadDetail?.hasMoreActivities = activities.count > 2
             }
             if flicks.isEmpty {
-                state.repos[0] = [SquadPlaceholder(content: "No flicks currently planned. ")]
+                state.repos[0] = [SquadPlaceholder(content: NSLocalizedString("squadDetail.flicksPlaceholder", comment: ""))]
             } else {
                 // 筛选出所有照片, 只取前10张
                 let pritureList = flicks.reduce([], { (total, model) -> Array<URL> in
@@ -264,7 +264,7 @@ class SquadReactor: Reactor {
             state.repos[2] = channelds
             detail.activities.flatMap {
                 if $0.isEmpty {
-                    state.repos[1] = [SquadPlaceholder(content: "No activities currently planned. Create one!")]
+                    state.repos[1] = [SquadPlaceholder(content: NSLocalizedString("squadDetail.activityPlaceholder", comment: ""))]
                 } else {
                     state.repos[1] = $0
                 }
@@ -276,7 +276,7 @@ class SquadReactor: Reactor {
                 })
                 state.repos[0] = pritureList.count > 9 ? [Array(pritureList.prefix(through: 9))] : [pritureList]
             } else {
-                state.repos[0] = [SquadPlaceholder(content: "No flicks currently planned. ")]
+                state.repos[0] = [SquadPlaceholder(content: NSLocalizedString("squadDetail.flicksPlaceholder", comment: ""))]
             }
             state.currentSquadDetail = detail
         case let .setPrepareMembers(list, detail):
@@ -429,7 +429,7 @@ class SquadReactor: Reactor {
                 observer.onNext(.success(()))
                 observer.onCompleted()
             }, fail: { (code, message) in
-                observer.onNext(.failure(.custom(message ?? "未知错误")))
+                observer.onNext(.failure(.custom(message ?? NSLocalizedString("system.wrongOperation", comment: ""))))
                 observer.onCompleted()
             })
             
