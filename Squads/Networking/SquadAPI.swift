@@ -151,7 +151,7 @@ enum SquadAPI {
     case deleteMediaWithFlick(id: Int)
     
     // 小组-媒体内容分页列表
-    case getPageListWithFlick(pageIndex: Int, pageSize: Int, keyword: String)
+    case getPageListWithFlick(squadId: Int, pageIndex: Int, pageSize: Int, keyword: String)
     
     // 某条媒体内容详情
     case mediaDetailWithFlick(id: Int)
@@ -233,14 +233,14 @@ extension SquadAPI: TargetType {
         case .updateGoingStatus:
             return "squadActivityGoing/update"
         case let .queryMembersActivityGoingStatus(activityId, isAccept):
-            let status: Int = isAccept ? 1 : -1
+            let status: Int = isAccept ? 1 : 0
             return "squadActivityGoing/memberList/\(activityId)/\(status)"
         case .queryActivityGoingStatus(let activityId):
             return "squadActivityGoing/status/\(activityId)"
         case .isAlreadyRegistered, .deleteInviteRecord, .inviteFriends:
             return ""
-        case .getPageListWithFlick:
-            return "squadMedia/getPageList"
+        case .getPageListWithFlick(let squadId, _, _, _):
+            return "squadMedia/getPageList/\(squadId)"
         case .addMediaWithFlick:
             return "squadMedia/add"
         case .deleteMediaWithFlick(let id):
@@ -543,7 +543,7 @@ extension SquadAPI: TargetType {
                 "mediaType": mediaType.rawValue,
                 "media": media.map{ $0.base64EncodedString(options: .lineLength64Characters) }
             ], encoding: JSONEncoding.default)
-        case let .getPageListWithFlick(pageIndex, pageSize, keyword):
+        case let .getPageListWithFlick(squadId, pageIndex, pageSize, keyword):
             return .requestParameters(parameters: [
                 "keyword": keyword,
                 "pageIndex": pageIndex,

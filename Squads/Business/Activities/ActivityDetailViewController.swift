@@ -229,11 +229,11 @@ extension ActivityDetailViewController {
                 .button(flag: "confirmGoing",
                        image: UIImage(named: "Activity Confirm Normal"),
                        disableImage: UIImage(named: "Activity Confirm Focus"),
-                       isEnabled: currentMember.isGoing == false),
+                       isEnabled: !(currentMember.isGoing == true)),
                 .button(flag: "cancelGoing",
                        image: UIImage(named: "Activity Reject Normal"),
                        disableImage: UIImage(named: "Activity Reject Focus"),
-                       isEnabled: currentMember.isGoing == true)]
+                       isEnabled: !(currentMember.isGoing == false))]
         }
     }
     
@@ -419,12 +419,10 @@ extension ActivityDetailViewController {
                 membersView.setBottomSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.waitingMembersTitle", comment: ""), list: members))
             }
         case .setTime:
-            if let members = detail.goingMembers {
-                membersView.setTopSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.goingMembersTitle", comment: ""), list: members))
-            }
-            if let members = detail.rejectMembers {
-                membersView.setBottomSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.rejectMembersTitle", comment: ""), list: members))
-            }
+            let topTitle = NSLocalizedString("squadDetail.goingMembersTitle", comment: "")
+            membersView.setTopSection(section: MembersSection<User>(title: topTitle, list: detail.goingMembers ?? []))
+            let bottomTitle = NSLocalizedString("squadDetail.rejectMembersTitle", comment: "")
+            membersView.setBottomSection(section: MembersSection<User>(title: bottomTitle, list: detail.rejectMembers ?? []))
         }
     }
     

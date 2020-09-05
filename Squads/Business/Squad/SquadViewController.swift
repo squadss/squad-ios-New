@@ -167,6 +167,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
     
     override func bind(reactor: SquadReactor) {
         
+        let user: User? = User.currentUser()
+        
         dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadPrimaryKey>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
             switch model {
             case is SquadPlaceholder:
@@ -179,7 +181,6 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                 let model = model as! SquadActivity
                 cell.titleLab.text = model.title
                 cell.pritureView.image = model.activityType.image
-                cell.dateLab.text = model.startDate
                 
                 if case .virtual = model.activityType {
                     cell.contentLab.text = "Virtual"
@@ -187,16 +188,35 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                     cell.contentLab.text = address
                 }
                 
+                // 如果是活动的创建者, 在setTime之前都显示TBD
+                // 如果是活动的参与者, 在自己没有setTime之前,显示Add Availability 设置完时间后显示 TBD,
+                // 如果创建者确认了活动的开始时间, 则大家都显示具体时间
+                
                 if model.activityStatus == .prepare {
-                    cell.containterView.borderColor = nil
-                    if let members = model.responsedMembers, !members.isEmpty {
-                        cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
+                    let members = model.responsedMembers
+                    if let m = members, !m.isEmpty {
+                        cell.membersView.setMembers(members: m.map{ $0.avatar.asURL })
                     }
+                    if user?.id == model.accountId {
+                        cell.dateLab.text = "Time TBD"
+                    } else if members?.contains(where: { $0.accountId == user?.id }) == true {
+                        cell.dateLab.text = "Time TBD"
+                    } else {
+                        cell.dateLab.text = "ADD AVAILABILITY"
+                    }
+                    // 更加创建的时间和现在的时间对比, 是不是同一天, 如果为同一天显示NEW
+                    let date = model.gmtCreate.flatMap { Date($0, format: "yyyy-MM-dd HH:mm:ss") }
+                    if let createDate = date, createDate.isSameDay(with: Date()) {
+                        cell.descriptionLab.text = "NEW!"
+                        cell.descriptionLab.isHidden = false
+                    }
+                    cell.containterView.borderColor = nil
                 } else {
-                    cell.containterView.borderColor = .red
                     if let members = model.goingMembers, !members.isEmpty {
                         cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
                     }
+                    cell.dateLab.text = model.startDate
+                    cell.containterView.borderColor = .red
                 }
                 
                 cell.selectionStyle = .none

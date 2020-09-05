@@ -39,8 +39,12 @@ class SquadMembersView: BaseView {
     }
     
     func setMembers(members: Array<URL?>) {
-        // 布局子视图
-        setupMemberListView(from: members)
+        if members.isEmpty {
+            removeAllMemberviews()
+        } else {
+            // 布局子视图
+            setupMemberListView(from: members)
+        }
         // 计算自身宽度
         let count = CGFloat(members.count)
         width = count * memberWidth + stackView.spacing * max(count - 1, 0)
@@ -72,8 +76,16 @@ class SquadMembersView: BaseView {
         if list.count < count {
             (0..<count - list.count).forEach{ index in
                 let view = listView[list.count + index]
+                view.image = nil
                 stackView.removeArrangedSubview(view)
             }
+        }
+    }
+    
+    func removeAllMemberviews() {
+        stackView.arrangedSubviews.forEach{
+            ($0 as? UIImageView)?.image = nil
+            stackView.removeArrangedSubview($0)
         }
     }
     

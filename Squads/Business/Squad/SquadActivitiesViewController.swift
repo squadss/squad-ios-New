@@ -88,20 +88,32 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
                 cell.menuView.isHidden = false
                 cell.statusView.isHidden = true
                 cell.containterView.borderColor = .red
-                if let members = model.goingMembers, !members.isEmpty {
+                
+                var isGoing: Bool?
+                
+                if let members = model.goingMembers {
                     if members.contains(where: { $0.id == user?.id }) {
-                        (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = true
-                        (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = false
+                        isGoing = true
                     }
                     cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
-                } else if let members = model.rejectMembers, !members.isEmpty {
+                }
+                
+                if let members = model.rejectMembers, isGoing == nil {
                     if members.contains(where: { $0.id == user?.id }) {
-                        (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = false
-                        (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
+                        isGoing = false
                     }
-                } else {
-                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
+                }
+                
+                switch isGoing {
+                case .some(true):
                     (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = true
+                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = false
+                case .some(false):
+                    (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = false
+                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
+                case .none:
+                    (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = true
+                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
                 }
             }
             

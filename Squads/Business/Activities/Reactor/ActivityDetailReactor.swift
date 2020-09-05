@@ -45,6 +45,7 @@ class ActivityDetailReactor: Reactor {
         case setRepos(detail: SquadActivity)
         case setActivity(title: String?, location: SquadLocation?, status: ActivityStatus?)
         case setExitActivity
+        case adjustGoingMembers(isAccept: Bool, toast: String)
     }
     
     struct State {
@@ -125,10 +126,10 @@ class ActivityDetailReactor: Reactor {
         case .handlerGoing(let isAccept):
             return provider.request(target: .updateGoingStatus(activityId: activityId, isAccept: isAccept), model: GeneralModel.Plain.self).asObservable().map { result in
                 switch result {
-                case .success(let plain): return .setToast(plain.message)
+                case .success(let plain): return .adjustGoingMembers(isAccept: isAccept, toast: plain.message)
                 case .failure(let error): return .setToast(error.message)
                 }
-            }
+            }.startWith(.setLoading(true))
         case let .setDetail(times, title, location):
             let status: ActivityStatus? = times?.isEmpty == false ? .setTime : nil
             return provider.request(target: .setActivityInfo(activityId: activityId, squadId: squadId, title: title, location: location, setTime: times?.first, status: status), model: GeneralModel.Plain.self).asObservable().map { result in
@@ -200,6 +201,29 @@ class ActivityDetailReactor: Reactor {
             state.repos = detail
             state.isLoading = false
             state.currentMemberProfile = currentMemberProfile
+        case let .adjustGoingMembers(isAccept, toast):
+            if isAccept {
+                var members = state.repos?.goingMembers
+                if members == nil {
+                    members = [user]
+                } else if members?.contains(user) == false {
+                    members?.append(user)
+                    state.repos?.goingMembers = members
+                    state.repos?.rejectMembers?.removeAll(where: { $0 == user })
+                }
+            } else {
+                var members = state.repos?.rejectMembers
+                if members == nil {
+                    members = [user]
+                } else if members?.contains(user) == false {
+                    members?.append(user)
+                    state.repos?.rejectMembers = members
+                    state.repos?.goingMembers?.removeAll(where: { $0 == user })
+                }
+            }
+            state.isLoading = false
+            state.toast = toast
+            state.currentMemberProfile?.isGoing = isAccept
         case let .setActivity(title, location, activityStatus):
             if let unwrappedTitle = title {
                 state.repos?.title = unwrappedTitle

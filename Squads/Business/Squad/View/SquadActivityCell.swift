@@ -21,6 +21,8 @@ class SquadActivityCell: BaseTableViewCell {
     
     var containterView = ActivityShadowView()
     
+    var descriptionLab = UILabel()
+    
     private var isAniming: Bool = false
     
     override func setupView() {
@@ -36,10 +38,15 @@ class SquadActivityCell: BaseTableViewCell {
         contentLab.font = UIFont.systemFont(ofSize: 12)
         contentLab.theme.textColor = UIColor.textGray
         
+        descriptionLab.isHidden = true
+        descriptionLab.textAlignment = .center
+        descriptionLab.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        descriptionLab.theme.textColor = UIColor.secondary
+        
         membersView.margin = 3
         membersView.memberWidth = 16
         
-        containterView.contentView.addSubviews(membersView, contentLab, titleLab, dateLab, pritureView)
+        containterView.contentView.addSubviews(membersView, contentLab, titleLab, dateLab, pritureView, descriptionLab)
         contentView.addSubviews(containterView)
         
         pritureView.snp.makeConstraints { (maker) in
@@ -67,6 +74,12 @@ class SquadActivityCell: BaseTableViewCell {
         membersView.snp.makeConstraints { (maker) in
             maker.trailing.equalToSuperview().offset(-17)
             maker.bottom.equalToSuperview().offset(-12)
+        }
+        
+        descriptionLab.snp.makeConstraints { (maker) in
+            maker.top.equalTo(14)
+            maker.width.equalTo(150)
+            maker.trailing.equalToSuperview()
         }
     }
     

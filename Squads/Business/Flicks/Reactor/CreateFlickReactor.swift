@@ -120,7 +120,7 @@ class CreateFlickReactor: Reactor {
                 state.isDenied = isDenied
             }
         case .setPhoto(let list):
-            if state.selectedPhotos?.elementsEqual(list) == false {
+            if state.selectedPhotos == nil || state.selectedPhotos?.elementsEqual(list) == false {
                 state.selectedPhotos = list
             }
         case .setDeletePhoto(let asset):
@@ -182,6 +182,7 @@ class CreateFlickReactor: Reactor {
             let options = PHImageRequestOptions()
             options.isNetworkAccessAllowed = true
             options.deliveryMode = .highQualityFormat
+            options.resizeMode = .none
             
             // 使用多线程下载图片
             var resultDatas = Array<Data>()

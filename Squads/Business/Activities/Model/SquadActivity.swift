@@ -18,6 +18,7 @@ struct SquadActivity: Codable, Equatable {
     var startTime: String?
     var endTime: String?
     var position: SquadLocation?
+    var gmtCreate: String?
     
     // 显示开始的日期和月份
     var startDay: String = ""
@@ -41,6 +42,7 @@ struct SquadActivity: Codable, Equatable {
         activityStatus = try decoder.decode("activityStatus")
         startTime = try decoder.decodeIfPresent("startTime")
         endTime = try decoder.decodeIfPresent("endTime")
+        gmtCreate = try decoder.decodeIfPresent("gmtCreate")
         
         if let unwrappedStartTime = startTime {
             let date = unwrappedStartTime.toDate("yyyy-MM-dd HH:mm:ss", region: .current)
@@ -70,6 +72,7 @@ struct SquadActivity: Codable, Equatable {
         try encoder.encode(title, for: "title")
         try encoder.encode(activityType, for: "activityType")
         try encoder.encode(activityStatus, for: "activityStatus")
+        try encoder.encode(gmtCreate, for: "gmtCreate")
     }
     
     func isEquadTo(_ other: SquadActivity) -> Bool {

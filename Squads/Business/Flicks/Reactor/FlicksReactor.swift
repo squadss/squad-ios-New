@@ -94,7 +94,7 @@ class FlicksReactor: Reactor {
     }
     
     private func requestData(keyword: String, isRefresh: Bool) -> Observable<Mutation> {
-        return provider.request(target: .getPageListWithFlick(pageIndex: self.paging.index, pageSize: self.paging.size, keyword: keyword), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data)
+        return provider.request(target: .getPageListWithFlick(squadId: squadId, pageIndex: self.paging.index, pageSize: self.paging.size, keyword: keyword), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data)
         .asObservable()
         .map { [unowned self] result in
             switch result {

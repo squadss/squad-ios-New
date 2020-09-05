@@ -125,12 +125,20 @@ class FriendProfileReactor: Reactor {
                                                     nickname: params.nickname,
                                                     gender: params.gender,
                                                     avatar: params.avatar),
-                                    model: GeneralModel.Plain.self).asObservable().map { result in
-            switch result {
-            case .success: return .setToast("", true)
-            case .failure(let error): return .setToast(error.message, false)
-            }
-            }.startWith(.setLoading(true))
+                                    model: User.self, atKeyPath: .data)
+                .asObservable()
+                .do(onNext: { [unowned self] result in
+                    if case .success(let user) = result, user.id == self.localUser?.id {
+                        user.save()
+                        self.localUser = user
+                    }
+                })
+                .map { result in
+                    switch result {
+                    case .success(let user): return .setUser(user)
+                    case .failure(let error): return .setToast(error.message, false)
+                    }
+                }.startWith(.setLoading(true))
         case .toggleEnable:
             return .just(.setToggleEdit)
         }

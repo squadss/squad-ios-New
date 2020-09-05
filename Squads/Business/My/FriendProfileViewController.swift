@@ -10,6 +10,7 @@ import UIKit
 import RxSwift
 import RxCocoa
 import RxDataSources
+import JXPhotoBrowser
 
 class FriendProfileViewController: ReactorViewController<FriendProfileReactor> {
 
@@ -64,6 +65,7 @@ class FriendProfileViewController: ReactorViewController<FriendProfileReactor> {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 220))
         headerView.theme.backgroundColor = UIColor.background
         
+        infoView.canEdit = false
         infoView.frame = CGRect(x: 50, y: 32, width: headerView.frame.width - 100, height: 90)
         menuView.frame = CGRect(x: 50, y: infoView.frame.maxY + 35, width: headerView.frame.width - 100, height: 40)
         headerView.addSubviews(infoView, menuView)
@@ -113,7 +115,6 @@ class FriendProfileViewController: ReactorViewController<FriendProfileReactor> {
         reactor.state
             .compactMap{ $0.isOwner }
             .subscribe(onNext: { [unowned self] state in
-                self.infoView.canEdit = state
                 if state {
                     self.editButton.setTitle("Edit", for: .normal)
                     self.editButton.isHidden = false
@@ -128,13 +129,27 @@ class FriendProfileViewController: ReactorViewController<FriendProfileReactor> {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        Observable.merge(infoView.canEditTap, infoView.imageBtnTap)
+        infoView.canEditTap
             .flatMap { [unowned self] in
                 self.picker.image(optionSet: [.camera, .photo], delegate: self)
             }
             .map{ $0.0 }
             .bind(to: infoView.rx.setImage(for: .selected))
             .disposed(by: disposeBag)
+        
+        infoView.imageBtnTap.subscribe(onNext: {
+            let browser = JXPhotoBrowser()
+            browser.numberOfItems = { 1 }
+            browser.reloadCellAtIndex = { context in
+                let avatar = reactor.currentState.avatar
+                let cell = context.cell as? JXPhotoBrowserImageCell
+                cell?.imageView.kf.setImage(with: avatar)
+            }
+            browser.cellClassAtIndex = { _ in JXPhotoBrowserImageCell.self }
+            browser.pageIndex = 0
+            browser.show()
+        })
+        .disposed(by: disposeBag)
         
         updateUserInfoRelay
             .map{ Reactor.Action.updateUserInfo($0) }
@@ -180,8 +195,10 @@ class FriendProfileViewController: ReactorViewController<FriendProfileReactor> {
             } else {
                 showToast(message: "The content you fill in cannot be empty")
             }
+            infoView.canEdit = false
         } else {
             toggleEnableRelay.accept(())
+            infoView.canEdit = true
         }
         sender.isSelected.toggle()
     }

@@ -74,16 +74,12 @@ class MembersGroupView: BaseView {
     
     func setTopSection<T: MembersItemProtocol>(section: MembersSection<T>) {
         topLab.text = section.title
-        if !section.list.isEmpty {
-            topMemberView.setMembers(members: section.list.map{ $0.url })
-        }
+        topMemberView.setMembers(members: section.list.map{ $0.url })
     }
     
     func setBottomSection<T: MembersItemProtocol>(section: MembersSection<T>) {
         bottomLab.text = section.title
-        if !section.list.isEmpty {
-            bottomMembersView.setMembers(members: section.list.map{ $0.url })
-        }
+        bottomMembersView.setMembers(members: section.list.map{ $0.url })
     }
 }
 
