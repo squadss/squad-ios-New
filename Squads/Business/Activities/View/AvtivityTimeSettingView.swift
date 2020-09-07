@@ -16,7 +16,7 @@ class AvtivityTimeSettingView: CornersView {
     var chooseTimeView = SingleChooseTimeView(cellStyle: .num)
     
     // 成员
-    var membersView = MembersGroupView<ActivityMember>()
+    var membersView = MembersGroupView()
     
     // 点击底部菜单的回调, 取消/确认
     var didTapped: Observable<String?> {

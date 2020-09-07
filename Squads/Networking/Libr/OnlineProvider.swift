@@ -30,8 +30,8 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     
     static var plugins: [PluginType] {
         
-        let logger = NetworkLogger()
-//        let logger = NetworkLoggerPlugin()
+//        let logger = NetworkLogger()
+        let logger = NetworkLoggerPlugin()
         
         var list: Array<PluginType> = [logger]
         
@@ -87,7 +87,8 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
             .do(onSuccess: {
                 #if DEBUG
                 if case .failure(let error) = $0 {
-                    print(error.message)
+                    debugPrint(target)
+                    debugPrint(error)
                 }
                 #endif
             })

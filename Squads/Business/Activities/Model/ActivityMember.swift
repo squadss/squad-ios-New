@@ -20,19 +20,20 @@ struct ActivityMember: Codable, Equatable {
     var nickname: String
     // 头像
     var avatar: String
-    // 是否参与 此值有三种情况, true: 参与, false: 拒绝, .none: 无响应
-    var isGoing: Bool?
     
     var isResponded: Bool {
         return !myTime.isEmpty
     }
     
-    init(activityId: Int, user: User) {
+    var isGoing: Bool?
+    
+    init(activityId: Int, user: User, isGoing: Bool? = nil) {
         self.accountId = user.id
         self.nickname = user.nickname
         self.avatar = user.avatar
         self.activityId = activityId
         self.myTime = []
+        self.isGoing = isGoing
     }
     
     init(from decoder: Decoder) throws {
@@ -40,7 +41,6 @@ struct ActivityMember: Codable, Equatable {
         activityId = try decoder.decode("activityId")
         nickname = try decoder.decode("nickname")
         avatar = try decoder.decode("headimgurl")
-        isGoing = try decoder.decode("memberGoing") == 1
         let jsonString = try decoder.decode("selectTime", as: String.self)
         
         // 服务器返回的jsonString 有问题, 引号"" 在JAVA后台被转义为 &quot, 处理办法是将 &quot 字符替换回 "
@@ -57,7 +57,6 @@ struct ActivityMember: Codable, Equatable {
         try encoder.encode(activityId, for: "activityId")
         try encoder.encode(nickname, for: "nickname")
         try encoder.encode(avatar, for: "headimgurl")
-        try encoder.encode(isGoing == .some(true) ? 1 : 0, for: "memberGoing")
         try encoder.encode(myTime.toJSONString(), for: "selectTime")
     }
     
@@ -67,7 +66,6 @@ struct ActivityMember: Codable, Equatable {
     
     func isEquadTo(_ other: ActivityMember) -> Bool {
         return accountId == other.accountId
-            && isGoing == other.isGoing
             && myTime == other.myTime
             && activityId == other.activityId
             && nickname == other.nickname

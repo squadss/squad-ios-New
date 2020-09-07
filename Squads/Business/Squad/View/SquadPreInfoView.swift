@@ -12,8 +12,8 @@ import RxCocoa
 
 class SquadPreInfoView: BaseView {
     
-    var imageTap: Observable<Void> {
-        return imageBtn.rx.tap.asObservable()
+    var imageTap: Observable<URL?> {
+        return imageBtn.rx.tap.asObservable().map{ [unowned self] in self.imageURL }
     }
     
     var canEditTap: Observable<Void> {

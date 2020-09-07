@@ -162,7 +162,7 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             
             cell.avatarBtn.rx.tap
                 .subscribe(onNext: { [unowned self] in
-                    let friendReactor = FriendProfileReactor()
+                    let friendReactor = FriendProfileReactor(accountId: model.user.id)
                     let vc = FriendProfileViewController(reactor: friendReactor)
                     self.navigationController?.pushViewController(vc, animated: true)
                 })
@@ -217,6 +217,7 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
                     let messageVC = MFMessageComposeViewController()
                     messageVC.messageComposeDelegate = self
                     messageVC.body = text
+                    messageVC.modalPresentationStyle = .fullScreen
                     self.present(messageVC, animated: true)
                 } else {
                     let alert = UIAlertController(title: "Warning", message: "This feature is not supported on current devices", preferredStyle: .alert)
@@ -274,7 +275,8 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
         Observable.merge(
             reactor.state
                 .filter { $0.inviteSuccess == true }
-                .map{ _ in () },
+                .map{ _ in () }
+                .delay(RxTimeInterval.seconds(1), scheduler: MainScheduler.instance),
             rightBarButtonItem.rx.tap
                 .filter {
                     let state = reactor.currentState

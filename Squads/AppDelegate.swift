@@ -71,8 +71,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let webpageURL = userActivity.webpageURL {
             if webpageURL.host == App.AssociatedDomains {
                 //获取邀请码
-                if let code = pathComponentsParse(url: webpageURL, key: "invite") {
-                    let reactor = JoinSquadReactor(inviteCode: code)
+                if let (accountId, code) = pathComponentsParse(url: webpageURL, key: "invite") {
+                    if User.currentUser()?.id == accountId { return true }
+                    let reactor = JoinSquadReactor(inviteCode: code, inviterAccountId: accountId)
                     let vc = JoinSquadViewController(reactor: reactor)
                     let nav = BaseNavigationController(rootViewController: vc)
                     nav.modalPresentationStyle = .fullScreen
@@ -234,13 +235,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     
-    private func pathComponentsParse(url: URL, key: String) -> String? {
+    private func pathComponentsParse(url: URL, key: String) -> (Int, String)? {
         let pathComponents = url.pathComponents
-        guard pathComponents.count >= 2 else { return nil }
+        guard pathComponents.count >= 3 else { return nil }
         for i in 0..<pathComponents.count {
             let pathComponent = pathComponents[i]
-            if key == pathComponent && i != pathComponents.count - 1 {
-                return pathComponents[i + 1]
+            if key == pathComponent && i < pathComponents.count - 2 {
+                let code = pathComponents[i + 2]
+                if let accountId = Int(pathComponents[i + 1]) {
+                    return (accountId, code)
+                }
             }
         }
         return nil

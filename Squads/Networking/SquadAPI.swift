@@ -86,7 +86,7 @@ enum SquadAPI {
     case querySquadByInviteCode(code: String)
     
     /// 根据squadid生成邀请链接
-    case createLinkBySquad(squadId: Int, nationCode: String, phoneNumber: String)
+    case createLinkBySquad(squadId: Int)
     
     // MARK: - 活动相关
     
@@ -128,7 +128,16 @@ enum SquadAPI {
     case getWaiting(activityId: Int)
     
     // 修改活动成员表
-    case updateActivityMemberInfo(activityId: Int, myTime: Array<TimePeriod>?, isGoing: Bool?)
+    case updateActivityMemberInfo(activityId: Int, myTime: Array<TimePeriod>)
+    
+    // 查看某个活动 GOING->1 / CAN'T MAKE IT -> -1 的人列表
+    case queryMembersActivityGoingStatus(activityId: Int, isAccept: Bool)
+    
+    // 查看当前登录用户某个活动的 Going 状态
+    case queryActivityGoingStatus(activityId: Int)
+    
+    // 用户修改 Going 状态
+    case updateGoingStatus(activityId: Int, isAccept: Bool)
     
     //MARK: - Flick 相关
     
@@ -142,7 +151,7 @@ enum SquadAPI {
     case deleteMediaWithFlick(id: Int)
     
     // 小组-媒体内容分页列表
-    case getPageListWithFlick(pageIndex: Int, pageSize: Int, keyword: String)
+    case getPageListWithFlick(squadId: Int, pageIndex: Int, pageSize: Int, keyword: String)
     
     // 某条媒体内容详情
     case mediaDetailWithFlick(id: Int)
@@ -221,10 +230,17 @@ extension SquadAPI: TargetType {
             return "activityMember/wating/\(activityId)"
         case .updateActivityMemberInfo:
             return "activityMember/update"
+        case .updateGoingStatus:
+            return "squadActivityGoing/update"
+        case let .queryMembersActivityGoingStatus(activityId, isAccept):
+            let status: Int = isAccept ? 1 : 0
+            return "squadActivityGoing/memberList/\(activityId)/\(status)"
+        case .queryActivityGoingStatus(let activityId):
+            return "squadActivityGoing/status/\(activityId)"
         case .isAlreadyRegistered, .deleteInviteRecord, .inviteFriends:
             return ""
-        case .getPageListWithFlick:
-            return "squadMedia/getPageList"
+        case .getPageListWithFlick(let squadId, _, _, _):
+            return "squadMedia/getPageList/\(squadId)"
         case .addMediaWithFlick:
             return "squadMedia/add"
         case .deleteMediaWithFlick(let id):
@@ -261,9 +277,9 @@ extension SquadAPI: TargetType {
              .queryAllFriends,
              .myInviteRecords:
             return .get
-        case .deleteActivity, .exitActivity, .setActivityInfo, .createActivity, .queryActivities, .joinActivity, .getResponded, .getWaiting, .updateActivityMemberInfo:
+        case .deleteActivity, .exitActivity, .setActivityInfo, .createActivity, .queryActivities, .joinActivity, .getResponded, .getWaiting, .updateActivityMemberInfo, .updateGoingStatus, .queryMembersActivityGoingStatus:
             return .post
-        case .queryActivityInfo:
+        case .queryActivityInfo, .queryActivityGoingStatus:
             return .get
         case .addMediaWithFlick, .getPageListWithFlick, .deleteMediaWithFlick:
             return .post
@@ -398,12 +414,9 @@ extension SquadAPI: TargetType {
         case let .updateSquad(name, avator, remark):
             let params = ["squadName": name, "logoImgBase64": avator.base64EncodedString(options: .lineLength64Characters), "createRemark": remark]
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
-        case let .createLinkBySquad(squadId, nationCode, phoneNumber):
+        case let .createLinkBySquad(squadId):
             return .requestParameters(parameters: [
-                "squadId": squadId,
-                "nationCode": nationCode,
-                "phoneNumber": phoneNumber,
-                "purePhoneNumber": nationCode + phoneNumber
+                "squadId": squadId
             ], encoding: JSONEncoding.default)
         case .getMembersFromSquad(let id):
             return .requestParameters(parameters: ["squadId": id], encoding: URLEncoding.default)
@@ -507,20 +520,20 @@ extension SquadAPI: TargetType {
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
         case .exitActivity, .deleteActivity, .getResponded, .getWaiting:
             return .requestPlain
-        case let .updateActivityMemberInfo(activityId, myTime, isGoing):
+        case let .updateActivityMemberInfo(activityId, myTime):
             var params: [String: Any] = ["activityId": activityId]
             // 外部需要保证myTime数组个数不能为空
-            myTime.flatMap {
-                params["selectTime"] = $0.toJSONString()
-            }
-            // 是否参与
-            isGoing.flatMap {
-                params["memberGoing"] = $0 ? 1 : 0
-            }
+            params["selectTime"] = myTime.toJSONString()
             User.currentUser().flatMap {
                 params["accountId"] = $0.id
             }
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+        case let .updateGoingStatus(activityId, isAccept):
+            var params: [String: Any] = ["activityId": activityId, "going": isAccept]
+            User.currentUser().flatMap { params["accountId"] = $0.id }
+            return .requestParameters(parameters: params, encoding: JSONEncoding.default)
+        case .queryMembersActivityGoingStatus, .queryActivityGoingStatus:
+            return .requestPlain
         case let .addMediaWithFlick(squadId, mediaType, media, title, url):
             return .requestParameters(parameters: [
                 "squadId": squadId,
@@ -530,12 +543,12 @@ extension SquadAPI: TargetType {
                 "mediaType": mediaType.rawValue,
                 "media": media.map{ $0.base64EncodedString(options: .lineLength64Characters) }
             ], encoding: JSONEncoding.default)
-        case let .getPageListWithFlick(pageIndex, pageSize, keyword):
+        case let .getPageListWithFlick(squadId, pageIndex, pageSize, keyword):
             return .requestParameters(parameters: [
                 "keyword": keyword,
                 "pageIndex": pageIndex,
                 "pageSize": pageSize,
-                "pageSorts": [["column": "gmtCreate", "asc": true]]
+                "pageSorts": [["column": "gmtCreate", "asc": false]]
             ], encoding: JSONEncoding.default)
         case .deleteMediaWithFlick, .mediaDetailWithFlick:
             return .requestPlain

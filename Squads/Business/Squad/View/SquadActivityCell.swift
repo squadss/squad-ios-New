@@ -17,13 +17,17 @@ class SquadActivityCell: BaseTableViewCell {
     var dateLab = UILabel()
     var titleLab = UILabel()
     var contentLab = UILabel()
-    var membersView = SquadMembersView<ActivityMember>()
+    var membersView = SquadMembersView()
     
     var containterView = ActivityShadowView()
+    
+    var descriptionLab = UILabel()
     
     private var isAniming: Bool = false
     
     override func setupView() {
+        
+        pritureView.contentMode = .scaleAspectFit
         
         dateLab.textColor = UIColor(red: 0.925, green: 0.384, blue: 0.337, alpha: 1)
         dateLab.font = UIFont.systemFont(ofSize: 9, weight: .medium)
@@ -34,33 +38,48 @@ class SquadActivityCell: BaseTableViewCell {
         contentLab.font = UIFont.systemFont(ofSize: 12)
         contentLab.theme.textColor = UIColor.textGray
         
-        containterView.contentView.addSubviews(membersView, contentLab, titleLab, dateLab, pritureView)
+        descriptionLab.isHidden = true
+        descriptionLab.textAlignment = .center
+        descriptionLab.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        descriptionLab.theme.textColor = UIColor.secondary
+        
+        membersView.margin = 3
+        membersView.memberWidth = 16
+        
+        containterView.contentView.addSubviews(membersView, contentLab, titleLab, dateLab, pritureView, descriptionLab)
         contentView.addSubviews(containterView)
         
         pritureView.snp.makeConstraints { (maker) in
             maker.centerY.equalToSuperview()
-            maker.size.equalTo(CGSize(width: 45, height: 45))
-            maker.leading.equalToSuperview().offset(8)
+            maker.size.equalTo(CGSize(width: 30, height: 30))
+            maker.leading.equalToSuperview().offset(15)
         }
         
         dateLab.snp.makeConstraints { (maker) in
-            maker.leading.equalTo(pritureView.snp.trailing).offset(8)
-            maker.top.equalTo(pritureView).offset(2)
+            maker.leading.equalTo(pritureView.snp.trailing).offset(15)
+            maker.top.equalTo(10)
         }
         
         titleLab.snp.makeConstraints { (maker) in
             maker.leading.equalTo(dateLab)
-            maker.top.equalTo(dateLab.snp.bottom)
+            maker.top.equalTo(dateLab.snp.bottom).offset(5)
         }
         
         contentLab.snp.makeConstraints { (maker) in
             maker.leading.equalTo(dateLab)
-            maker.top.equalTo(titleLab.snp.bottom)
+            maker.top.equalTo(titleLab.snp.bottom).offset(5)
+            maker.height.equalTo(15)
         }
         
         membersView.snp.makeConstraints { (maker) in
             maker.trailing.equalToSuperview().offset(-17)
-            maker.bottom.equalTo(contentLab)
+            maker.bottom.equalToSuperview().offset(-12)
+        }
+        
+        descriptionLab.snp.makeConstraints { (maker) in
+            maker.top.equalTo(14)
+            maker.width.equalTo(150)
+            maker.trailing.equalToSuperview()
         }
     }
     

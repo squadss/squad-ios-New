@@ -10,7 +10,7 @@ import UIKit
 
 class MyProfileHeaderView: BaseView {
     
-    var avatarView = UIImageView()
+    var avatarBtn = UIButton()
     var nicknameLab = UILabel()
     var contentLab = UILabel()
     
@@ -35,20 +35,20 @@ class MyProfileHeaderView: BaseView {
         contentLab.theme.textColor = UIColor.textGray
         contentLab.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         
-        avatarView.contentMode = .scaleAspectFill
-        avatarView.layer.maskCorners(24, rect: CGRect(x: 0, y: 0, width: 48, height: 48))
-        avatarView.clipsToBounds = true
+        avatarBtn.imageView?.contentMode = .scaleAspectFill
+        avatarBtn.imageView?.layer.cornerRadius = 24
+        avatarBtn.imageView?.layer.masksToBounds = true
         
         line.theme.backgroundColor = UIColor.textGray
-        addSubviews(avatarView, nicknameLab, contentLab, applyBtn, line, titleLab)
+        addSubviews(avatarBtn, nicknameLab, contentLab, applyBtn, line, titleLab)
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        avatarView.frame = CGRect(x: 34, y: 0, width: 48, height: 48)
-        nicknameLab.frame = CGRect(x: avatarView.frame.maxX + 16, y: 2, width: bounds.width - avatarView.frame.maxX - 20, height: 20)
+        avatarBtn.frame = CGRect(x: 34, y: 0, width: 48, height: 48)
+        nicknameLab.frame = CGRect(x: avatarBtn.frame.maxX + 16, y: 2, width: bounds.width - avatarBtn.frame.maxX - 20, height: 20)
         contentLab.frame = CGRect(x: nicknameLab.frame.minX, y: nicknameLab.frame.maxY, width: nicknameLab.frame.width, height: 17)
-        line.frame = CGRect(x: 30, y: avatarView.frame.maxY + 25, width: bounds.width - 60, height: 0.5)
+        line.frame = CGRect(x: 30, y: avatarBtn.frame.maxY + 25, width: bounds.width - 60, height: 0.5)
         titleLab.frame = CGRect(x: 34, y: line.frame.maxY + 10, width: 60, height: 14)
         applyBtn.frame = CGRect(x: bounds.width - 134, y: line.frame.maxY, width: 100, height: 37)
     }

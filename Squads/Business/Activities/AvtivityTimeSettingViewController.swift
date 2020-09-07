@@ -15,25 +15,6 @@ class AvtivityTimeSettingViewController: BaseViewController, OverlayTransitionin
 
     var transitioningProvider: OverlayTransitioningProvider? = .init(height: UIScreen.main.bounds.height, maskOpacity: 0.5)
     
-    var topSection: MembersSection<ActivityMember>? {
-        set {
-            guard let _newValue = newValue else { return }
-            contentView.membersView.topSection = _newValue
-            let list = _newValue.list.flatMap{ $0.myTime }
-            contentView.chooseTimeView.setDataSource(originList: list)
-        }
-        
-        get {
-            return contentView.membersView.topSection
-        }
-    }
-    
-    var bottomSection: MembersSection<ActivityMember>! {
-        didSet {
-            contentView.membersView.bottomSection = bottomSection
-        }
-    }
-    
     var activityType: EventCategory!
     
     private var didSelectItemSubject = PublishSubject<Array<TimePeriod>>()
@@ -70,9 +51,15 @@ class AvtivityTimeSettingViewController: BaseViewController, OverlayTransitionin
                     // 打开确认弹窗
                     self.contentView.isHidden = true
                     self.confirmView.isHidden = false
+                    self.confirmView.alpha = 0
+                    self.confirmView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+                    UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut, animations: {
+                        self.confirmView.alpha = 1
+                        self.confirmView.transform = .identity
+                    })
                     self.confirmView.config(activityType: self.activityType, timeperiod: timePeriod)
                 } else {
-                    self.showToast(message: "No time has been chosen")
+                    self.contentView.showToast(message: NSLocalizedString("squadSettingTime.neverChosenTip", comment: ""))
                     return
                 }
             default:
@@ -117,6 +104,16 @@ class AvtivityTimeSettingViewController: BaseViewController, OverlayTransitionin
 //                self.didSelectItemSubject.onNext([])
 //            })
 //            .disposed(by: disposeBag)
+    }
+    
+    func topSection(section: MembersSection<ActivityMember>) {
+        contentView.membersView.setTopSection(section: section)
+        let list = section.list.flatMap{ $0.myTime }
+        contentView.chooseTimeView.setDataSource(originList: list)
+    }
+    
+    func bottomSection(section: MembersSection<User>) {
+        contentView.membersView.setBottomSection(section: section)
     }
     
     override func viewWillLayoutSubviews() {

@@ -10,6 +10,7 @@ import UIKit
 import RxSwift
 import RxCocoa
 import RxDataSources
+import JXPhotoBrowser
 import ETNavBarTransparent
 
 class MyProfileViewController: ReactorViewController<MyProfileReactor> {
@@ -24,6 +25,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
         })
     }
     
+    private var user: User?
     private var tableView = UITableView()
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, MyProfileReactor.Model>>!
     
@@ -35,16 +37,16 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
         view.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
     }
     
-    override func initData() {
-        guard let user = User.currentUser() else {
-            return
-        }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        user = User.currentUser()
+        
         headerView.applyBtn.isHidden = false
         headerView.applyBtn.setTitle("Requests", for: .normal)
         headerView.applyBtn.addTarget(self, action: #selector(applyBtnDidTapped), for: .touchUpInside)
-        headerView.contentLab.text = user.username
-        headerView.nicknameLab.text = user.nickname
-        headerView.avatarView.kf.setImage(with: user.avatar.asURL)
+        headerView.contentLab.text = user?.username
+        headerView.nicknameLab.text = user?.nickname
+        headerView.avatarBtn.kf.setImage(with: user?.avatar.asURL, for: .normal)
     }
     
     override func setupView() {
@@ -57,6 +59,7 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
         tableView.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
         view.addSubview(tableView)
         
+        headerView.avatarBtn.addTarget(self, action: #selector(avatarBtnDidTapped(sender:)), for: .touchUpInside)
         view.addSubview(headerView)
         
         view.addSubview(footerView)
@@ -125,6 +128,19 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
         navigationController?.pushViewController(applyListViewController, animated: true)
     }
     
+    @objc
+    private func avatarBtnDidTapped(sender: UIButton) {
+        let browser = JXPhotoBrowser()
+        browser.numberOfItems = { 1 }
+        browser.reloadCellAtIndex = { [weak self]context in
+            let cell = context.cell as? JXPhotoBrowserImageCell
+            cell?.imageView.kf.setImage(with: self?.user?.avatar.asURL)
+        }
+        browser.cellClassAtIndex = { _ in JXPhotoBrowserImageCell.self }
+        browser.pageIndex = 0
+        browser.show()
+    }
+    
     override func addTouchAction() {
         
         footerView.addTapped
@@ -140,13 +156,12 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
             .subscribe(onNext: { [unowned self] flag in
                 switch flag {
                 case "profile":
-                    if let squadId = UserDefaults.standard.topSquad {
-                        let preReactor = SquadPreReactor(squadId: squadId)
-                        let preViewController = SquadPreViewController(reactor: preReactor)
-                        let nav = BaseNavigationController(rootViewController: preViewController)
-                        nav.modalPresentationStyle = .fullScreen
-                        self.present(nav, animated: true)
-                    }
+                    guard let accountId = self.user?.id else { return }
+                    let friendReactor = FriendProfileReactor(accountId: accountId)
+                    let friendVC = FriendProfileViewController(reactor: friendReactor)
+                    let nav = BaseNavigationController(rootViewController: friendVC)
+                    nav.modalPresentationStyle = .fullScreen
+                    self.present(nav, animated: true)
                 case "notifications":
                     let notificationReactor = SquadNotificationsReactor()
                     let vc = SquadNotificationsViewController(reactor: notificationReactor)

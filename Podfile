@@ -52,5 +52,5 @@ target 'Squads' do
   # Custom Emoji
   pod 'ISEmojiView'
   # 下拉刷新
-  pod 'MJRefresh'
+  pod 'SwiftPullToRefresh'
 end

@@ -39,7 +39,7 @@ class SquadInvithNewReactor: Reactor {
     enum Mutation {
         case setDeleteMember(Member)
         case setAddMember(Member)
-        case setInviteSuccess
+        case setInviteSuccess(String)
         case setMembers(members: Array<Member>, isDenied: Bool?)
         case setToast(String)
         case setLinkText(String)
@@ -67,7 +67,7 @@ class SquadInvithNewReactor: Reactor {
     
     var initialState: State
     var provider = OnlineProvider<SquadAPI>()
-    
+    var currentUser: User = User.currentUser()!
     let squadId: Int
     init(squadId: Int) {
         self.squadId = squadId
@@ -81,9 +81,9 @@ class SquadInvithNewReactor: Reactor {
         case .addSelectedMember(let member):
             return Observable.just(.setAddMember(member))
         case .getAllFriends:
-            return provider.request(target: .queryAllFriends, model: Array<User>.self, atKeyPath: .data).asObservable().map{ result in
+            return provider.request(target: .queryAllFriends, model: Array<User>.self, atKeyPath: .data).asObservable().map{ [unowned self] result in
                 switch result {
-                case .success(let list): return .setMembers(members: list.map{ Member(user: $0, isAdded: false, isColsable: true) }, isDenied: nil)
+                case .success(let list): return .setMembers(members: list.filter{ $0 != self.currentUser }.map{ Member(user: $0, isAdded: false, isColsable: true) }, isDenied: nil)
                 case .failure(let error): return .setToast(error.message)
                 }
             }
@@ -96,8 +96,9 @@ class SquadInvithNewReactor: Reactor {
                     return total || result.error == nil
                 }
                 .map { state in
-                    return state ? .setInviteSuccess : .setToast("Invitation failed")
+                    return state ? .setInviteSuccess(NSLocalizedString("squadInvite.successTip", comment: "")) : .setToast(NSLocalizedString("squadInvite.failureTip", comment: ""))
                 }
+                .startWith(.setLoading(true))
         case let .visibleContacts(phoneList, isDenied):
             return provider.request(target: .isAlreadyRegistered(phoneList: phoneList),
                                     model: Array<User>.self,
@@ -108,7 +109,7 @@ class SquadInvithNewReactor: Reactor {
                 }
             }
         case .createLink:
-            return provider.request(target: .createLinkBySquad(squadId: squadId, nationCode: "", phoneNumber: ""), model: String.self, atKeyPath: .data).asObservable().map { result in
+            return provider.request(target: .createLinkBySquad(squadId: squadId), model: String.self, atKeyPath: .data).asObservable().map { result in
                 switch result {
                 case .success(let linkString):
                     return .setLinkText(linkString)
@@ -128,7 +129,7 @@ class SquadInvithNewReactor: Reactor {
         case .setAddMember(let member):
             
             if state.members == nil {
-                let current = Member(user: User.currentUser()!, isAdded: false, isColsable: false)
+                let current = Member(user: currentUser, isAdded: false, isColsable: false)
                 state.members = [current, member]
             } else {
                 state.members?.append(member)
@@ -158,8 +159,10 @@ class SquadInvithNewReactor: Reactor {
                     }
                 }
             }
-        case .setInviteSuccess:
+        case .setInviteSuccess(let s):
             state.inviteSuccess = true
+            state.isLoading = false
+            state.toast = s
         case .setToast(let s):
             state.isLoading = false
             state.toast = s

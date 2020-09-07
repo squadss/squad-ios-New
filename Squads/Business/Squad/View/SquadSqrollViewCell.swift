@@ -11,7 +11,7 @@ import RxCocoa
 import RxSwift
 import RxDataSources
 
-class SquadSqrollViewCell: BaseTableViewCell, UICollectionViewDataSource {
+class SquadSqrollViewCell: BaseTableViewCell, UICollectionViewDataSource, UICollectionViewDelegate {
     
     var disposeBag = DisposeBag()
     
@@ -35,12 +35,16 @@ class SquadSqrollViewCell: BaseTableViewCell, UICollectionViewDataSource {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(Reusable.squadSqrollCollectionCell)
         collectionView.alwaysBounceHorizontal = true
+        collectionView.showsHorizontalScrollIndicator = false
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 17, bottom: 0, right: 0)
         collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.backgroundColor = UIColor.white
         contentView.addSubview(collectionView)
-        contentView.theme.backgroundColor = UIColor.background
-        theme.backgroundColor = UIColor.background
-        collectionView.theme.backgroundColor = UIColor.background
+        contentView.backgroundColor = UIColor.white
+        collectionView.snp.makeConstraints { (maker) in
+            maker.edges.equalToSuperview()
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -51,16 +55,12 @@ class SquadSqrollViewCell: BaseTableViewCell, UICollectionViewDataSource {
         let model = dataSource[indexPath.row]
         let cell = collectionView.dequeue(Reusable.squadSqrollCollectionCell, for: indexPath)
         cell.pritureView.kf.setImage(with: model, placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+        cell.backgroundColor = .white
         return cell
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        collectionView.frame = bounds
     }
 }

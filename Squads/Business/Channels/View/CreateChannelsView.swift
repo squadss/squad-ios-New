@@ -17,7 +17,8 @@ class CreateChannelsView: BaseView {
     // 关闭pop的按钮
     var closeBtn = UIButton()
     // 头像
-    var imageTextView = UITextView()
+    var imageTextView = ImageTextView()
+//    var imagePlacehoaderView = UIImageView(image: UIImage(named: "Normal Channel"))
     // 输入框
     var textField = UITextField()
     // 标题
@@ -52,7 +53,7 @@ class CreateChannelsView: BaseView {
         imageTextView.layer.masksToBounds = true
         imageTextView.font = UIFont.systemFont(ofSize: 60)
         imageTextView.tintColor = UIColor.clear
-        imageTextView.backgroundColor = .lightGray
+        imageTextView.text = "😎"
         imageTextView.textContainerInset = UIEdgeInsets(top: 3, left: 2, bottom: 0, right: 0)
         imageTextView.setInputAccessoryView(target: self, selector: #selector(imageCompletedBtnDidTapped))
         
@@ -80,6 +81,8 @@ class CreateChannelsView: BaseView {
         textField.borderStyle = .none
         textField.backgroundColor = .white
         textField.layer.cornerRadius = 8
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 10))
+        textField.leftViewMode = .always
         textField.setInputAccessoryView(target: self, selector: #selector(textCompletedBtnDidTapped))
     }
     
@@ -99,9 +102,15 @@ class CreateChannelsView: BaseView {
         
         canEditView.contentMode = .center
         canEditView.setImage(UIImage(named: "Edit Group"), for: .normal)
+        canEditView.addTarget(self, action: #selector(canEditBtnDidTapped), for: .touchUpInside)
         
         closeBtn.imageView?.contentMode = .center
         closeBtn.setImage(UIImage(named: "Channels Close"), for: .normal)
+    }
+    
+    @objc
+    private func canEditBtnDidTapped() {
+        imageTextView.becomeFirstResponder()
     }
     
     @objc
@@ -118,6 +127,7 @@ class CreateChannelsView: BaseView {
         super.layoutSubviews()
         
         imageTextView.frame = CGRect(x: (bounds.width - 78)/2, y: 56, width: 78, height: 78)
+//        imagePlacehoaderView.frame = imageTextView.frame
         canEditView.frame = CGRect(x: imageTextView.frame.maxX - 25, y: imageTextView.frame.maxY - 25, width: 29, height: 29)
         
         tipLab.frame = CGRect(x: 36, y: imageTextView.frame.maxY + 29, width: bounds.width - 2 * 36, height: 14)
@@ -136,7 +146,8 @@ extension CreateChannelsView: EmojiViewDelegate {
     
     func emojiViewDidSelectEmoji(_ emoji: String, emojiView: EmojiView) {
         imageTextView.deleteBackward()
-        imageTextView.insertText(emoji)
+        imageTextView.text = emoji
+//        imagePlacehoaderView.isHidden = true
     }
     
     func emojiViewDidPressChangeKeyboardButton(_ emojiView: EmojiView) {
@@ -147,9 +158,21 @@ extension CreateChannelsView: EmojiViewDelegate {
     
     func emojiViewDidPressDeleteBackwardButton(_ emojiView: EmojiView) {
         imageTextView.deleteBackward()
+        imageTextView.text = "😎"
+//        imagePlacehoaderView.isHidden = false
     }
     
     func emojiViewDidPressDismissKeyboardButton(_ emojiView: EmojiView) {
         imageTextView.resignFirstResponder()
+    }
+}
+
+class ImageTextView: UITextView {
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        let menuControler = UIMenuController.shared
+        if menuControler != nil {
+            menuControler.isMenuVisible = false
+        }
+        return false
     }
 }

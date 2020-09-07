@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 // Frame.Origin.Y 固定为320
 class MultipleChooseTimeView: UIView {
@@ -14,9 +16,13 @@ class MultipleChooseTimeView: UIView {
     // 两个item之间的距离
     var margin: CGFloat = 9
     
-    var axisView = TimeLineAxisControl()
-    var displayView: ActivityTimeSectionView<TimeLineCollectionView>!
+    var didEndSelectedTimeObservable: Observable<Array<TimePeriod>> {
+        return drawView.itemView.didEndSelectedTimeObservable
+    }
+    
+    private var axisView = TimeLineAxisControl(frame: CGRect(x: 0, y: 0, width: 60, height: 320))
     private var drawView: ActivityTimeSectionView<TimeLineCollectionView>!
+    private var displayView: ActivityTimeSectionView<TimeLineCollectionView>!
     
     init() {
         super.init(frame: .zero)
@@ -41,12 +47,15 @@ class MultipleChooseTimeView: UIView {
         let tapView = TimeLineCollectionView()
         tapView.cellStyle = .num
         
-        displayView = ActivityTimeSectionView<TimeLineCollectionView>(itemView: tapView)
+        displayView = ActivityTimeSectionView(itemView: tapView)
         displayView.title = "SQUAD AVAILABILIT"
         
-        drawView = ActivityTimeSectionView<TimeLineCollectionView>(itemView: pageView)
+        drawView = ActivityTimeSectionView(itemView: pageView)
         drawView.title = "CLICK YOUR TIME"
         
+        axisView.layout.indicatorsInsert = UIEdgeInsets(top: 6, left: 0, bottom: 36, right: 3)
+        axisView.layout.topHandlerMarginTop = 3
+        axisView.layout.bottomHanderMarginBottom = 34
         addSubviews(axisView, displayView, drawView)
         
         axisView.scrollDidStop = { [unowned self] hour in
@@ -71,16 +80,19 @@ class MultipleChooseTimeView: UIView {
         displayView.itemView.setDataSource(originList)
         
         if isFirstSetData {
-            axisView.scrollToCurrentDate()
+            axisView.scrollToAdaptDate(array: myTime)
             isFirstSetData = false
         }
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        axisView.frame = CGRect(x: 0, y: 4, width: 55, height: 300)
+        axisView.frame.origin.y = 4
+        axisView.frame.size.height -= 4
         let itemWidth = (bounds.width - axisView.frame.maxX - margin)/2
-        displayView.frame = CGRect(x: axisView.frame.maxX, y: 0, width: itemWidth, height: 320)
-        drawView.frame = CGRect(x: displayView.frame.maxX + margin, y: 0, width: itemWidth, height: 320)
+        displayView.frame = CGRect(x: axisView.frame.maxX, y: 0,
+                                   width: itemWidth, height: axisView.frame.height)
+        drawView.frame = CGRect(x: displayView.frame.maxX + margin, y: 0,
+                                width: itemWidth, height: axisView.frame.height)
     }
 }

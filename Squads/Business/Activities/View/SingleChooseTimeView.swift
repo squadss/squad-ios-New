@@ -11,7 +11,7 @@ import UIKit
 // Frame.Origin.Y 固定为320
 class SingleChooseTimeView: UIView {
 
-    var axisView = TimeLineAxisControl()
+    var axisView = TimeLineAxisControl(frame: CGRect(x: 0, y: 0, width: 50, height: 320))
     private(set) var sectionView: ActivityTimeSectionView<TimeLineCollectionView>!
     
     var currentSelectedTimes: TimePeriod? {
@@ -23,9 +23,9 @@ class SingleChooseTimeView: UIView {
         
         let collectionView = TimeLineCollectionView()
         switch cellStyle {
-        case .dash:
+        case .dash(let level):
             collectionView.canEdit = true
-            collectionView.cellStyle = .dash
+            collectionView.cellStyle = .dash(level: level)
         case .num:
             collectionView.canEdit = true
             collectionView.cellStyle = .num
@@ -49,7 +49,9 @@ class SingleChooseTimeView: UIView {
         sectionView.headerTitleStyle.textColor = UIColor.secondary
         sectionView.headerTitleStyle.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
 
-        axisView.indicatorsMarginRight = 5
+        axisView.layout.indicatorsInsert = UIEdgeInsets(top: 6, left: 0, bottom: 36, right: 5)
+        axisView.layout.topHandlerMarginTop = 3
+        axisView.layout.bottomHanderMarginBottom = 34
         addSubviews(axisView, sectionView)
         
         axisView.scrollDidStop = { hour in
@@ -67,14 +69,16 @@ class SingleChooseTimeView: UIView {
         sectionView.itemView.setDataSource(originList)
         
         if isFirstSetData {
-            axisView.scrollToCurrentDate()
+            axisView.scrollToAdaptDate(array: originList)
             isFirstSetData = false
         }
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        axisView.frame = CGRect(x: 0, y: 4, width: 50, height: 300)
-        sectionView.frame = CGRect(x: axisView.frame.maxX + 8, y: 0, width: bounds.width - axisView.frame.maxX, height: 320)
+        axisView.frame.origin.y = 4
+        axisView.frame.size.height -= 4
+        sectionView.frame = CGRect(x: axisView.frame.maxX + 8, y: 0,
+                                   width: bounds.width - axisView.frame.maxX, height: axisView.frame.height)
     }
 }

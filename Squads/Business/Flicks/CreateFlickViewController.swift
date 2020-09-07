@@ -116,12 +116,12 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
         inputBar.textField.theme.textColor = UIColor.textGray
         inputBar.textField.returnKeyType = .done
         if #available(iOS 13.0, *) {
-            inputBar.textField.attributedPlaceholder = NSAttributedString(string: "Search", attributes: [
+            inputBar.textField.attributedPlaceholder = NSAttributedString(string: "Add a caption...", attributes: [
                 .foregroundColor: UIColor(red: 0.571, green: 0.571, blue: 0.571, alpha: 1),
                 .font: UIFont.systemFont(ofSize: 16),
             ])
         } else {
-            inputBar.textField.placeholder = "Search"
+            inputBar.textField.placeholder = "Add a caption..."
             inputBar.textField.setValue(UIColor(red: 0.571, green: 0.571, blue: 0.571, alpha: 1), forKeyPath: "_placeholderLabel.textColor")
             inputBar.textField.setValue(UIFont.systemFont(ofSize: 16), forKeyPath: "_placeholderLabel.font")
         }
@@ -201,7 +201,7 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
             .bind(to: photoView.rx.items(dataSource: photoDataSource))
             .disposed(by: disposeBag)
         
-        contentDataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, PHAsset>>(configureCell: { data, collectionView, indexPath, asset in
+        contentDataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, PHAsset>>(configureCell: { [unowned self] data, collectionView, indexPath, asset in
             
             let layout = (collectionView.collectionViewLayout as! UICollectionViewFlowLayout)
             let targetSize = CGSize(width: layout.itemSize.width * scale, height: layout.itemSize.height * scale)
@@ -220,7 +220,7 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
                 .subscribe(onNext: { [unowned self] in
                     let browser = JXPhotoBrowser()
                     browser.numberOfItems = { reactor.currentState.selectedPhotos?.count ?? 0 }
-                    browser.reloadCellAtIndex = { context in
+                    browser.reloadCellAtIndex = { [unowned self] context in
                         let browerCell = context.cell as? JXPhotoBrowserImageCell
                         self.imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: nil) { (image, nfo) in
                             browerCell?.imageView.image = image
@@ -249,6 +249,14 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
         reactor.state
             .compactMap{ $0.isLoading }
             .bind(to: rx.loading)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter{ $0.postSuccess == true }
+            .delay(RxTimeInterval.milliseconds(300), scheduler: MainScheduler.instance)
+            .subscribe(onNext: { [unowned self] _ in
+                self.dismiss(animated: true)
+            })
             .disposed(by: disposeBag)
         
         requestAuthorization()

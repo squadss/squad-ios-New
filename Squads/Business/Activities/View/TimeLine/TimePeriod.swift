@@ -49,12 +49,34 @@ enum TimeColor: Int {
         if self == .level5 { return .level5 }
         return TimeColor(rawValue: rawValue + 1)!
     }
+    
+    func next(in colors: [TimeColor]) -> TimeColor {
+        guard
+            let index = colors.firstIndex(of: self),
+            colors.indices.contains(index + 1)
+            else { return self }
+        return colors[index + 1]
+    }
+    
+    func prev(in colors: [TimeColor]) -> TimeColor {
+        guard
+            let index = colors.firstIndex(of: self),
+            colors.indices.contains(index - 1)
+            else { return self }
+        return colors[index - 1]
+    }
 }
 
 struct TimePeriod: Hashable, Codable {
 
     var middleDate: Date {
         return Date(timeIntervalSince1970: max(end - beginning, 0)/2 + beginning)
+    }
+    
+    var startOffTime: Date? {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: middleDate)
+        return calendar.date(from: components)
     }
     
     var beginning: TimeInterval
@@ -134,15 +156,8 @@ struct TimeFormatter {
         return dateFormatter.string(from: date)
     }
      
-    // 1 PM  /  2 AM
     var timeFormat: String {
-        if start > 12 * 3600 && end > 12 * 3600 {
-            return "\(start/3600 - 12) - \(end/3600 - 12) PM"
-        } else if start < 12 * 3600 && end < 12 * 3600 {
-            return "\(12 - start/3600) - \(12 - end/3600) AM"
-        } else {
-            return start > 12 * 3600 ? "\(start/3600 - 12) PM" : "\(start/3600) AM"
-        }
+        return formatTime(seconds: start) + "-" + formatTime(seconds: end)
     }
     
     let timePeriod: TimePeriod
@@ -180,5 +195,12 @@ struct TimeFormatter {
         } else {
             return nil
         }
+    }
+    
+    func formatTime(seconds: TimeInterval) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = .current
+        formatter.dateFormat = "hh:mm aa"
+        return formatter.string(from: date.addingTimeInterval(seconds))
     }
 }

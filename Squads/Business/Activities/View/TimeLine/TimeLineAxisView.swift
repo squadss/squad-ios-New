@@ -10,127 +10,150 @@ import UIKit
 import AudioToolbox
 
 class TimeLineAxisItemControl: BaseView {
-    
     var handleView = UIView()
-    
     override func setupView() {
         addSubview(handleView)
         handleView.theme.backgroundColor = UIColor.secondary
     }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        handleView.frame = CGRect(x: 0, y: 0, width: bounds.width, height: 50)
-    }
 }
 
-class TimeLineAxisControl: BaseView, UIScrollViewDelegate, UITableViewDelegate, UITableViewDataSource {
-    
-    struct Model {
-        var hour: Int
-        var format12: String
+struct TimeLineAxisLayout {
+    // 滚动条距离tableView轴的距离
+    var indicatorsInsert: UIEdgeInsets = .zero
+    var topHandlerMarginTop: CGFloat = 5
+    var bottomHanderMarginBottom: CGFloat = 5
+}
+
+class TimeLineAxisControl: BaseView, UIScrollViewDelegate {
+
+    var layout = TimeLineAxisLayout() {
+        didSet { layoutUI() }
     }
     
+    // 滑动暂停时的回调, 将当前Hour返回
     var scrollDidStop: ((Int) -> Void)?
-    var indicatorsMarginRight: CGFloat = 0
-    private var topHandler = UIButton()
-    private var bottomHandler = UIButton()
-    private var dataSource: Array<Model>!
+    // 滑动时考虑label的高度, 需要偏移的值
+    private let labOffset: CGFloat = 5
     private var tableView = UITableView()
+    private var topHandlerBtn = UIButton()
+    private var bottomHandlerBtn = UIButton()
     private var indicatorsView = TimeLineAxisItemControl()
+    private var dataSource: Array<Int> = (0..<24).map { $0 }
     
     override func setupView() {
         
-        dataSource = (0..<24).map { value in
-            let suffix: String = value < 12 ? " AM" : " PM"
-            return Model(hour: value, format12: "\(value == 12 ? 12 : value % 12)" + suffix)
-        }
-        
-        topHandler.setImage(UIImage(named: "timeline_up"), for: .normal)
-        topHandler.theme.backgroundColor = UIColor.background
-        bottomHandler.setImage(UIImage(named: "timeline_down"), for: .normal)
-        bottomHandler.theme.backgroundColor = UIColor.background
-        
-        tableView.rowHeight = 50
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.scrollsToTop = false
         tableView.separatorStyle = .none
         tableView.tableFooterView = UIView()
         tableView.tableHeaderView = UIView()
-        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 15, right: 0)
+        tableView.estimatedRowHeight = 0
+        tableView.estimatedSectionHeaderHeight = 0
+        tableView.estimatedSectionFooterHeight = 0
         tableView.register(Reusable.timeLineAxisCalibrationCell)
         tableView.showsVerticalScrollIndicator = false
         tableView.showsHorizontalScrollIndicator = false
         
+        topHandlerBtn.isEnabled = false
+        topHandlerBtn.setImage(UIImage(named: "timeline_up"), for: .normal)
+        topHandlerBtn.theme.backgroundColor = UIColor.background
+        bottomHandlerBtn.isEnabled = false
+        bottomHandlerBtn.setImage(UIImage(named: "timeline_down"), for: .normal)
+        bottomHandlerBtn.theme.backgroundColor = UIColor.background
+        
         indicatorsView.clipsToBounds = true
         indicatorsView.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
-        addSubviews(indicatorsView, tableView, topHandler, bottomHandler)
+        addSubviews(indicatorsView, tableView, topHandlerBtn, bottomHandlerBtn)
+        
+        layoutUI()
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        indicatorsView.frame = CGRect(x: 0, y: 0, width: 7, height: bounds.height - 15)
-        tableView.frame = CGRect(x: indicatorsView.frame.maxX + indicatorsMarginRight, y: 0, width: bounds.width - indicatorsView.frame.maxX, height: bounds.height - 20)
-        topHandler.frame = CGRect(x: tableView.frame.minX, y: 0, width: tableView.bounds.width, height: 10)
-        bottomHandler.frame = CGRect(x: tableView.frame.minX, y: bounds.height - 25, width: tableView.bounds.width, height: 10)
-    }
     
-    func scrollToCurrentDate(animated: Bool = false) {
+    /// 根据传入的时间段列表, 滚动到其适应的位置
+    /// - Parameter array: 时间段列表
+    func scrollToAdaptDate(array: Array<TimePeriod>) {
+        guard let adaptTimestamp = getAdaptDate(array: array) else {
+            return
+        }
         let calendar = Calendar.current
-        let components = calendar.dateComponents([.hour], from: Date())
-        let hour = components.hour ?? 0
-        tableView.scrollToRow(at: IndexPath(row: hour, section: 0), at: .top, animated: animated)
-        scrollDidStop?(hour)
+        let adaptDate = Date(timeIntervalSince1970: adaptTimestamp)
+        let components = calendar.dateComponents([.year, .month, .day, .hour], from: adaptDate)
+        if let hour = components.hour {
+            scrollToDate(hour: hour)
+        }
+    }
+    
+    func getAdaptDate(array: Array<TimePeriod>) -> TimeInterval? {
+        var maxTime: TimeInterval?
+        var minTime: TimeInterval?
+        array.forEach { timePeriod in
+            
+            let end = timePeriod.end
+            let beginning = timePeriod.beginning
+            
+            if let _minTime = minTime {
+                minTime = min(beginning, _minTime)
+            } else {
+                minTime = beginning
+            }
+            if let _maxTime = maxTime {
+                maxTime = max(end, _maxTime)
+            } else {
+                maxTime = end
+            }
+        }
+        
+        if let _maxTime = maxTime, let _minTime = minTime {
+            // 最大时间减去最小时间超过5小时, 就以最小时间为准
+            if _maxTime - _minTime >= 5 * 3600 {
+                return _minTime
+            } else {
+                return _minTime - floor((5 * 3600 - (_maxTime - _minTime)) / 2)
+            }
+        }
+        return nil
+    }
+    
+    func scrollToCurrentDate(currentHour: Int = TimeLineAxisControl.currentHour, animated: Bool = false) {
+        scrollToDate(hour: currentHour, animated: animated)
+    }
+    
+    /// 滚动到当前时刻下
+    func scrollToDate(hour: Int, animated: Bool = false) {
+        guard hour >= 0 && hour < 24 else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            // https://www.jianshu.com/p/6935ef251cfb
+            let calcHour = min(hour, 19)
+            self.tableView.reloadData()
+            self.tableView.layoutIfNeeded()
+            self.tableView.scrollToRow(at: IndexPath(row: calcHour, section: 0), at: .top, animated: false)
+            self.adjustIndicatorsFrame(scrollView: self.tableView)
+            self.scrollDidStop?(calcHour)
+        }
     }
     
     private var lastIndex: Int?
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        slideWithContentOffset(contentOffset: scrollView.contentOffset.y,
-                               contentHeight: scrollView.contentSize.height,
-                               scrollViewHeight: scrollView.frame.size.height)
+        
+        // 调整滚动条的显示
+        adjustIndicatorsFrame(scrollView: scrollView)
         
         // 添加振动效果
-        let offsetY = scrollView.contentOffset.y - scrollView.contentInset.top
-        let index = Int(round(offsetY / max(tableView.rowHeight, 1)))
+        let offsetY = scrollView.contentOffset.y
+        let index = Int(round(offsetY / max(50, 1)))
         if lastIndex != index {
             AudioServicesPlaySystemSound(1519)
             lastIndex = index
         }
     }
     
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate {
-            let offsetY = scrollView.contentOffset.y
-            let index = Int(round(offsetY / max(tableView.rowHeight, 1)))
-            tableView.scrollToRow(at: IndexPath(row: index, section: 0), at: .top, animated: true)
-            let model = dataSource[index]
-            scrollDidStop?(model.hour)
-        }
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let index = Int(round(offsetY / max(tableView.rowHeight, 1)))
-        tableView.scrollToRow(at: IndexPath(row: index, section: 0), at: .top, animated: true)
-        let model = dataSource[index]
-        scrollDidStop?(model.hour)
-    }
-    
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSource.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let model = dataSource[indexPath.row]
-        let cell = tableView.dequeue(Reusable.timeLineAxisCalibrationCell)!
-        cell.selectionStyle = .none
-        cell.titleLab.text = model.format12
-        return cell
-    }
-    
-    private func slideWithContentOffset(contentOffset: CGFloat, contentHeight: CGFloat, scrollViewHeight: CGFloat) {
+    private func adjustIndicatorsFrame(scrollView: UIScrollView) {
+        let contentOffset = floor(scrollView.contentOffset.y)
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.frame.size.height
         let scrollAreaHeight = contentHeight - scrollViewHeight
+        
         if scrollAreaHeight == 0 { return }
         if contentOffset < 0 || contentOffset > scrollAreaHeight { return }
         // 滚动的比例
@@ -147,8 +170,73 @@ class TimeLineAxisControl: BaseView, UIScrollViewDelegate, UITableViewDelegate, 
         frame.origin.y = slideOffset
         indicatorsView.handleView.frame = frame
     }
+    
+    // https://www.it1352.com/926464.html
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            setContentOffset(scrollView: scrollView)
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        setContentOffset(scrollView: scrollView)
+    }
+    
+    private func setContentOffset(scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let index = Int(round(offsetY / 50))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            scrollView.setContentOffset(CGPoint(x: 0, y: CGFloat(index) * 50), animated: true)
+        }
+        let hour = dataSource[index]
+        scrollDidStop?(hour)
+    }
+    
+    static var currentHour: Int {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour], from: Date())
+        let hour = components.hour ?? 0
+        return hour
+    }
+    
+    private func layoutUI() {
+        indicatorsView.frame = CGRect(x: layout.indicatorsInsert.left, y: layout.indicatorsInsert.top, width: 7,
+                                      height: bounds.height - layout.indicatorsInsert.top - layout.indicatorsInsert.bottom)
+        indicatorsView.handleView.frame = CGRect(x: 0, y: 0, width: 7, height: 50)
+        let contentWidth = bounds.width - indicatorsView.frame.maxX - layout.indicatorsInsert.right
+        let contentMinX = indicatorsView.frame.maxX + layout.indicatorsInsert.right
+        topHandlerBtn.frame = CGRect(x: contentMinX, y: layout.topHandlerMarginTop, width: contentWidth, height: 10)
+        bottomHandlerBtn.frame = CGRect(x: contentMinX, y: bounds.height - layout.bottomHanderMarginBottom - 10,
+                                        width: contentWidth, height: 10)
+        tableView.frame = CGRect(x: contentMinX, y: topHandlerBtn.frame.maxY, width: contentWidth,
+                                 height: bottomHandlerBtn.frame.minY - topHandlerBtn.frame.maxY)
+    }
 }
 
+extension TimeLineAxisControl: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return dataSource.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let hour = dataSource[indexPath.row]
+        let cell = tableView.dequeue(Reusable.timeLineAxisCalibrationCell)!
+        cell.selectionStyle = .none
+        cell.titleLab.text = String(hour == 12 ? 12 : hour % 12) + (hour < 12 ? " AM" : " PM")
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if dataSource.count == indexPath.row + 1 {
+            return 50 + 12.5
+        }
+        return 50
+    }
+}
+
+//MARK: - 此类已废弃
+/*
 class TimeLineAxisView: BaseView {
     
     var list: Array<String>? {
@@ -215,3 +303,4 @@ class TimeLineAxisView: BaseView {
     }
     
 }
+*/
