@@ -11,17 +11,19 @@ import RxCocoa
 import RxSwift
 import RxDataSources
 
-class SquadSqrollViewCell: BaseTableViewCell {
+class SquadSqrollViewCell: BaseTableViewCell, UICollectionViewDataSource {
     
     var disposeBag = DisposeBag()
-    var dataSubject = PublishSubject<[String]>()
     
-    var tapObservable: Observable<String> {
-        return collectionView.rx.itemSelected.map{ [unowned self] in self.dataSource[$0] }
+    var tapObservable: Observable<URL> {
+        return collectionView.rx.itemSelected.map{ [unowned self] in self.dataSource[$0.row] }
+    }
+    
+    var dataSource: [URL]! {
+        didSet { collectionView.reloadData() }
     }
     
     private var collectionView: UICollectionView!
-    private var dataSource: RxCollectionViewSectionedReloadDataSource<SectionModel<String, String>>!
     
     override func setupView() {
         
@@ -32,21 +34,24 @@ class SquadSqrollViewCell: BaseTableViewCell {
         layout.minimumInteritemSpacing = 2
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(Reusable.squadSqrollCollectionCell)
-        collectionView.theme.backgroundColor = UIColor.background
         collectionView.alwaysBounceHorizontal = true
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 17, bottom: 0, right: 0)
+        collectionView.dataSource = self
         contentView.addSubview(collectionView)
-        
-        dataSource = RxCollectionViewSectionedReloadDataSource<SectionModel<String, String>>(configureCell: { (data, collectionView, indexPath, model) -> UICollectionViewCell in
-            let cell = collectionView.dequeue(Reusable.squadSqrollCollectionCell, for: indexPath)
-            cell.pritureView.kf.setImage(with: model.asURL, placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
-            return cell
-        })
-        
-        dataSubject
-            .map{ [SectionModel(model: "", items: $0)] }
-            .bind(to: collectionView.rx.items(dataSource: dataSource))
-            .disposed(by: disposeBag)
+        contentView.theme.backgroundColor = UIColor.background
+        theme.backgroundColor = UIColor.background
+        collectionView.theme.backgroundColor = UIColor.background
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return dataSource == nil ? 0 : dataSource.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let model = dataSource[indexPath.row]
+        let cell = collectionView.dequeue(Reusable.squadSqrollCollectionCell, for: indexPath)
+        cell.pritureView.kf.setImage(with: model, placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+        return cell
     }
     
     override func prepareForReuse() {

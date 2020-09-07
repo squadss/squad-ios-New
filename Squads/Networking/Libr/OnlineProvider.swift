@@ -31,6 +31,7 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     static var plugins: [PluginType] {
         
         let logger = NetworkLogger()
+//        let logger = NetworkLoggerPlugin()
         
         var list: Array<PluginType> = [logger]
         
@@ -73,9 +74,7 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
             .map{ object in
                 if object is GeneralModel.Plain {
                     let plain = (object as! GeneralModel.Plain)
-                    if !plain.success {
-                        return .failure(.newwork(code: plain.code, message: plain.message))
-                    }
+                    if !plain.success { return .failure(.newwork(plain)) }
                 }
                 return .success(object)
             }

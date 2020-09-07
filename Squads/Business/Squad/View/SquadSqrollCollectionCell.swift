@@ -17,6 +17,8 @@ class SquadSqrollCollectionCell: BaseCollectionViewCell {
         pritureView.layer.maskCorners(8, rect: CGRect(origin: .zero, size: CGSize(width: 97, height: 97)))
         pritureView.clipsToBounds = true
         contentView.addSubview(pritureView)
+        contentView.theme.backgroundColor = UIColor.background
+        theme.backgroundColor = UIColor.background
     }
     
     override func layoutSubviews() {

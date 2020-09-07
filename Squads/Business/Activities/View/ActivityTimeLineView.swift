@@ -9,61 +9,58 @@
 import UIKit
 import RxSwift
 
-struct ActivityTimeLineAxisXDate {
-    var dateList: Array<TimeInterval>
-    var dateFormatter: (TimeInterval) -> String
-    
-    init(dateList: Array<TimeInterval>, dateFormatter: @escaping (TimeInterval) -> String = dateFormatter) {
-        self.dateList = dateList
-        self.dateFormatter = dateFormatter
-    }
-    
-    static func dateFormatter(timeInterval: TimeInterval) -> String {
-        let date = Date(timeIntervalSince1970: timeInterval)
-        let calendar = Calendar.current
-        let dateComponets = calendar.dateComponents([.year, .month, .weekday, .day], from: date)
-        switch dateComponets.weekday {
-        case 1:
-            // 星期天
-            return "Sun"
-        case 2:
-            // 星期一
-            return "Mon"
-        case 3:
-            //星期二
-            return "Tues"
-        case 4:
-            //星期三
-            return "Wed"
-        case 5:
-            //星期四
-            return "Thur"
-        case 6:
-            //星期五
-            return "Fri"
-        case 7:
-            //星期六
-            return "Sat"
-        default:
-            return ""
-        }
-    }
-}
-
-struct ActivityTimeLineStyle {
+struct ActivityTimeSectionStyle {
     var font: UIFont
     var textAlignment: NSTextAlignment
     var textColor: Observable<UIColor?>
    
-    static let small = ActivityTimeLineStyle(font: .systemFont(ofSize: 9, weight: .bold),
-                                             textAlignment: .center,
-                                             textColor: UIColor.secondary)
+    static let small = ActivityTimeSectionStyle(font: .systemFont(ofSize: 9, weight: .bold), textAlignment: .center, textColor: UIColor.secondary)
 }
 
-class ActivityTimeLineView: BaseView {
+class ActivityTimeSectionView<T: UIView>: UIView {
+    
+    struct AxisXDate {
+        var dateList: Array<Date>
+        var dateFormatter: (Date) -> String
+        
+        init(dateList: Array<Date>, dateFormatter: @escaping (Date) -> String = dateFormatter) {
+            self.dateList = dateList
+            self.dateFormatter = dateFormatter
+        }
+        
+        static func dateFormatter(date: Date) -> String {
+            let calendar = Calendar.current
+            let dateComponets = calendar.dateComponents([.year, .month, .weekday, .day], from: date)
+            switch dateComponets.weekday {
+            case 1:
+                // 星期天
+                return "Sun"
+            case 2:
+                // 星期一
+                return "Mon"
+            case 3:
+                //星期二
+                return "Tues"
+            case 4:
+                //星期三
+                return "Wed"
+            case 5:
+                //星期四
+                return "Thur"
+            case 6:
+                //星期五
+                return "Fri"
+            case 7:
+                //星期六
+                return "Sat"
+            default:
+                return ""
+            }
+        }
+    }
     
     // X轴时间列表
-    var axisXDates: ActivityTimeLineAxisXDate! {
+    var axisXDates = AxisXDate(dateList: []) {
         didSet {
             prepareBottomLabels()
         }
@@ -77,7 +74,7 @@ class ActivityTimeLineView: BaseView {
     }
     
     // 头部样式
-    var headerTitleStyle = ActivityTimeLineStyle.small {
+    var headerTitleStyle = ActivityTimeSectionStyle.small {
         didSet {
             titleLab.textAlignment = headerTitleStyle.textAlignment
             titleLab.theme.textColor = headerTitleStyle.textColor
@@ -86,25 +83,30 @@ class ActivityTimeLineView: BaseView {
     }
     
     // X轴标题样式
-    var axisXTitleStyle = ActivityTimeLineStyle.small
+    var axisXTitleStyle = ActivityTimeSectionStyle.small
     
     private var titleLab = UILabel()
-    private(set) var contentView: TimeLineDrawView?
+    private(set) var itemView: T!
     private var bottomStackView = UIStackView()
     private var pool = ReusePool<UILabel>()
     
-    override func setupView() {
+    init(itemView: T) {
+        super.init(frame: .zero)
+        self.itemView = itemView
+        addSubview(itemView)
+        setupView()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupView() {
         bottomStackView.axis = .horizontal
         bottomStackView.distribution = .fillEqually
         bottomStackView.alignment = .fill
         addSubviews(titleLab, bottomStackView)
-        headerTitleStyle = ActivityTimeLineStyle.small
-    }
-    
-    func set(_ contentView: TimeLineDrawView) {
-        self.contentView?.removeFromSuperview()
-        addSubview(contentView)
-        self.contentView = contentView
+        headerTitleStyle = ActivityTimeSectionStyle.small
     }
     
     private func prepareBottomLabels() {
@@ -125,8 +127,8 @@ class ActivityTimeLineView: BaseView {
     override func layoutSubviews() {
         super.layoutSubviews()
         titleLab.frame = CGRect(x: 0, y: 0, width: bounds.width, height: 17)
-        contentView?.frame = CGRect(x: 0, y: titleLab.frame.maxY + 5, width: bounds.width, height: 250)
-        let contentFrame = contentView?.frame ?? CGRect(x: 0, y: titleLab.frame.maxY + 5, width: 0, height: 0)
+        itemView?.frame = CGRect(x: 0, y: titleLab.frame.maxY + 5, width: bounds.width, height: 250)
+        let contentFrame = itemView?.frame ?? CGRect(x: 0, y: titleLab.frame.maxY + 5, width: 0, height: 0)
         bottomStackView.frame = CGRect(x: 0, y: contentFrame.maxY, width: bounds.width, height: 45)
     }
 }

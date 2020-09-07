@@ -11,26 +11,12 @@ import RxSwift
 import RxCocoa
 
 class AvtivityTimeSettingView: CornersView {
-
-    // 已经响应的成员列表
-    var respondedMembers: Array<URL>? {
-        set { membersView.topList = newValue }
-        get { membersView.topList }
-    }
     
-    // 等待响应的成员列表
-    var waitingMembers: Array<URL>? {
-        set { membersView.bottomList = newValue }
-        get { membersView.bottomList }
-    }
+    // 选择时间
+    var chooseTimeView = SingleChooseTimeView(cellStyle: .num)
     
-    // 时间刻度数据源
-    var axisXDates: ActivityTimeLineAxisXDate! {
-        didSet {
-            guard let unwrappedDataSource = axisXDates else { return }
-            chooseTimeView.contentView.axisXDates = unwrappedDataSource
-        }
-    }
+    // 成员
+    var membersView = MembersGroupView<ActivityMember>()
     
     // 点击底部菜单的回调, 取消/确认
     var didTapped: Observable<String?> {
@@ -41,21 +27,14 @@ class AvtivityTimeSettingView: CornersView {
         return Observable.from(list).merge()
     }
     
-    private var chooseTimeView = SingleChooseTimeView()
-    private var membersView = MembersGroupView()
     private let hLine = CALayer()
     private let vLine = UIView()
     private var stackView: UIStackView!
     private var menuList = [UIButton(), UIButton()]
     
     override func setupView() {
-        
-        membersView.topTitle = "RESPONDED"
-        membersView.bottomTitle = "WAITING"
-        
-        let drawView = TimeLineDrawPageView()
-        chooseTimeView.contentView.set(drawView)
-        chooseTimeView.contentView.title = "Choose consecutive times"
+       
+        chooseTimeView.sectionView.title = "Choose consecutive times"
         
         vLine.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25)
         hLine.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25).cgColor

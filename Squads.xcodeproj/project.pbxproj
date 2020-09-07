@@ -34,10 +34,11 @@
 		171F957324B35B0000BD229F /* ActivityCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F957224B35B0000BD229F /* ActivityCalendarView.swift */; };
 		1724412924B2067200666135 /* SquadActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412824B2067200666135 /* SquadActivitiesViewController.swift */; };
 		1724412B24B2067F00666135 /* SquadActivitiesReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */; };
-		1727630D24D8F2D4000869DF /* ImSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1728DA1724EBC6510091A992 /* ActivityMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1728DA1624EBC6510091A992 /* ActivityMapView.swift */; };
 		172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */; };
 		172A4B8B24B6A06400A69803 /* VerificationCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */; };
 		172A4B9124B6D36300A69803 /* EditableAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172A4B9024B6D36300A69803 /* EditableAvatarView.swift */; };
+		172B83A024F15B5200521F03 /* TimeLineForegroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172B839F24F15B5200521F03 /* TimeLineForegroundView.swift */; };
 		172E8E5624C52C09002F9181 /* CreateFlickViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5524C52C09002F9181 /* CreateFlickViewController.swift */; };
 		172E8E5824C52E89002F9181 /* CreateFlickReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5724C52E89002F9181 /* CreateFlickReactor.swift */; };
 		172E8E5A24C5370C002F9181 /* CreateFlickInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E5924C5370C002F9181 /* CreateFlickInputView.swift */; };
@@ -47,20 +48,29 @@
 		172E8E6224C55A88002F9181 /* ChattingPreviewReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E8E6124C55A88002F9181 /* ChattingPreviewReactor.swift */; };
 		1733564F24CBC8820022D9D5 /* ReactorInputBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1733564E24CBC8820022D9D5 /* ReactorInputBarViewController.swift */; };
 		1733565124CC3ABC0022D9D5 /* ConversationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1733565024CC3ABC0022D9D5 /* ConversationManager.swift */; };
+		17460B6A24E0F05F003ADE53 /* Rx+MJRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17460B6924E0F05F003ADE53 /* Rx+MJRefresh.swift */; };
 		174A839524CB2B0200ABB76D /* SquadAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174A839424CB2B0200ABB76D /* SquadAPI.swift */; };
 		174F6C1B24B7291F00E5A1C6 /* ChatSoundRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */; };
 		174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */; };
 		174F6C1F24B7297300E5A1C6 /* ProximityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */; };
+		175AA12324E82EA30064BA7A /* Rx+UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AA12224E82EA30064BA7A /* Rx+UIViewController.swift */; };
+		175AA12524E8B83E0064BA7A /* hangout_placeholder.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 175AA12424E8B83D0064BA7A /* hangout_placeholder.jpeg */; };
 		175D1EE724D6DC7500DBC483 /* WelcomeReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175D1EE624D6DC7500DBC483 /* WelcomeReactor.swift */; };
-		1775511324D65043004E54BE /* ActivitiesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775511224D65043004E54BE /* ActivitiesAPI.swift */; };
-		1775511524D650CE004E54BE /* FlicksAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775511424D650CE004E54BE /* FlicksAPI.swift */; };
+		1762467624DE938200FA7D3E /* ImSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1762467424DE937200FA7D3E /* ImSDK.framework */; };
+		1762467724DE938200FA7D3E /* ImSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1762467424DE937200FA7D3E /* ImSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1764AB9F24E0D72E00351C71 /* FlickModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1764AB9E24E0D72E00351C71 /* FlickModel.swift */; };
+		1768166224E90515005A5581 /* AvtivityConfirmScheduledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1768166124E90515005A5581 /* AvtivityConfirmScheduledView.swift */; };
+		1768166424E9614E005A5581 /* TimeLineAxisCalibrationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1768166324E9614E005A5581 /* TimeLineAxisCalibrationCell.swift */; };
 		1775D04924C6D798001C94E9 /* UITextField+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1775D04824C6D798001C94E9 /* UITextField+Extension.swift */; };
 		17787E2B24D31287002EC196 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17787E2A24D31287002EC196 /* WelcomeViewController.swift */; };
+		177C9EAD24EAE97400C294D1 /* Date+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177C9EAC24EAE97400C294D1 /* Date+Extension.swift */; };
 		177D06AC24C562390023B382 /* CreateChannelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D06AB24C562390023B382 /* CreateChannelsView.swift */; };
 		177D06B324C5CC490023B382 /* TimeLineDrawPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D06B224C5CC490023B382 /* TimeLineDrawPageView.swift */; };
 		177D06B524C5D66C0023B382 /* ReusePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D06B424C5D66C0023B382 /* ReusePool.swift */; };
 		1780D89924CFFB360064DD28 /* Gender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1780D89824CFFB360064DD28 /* Gender.swift */; };
 		1780D89B24CFFB5D0064DD28 /* UserTDO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1780D89A24CFFB5D0064DD28 /* UserTDO.swift */; };
+		1783F18424ECAF83004A9752 /* JoinSquadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1783F18324ECAF83004A9752 /* JoinSquadViewController.swift */; };
+		1783F18624ECB0CA004A9752 /* JoinSquadReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1783F18524ECB0CA004A9752 /* JoinSquadReactor.swift */; };
 		178F468B24CAAF7A00FE966A /* AreaCode.plist in Resources */ = {isa = PBXBuildFile; fileRef = 178F468A24CAAF7A00FE966A /* AreaCode.plist */; };
 		178F468D24CAAFD800FE966A /* RegisterNationCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178F468C24CAAFD800FE966A /* RegisterNationCodeViewController.swift */; };
 		178F468F24CAB02600FE966A /* UserInfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178F468E24CAB02600FE966A /* UserInfoCell.swift */; };
@@ -130,14 +140,16 @@
 		17BF5CBB24AECA0800D5D8D8 /* UIColor+Squads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CBA24AECA0800D5D8D8 /* UIColor+Squads.swift */; };
 		17BF5CBD24AECA1F00D5D8D8 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BF5CBC24AECA1F00D5D8D8 /* ThemeManager.swift */; };
 		17C1ABB024DCFFF400A5D550 /* Invitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C1ABAF24DCFFF400A5D550 /* Invitation.swift */; };
-		17C1ABB124DD160700A5D550 /* ImSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */; };
 		17C561AB24C32BD40016500A /* ApplyListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C561AA24C32BD40016500A /* ApplyListViewController.swift */; };
 		17C561AD24C32BE40016500A /* ApplyListReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C561AC24C32BE40016500A /* ApplyListReactor.swift */; };
 		17C561AF24C32FA00016500A /* ApplyListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C561AE24C32FA00016500A /* ApplyListViewCell.swift */; };
 		17C561B124C34AD80016500A /* SquadNotificationsViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C561B024C34AD80016500A /* SquadNotificationsViewCell.swift */; };
+		17C6DF6524E7BA6700B134D5 /* SquadActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C6DF6424E7BA6700B134D5 /* SquadActivity.swift */; };
+		17C6DF6724E7D73200B134D5 /* ActivityMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C6DF6624E7D73200B134D5 /* ActivityMember.swift */; };
 		17D3443624B6084700AEB0E5 /* LoginBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D3443524B6084700AEB0E5 /* LoginBackgroundView.swift */; };
 		17D3443924B60E4E00AEB0E5 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D3443824B60E4E00AEB0E5 /* RegisterViewController.swift */; };
 		17D3443B24B60E4E00AEB0E5 /* RegisterReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D3443A24B60E4E00AEB0E5 /* RegisterReactor.swift */; };
+		17D89EAE24EE2C6100267350 /* TimeLineCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D89EAD24EE2C6100267350 /* TimeLineCollectionView.swift */; };
 		17D9AF4D24AF1EB800FEF4DA /* BaseCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D9AF4C24AF1EB800FEF4DA /* BaseCollectionView.swift */; };
 		17D9AF4F24AF1ECF00FEF4DA /* BaseTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D9AF4E24AF1ECF00FEF4DA /* BaseTableView.swift */; };
 		17D9AF5124B0294E00FEF4DA /* OnlineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D9AF5024B0294E00FEF4DA /* OnlineProvider.swift */; };
@@ -202,7 +214,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1727630D24D8F2D4000869DF /* ImSDK.framework in Embed Frameworks */,
+				1762467724DE938200FA7D3E /* ImSDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -239,9 +251,11 @@
 		171F957224B35B0000BD229F /* ActivityCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityCalendarView.swift; sourceTree = "<group>"; };
 		1724412824B2067200666135 /* SquadActivitiesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivitiesViewController.swift; sourceTree = "<group>"; };
 		1724412A24B2067F00666135 /* SquadActivitiesReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivitiesReactor.swift; sourceTree = "<group>"; };
+		1728DA1624EBC6510091A992 /* ActivityMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityMapView.swift; sourceTree = "<group>"; };
 		172A4B8824B6927400A69803 /* BrickInputFieldStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrickInputFieldStyle.swift; sourceTree = "<group>"; };
 		172A4B8A24B6A06400A69803 /* VerificationCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationCodeViewController.swift; sourceTree = "<group>"; };
 		172A4B9024B6D36300A69803 /* EditableAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableAvatarView.swift; sourceTree = "<group>"; };
+		172B839F24F15B5200521F03 /* TimeLineForegroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeLineForegroundView.swift; sourceTree = "<group>"; };
 		172E8E5524C52C09002F9181 /* CreateFlickViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickViewController.swift; sourceTree = "<group>"; };
 		172E8E5724C52E89002F9181 /* CreateFlickReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickReactor.swift; sourceTree = "<group>"; };
 		172E8E5924C5370C002F9181 /* CreateFlickInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlickInputView.swift; sourceTree = "<group>"; };
@@ -251,20 +265,30 @@
 		172E8E6124C55A88002F9181 /* ChattingPreviewReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChattingPreviewReactor.swift; sourceTree = "<group>"; };
 		1733564E24CBC8820022D9D5 /* ReactorInputBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactorInputBarViewController.swift; sourceTree = "<group>"; };
 		1733565024CC3ABC0022D9D5 /* ConversationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationManager.swift; sourceTree = "<group>"; };
+		17460B6924E0F05F003ADE53 /* Rx+MJRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rx+MJRefresh.swift"; sourceTree = "<group>"; };
 		174A839424CB2B0200ABB76D /* SquadAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadAPI.swift; sourceTree = "<group>"; };
 		174F6C1A24B7291F00E5A1C6 /* ChatSoundRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSoundRecorder.swift; sourceTree = "<group>"; };
 		174F6C1C24B7295800E5A1C6 /* Date+Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helper.swift"; sourceTree = "<group>"; };
 		174F6C1E24B7297300E5A1C6 /* ProximityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityManager.swift; sourceTree = "<group>"; };
+		175AA12224E82EA30064BA7A /* Rx+UIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rx+UIViewController.swift"; sourceTree = "<group>"; };
+		175AA12424E8B83D0064BA7A /* hangout_placeholder.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = hangout_placeholder.jpeg; sourceTree = "<group>"; };
 		175D1EE624D6DC7500DBC483 /* WelcomeReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeReactor.swift; sourceTree = "<group>"; };
-		1775511224D65043004E54BE /* ActivitiesAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitiesAPI.swift; sourceTree = "<group>"; };
-		1775511424D650CE004E54BE /* FlicksAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlicksAPI.swift; sourceTree = "<group>"; };
+		1762467424DE937200FA7D3E /* ImSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ImSDK.framework; sourceTree = "<group>"; };
+		1762467824DE939100FA7D3E /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		1762467924DE939E00FA7D3E /* libc.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libc.tbd; path = usr/lib/libc.tbd; sourceTree = SDKROOT; };
+		1764AB9E24E0D72E00351C71 /* FlickModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickModel.swift; sourceTree = "<group>"; };
+		1768166124E90515005A5581 /* AvtivityConfirmScheduledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvtivityConfirmScheduledView.swift; sourceTree = "<group>"; };
+		1768166324E9614E005A5581 /* TimeLineAxisCalibrationCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeLineAxisCalibrationCell.swift; sourceTree = "<group>"; };
 		1775D04824C6D798001C94E9 /* UITextField+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+Extension.swift"; sourceTree = "<group>"; };
 		17787E2A24D31287002EC196 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
+		177C9EAC24EAE97400C294D1 /* Date+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extension.swift"; sourceTree = "<group>"; };
 		177D06AB24C562390023B382 /* CreateChannelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateChannelsView.swift; sourceTree = "<group>"; };
 		177D06B224C5CC490023B382 /* TimeLineDrawPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeLineDrawPageView.swift; sourceTree = "<group>"; };
 		177D06B424C5D66C0023B382 /* ReusePool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusePool.swift; sourceTree = "<group>"; };
 		1780D89824CFFB360064DD28 /* Gender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gender.swift; sourceTree = "<group>"; };
 		1780D89A24CFFB5D0064DD28 /* UserTDO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTDO.swift; sourceTree = "<group>"; };
+		1783F18324ECAF83004A9752 /* JoinSquadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinSquadViewController.swift; sourceTree = "<group>"; };
+		1783F18524ECB0CA004A9752 /* JoinSquadReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinSquadReactor.swift; sourceTree = "<group>"; };
 		178F468A24CAAF7A00FE966A /* AreaCode.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = AreaCode.plist; sourceTree = "<group>"; };
 		178F468C24CAAFD800FE966A /* RegisterNationCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterNationCodeViewController.swift; sourceTree = "<group>"; };
 		178F468E24CAB02600FE966A /* UserInfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoCell.swift; sourceTree = "<group>"; };
@@ -340,9 +364,12 @@
 		17C561AC24C32BE40016500A /* ApplyListReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyListReactor.swift; sourceTree = "<group>"; };
 		17C561AE24C32FA00016500A /* ApplyListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyListViewCell.swift; sourceTree = "<group>"; };
 		17C561B024C34AD80016500A /* SquadNotificationsViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadNotificationsViewCell.swift; sourceTree = "<group>"; };
+		17C6DF6424E7BA6700B134D5 /* SquadActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadActivity.swift; sourceTree = "<group>"; };
+		17C6DF6624E7D73200B134D5 /* ActivityMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityMember.swift; sourceTree = "<group>"; };
 		17D3443524B6084700AEB0E5 /* LoginBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginBackgroundView.swift; sourceTree = "<group>"; };
 		17D3443824B60E4E00AEB0E5 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
 		17D3443A24B60E4E00AEB0E5 /* RegisterReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterReactor.swift; sourceTree = "<group>"; };
+		17D89EAD24EE2C6100267350 /* TimeLineCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeLineCollectionView.swift; sourceTree = "<group>"; };
 		17D9AF4C24AF1EB800FEF4DA /* BaseCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionView.swift; sourceTree = "<group>"; };
 		17D9AF4E24AF1ECF00FEF4DA /* BaseTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTableView.swift; sourceTree = "<group>"; };
 		17D9AF5024B0294E00FEF4DA /* OnlineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineProvider.swift; sourceTree = "<group>"; };
@@ -354,7 +381,6 @@
 		17E5FA5D24B41FF900E8B819 /* SquadPreReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreReactor.swift; sourceTree = "<group>"; };
 		17E5FA5F24B4207D00E8B819 /* SquadPreInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreInfoView.swift; sourceTree = "<group>"; };
 		17E5FA6124B44FB300E8B819 /* SquadPreMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadPreMenuView.swift; sourceTree = "<group>"; };
-		17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ImSDK.framework; sourceTree = "<group>"; };
 		17F1721B24B96A6B0081E4C0 /* ChattingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChattingCardView.swift; sourceTree = "<group>"; };
 		17F1721D24B96A8E0081E4C0 /* ChattingCardHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChattingCardHeaderView.swift; sourceTree = "<group>"; };
 		17F1721F24B9A54E0081E4C0 /* CreateEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventViewController.swift; sourceTree = "<group>"; };
@@ -408,10 +434,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17C1ABB124DD160700A5D550 /* ImSDK.framework in Frameworks */,
 				17B5ED8724CEF751009FA969 /* SystemConfiguration.framework in Frameworks */,
 				17B5ED8524CEF74A009FA969 /* libsqlite3.tbd in Frameworks */,
 				17B5ED8324CEF736009FA969 /* libz.tbd in Frameworks */,
+				1762467624DE938200FA7D3E /* ImSDK.framework in Frameworks */,
 				17B5ED8124CEF72E009FA969 /* CoreTelephony.framework in Frameworks */,
 				59206625CB7B469036D7008E /* Pods_Squads.framework in Frameworks */,
 				17B5ED7F24CED77E009FA969 /* UMCommon.framework in Frameworks */,
@@ -466,6 +492,7 @@
 		171E07B524B31E6600603F76 /* Activities */ = {
 			isa = PBXGroup;
 			children = (
+				17C6DF6324E7BA5800B134D5 /* Model */,
 				178FCB9124B4AEBC0054212F /* Reactor */,
 				171E07B624B31E6F00603F76 /* View */,
 				178FCB8F24B4AEAF0054212F /* ActivityDetailViewController.swift */,
@@ -480,22 +507,24 @@
 		171E07B624B31E6F00603F76 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				177D06AD24C5990D0023B382 /* TimeLine */,
-				171E07B724B31E7800603F76 /* ActivityShadowView.swift */,
 				171F957024B356D600BD229F /* ActivityCalendarCell.swift */,
 				171F957224B35B0000BD229F /* ActivityCalendarView.swift */,
-				17F1722324B9A7070081E4C0 /* CreateEventTextEditedCell.swift */,
-				17F1722524B9A76F0081E4C0 /* CreateEventLabelsCell.swift */,
-				17F1722724B9A7B20081E4C0 /* CreateEventCalendarCell.swift */,
-				17F1722924B9A7FE0081E4C0 /* CreateEventAvailabilityCell.swift */,
-				17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */,
-				170A484A24C08B36009BFDEA /* SingleChooseTimeView.swift */,
-				171B0F3924C2A4B50020DF15 /* MultipleChooseTimeView.swift */,
-				170A484C24C09220009BFDEA /* MembersGroupView.swift */,
-				170A484E24C09587009BFDEA /* AvtivityTimeSettingView.swift */,
-				171B0F3B24C2A5360020DF15 /* ActivityDetailToolbar.swift */,
 				171B0F3D24C2EA200020DF15 /* ActivityDetailInfoView.swift */,
+				171B0F3B24C2A5360020DF15 /* ActivityDetailToolbar.swift */,
+				1728DA1624EBC6510091A992 /* ActivityMapView.swift */,
+				171E07B724B31E7800603F76 /* ActivityShadowView.swift */,
 				17F6493C24C825B1008C334D /* ActivityTimeLineView.swift */,
+				1768166124E90515005A5581 /* AvtivityConfirmScheduledView.swift */,
+				170A484E24C09587009BFDEA /* AvtivityTimeSettingView.swift */,
+				17F1722924B9A7FE0081E4C0 /* CreateEventAvailabilityCell.swift */,
+				17F1722724B9A7B20081E4C0 /* CreateEventCalendarCell.swift */,
+				17F1722524B9A76F0081E4C0 /* CreateEventLabelsCell.swift */,
+				17A1514024D3FDEA00E441DE /* CreateEventLocationCell.swift */,
+				17F1722324B9A7070081E4C0 /* CreateEventTextEditedCell.swift */,
+				170A484C24C09220009BFDEA /* MembersGroupView.swift */,
+				171B0F3924C2A4B50020DF15 /* MultipleChooseTimeView.swift */,
+				170A484A24C08B36009BFDEA /* SingleChooseTimeView.swift */,
+				177D06AD24C5990D0023B382 /* TimeLine */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -525,6 +554,14 @@
 			path = Other;
 			sourceTree = "<group>";
 		};
+		1764AB9D24E0D71F00351C71 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				1764AB9E24E0D72E00351C71 /* FlickModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		177D06AD24C5990D0023B382 /* TimeLine */ = {
 			isa = PBXGroup;
 			children = (
@@ -535,6 +572,9 @@
 				17F6493E24C82B1E008C334D /* TimeLineDrawTapView.swift */,
 				177D06B224C5CC490023B382 /* TimeLineDrawPageView.swift */,
 				17F6493A24C81D09008C334D /* TimeLineAxisView.swift */,
+				1768166324E9614E005A5581 /* TimeLineAxisCalibrationCell.swift */,
+				17D89EAD24EE2C6100267350 /* TimeLineCollectionView.swift */,
+				172B839F24F15B5200521F03 /* TimeLineForegroundView.swift */,
 			);
 			path = TimeLine;
 			sourceTree = "<group>";
@@ -577,6 +617,7 @@
 				171E47E324C44AD800100DFD /* SquadInvithNewSearchViewController.swift */,
 				179693CD24CD36040023152A /* CreateSquadViewController.swift */,
 				17787E2A24D31287002EC196 /* WelcomeViewController.swift */,
+				1783F18324ECAF83004A9752 /* JoinSquadViewController.swift */,
 			);
 			path = Squad;
 			sourceTree = "<group>";
@@ -628,6 +669,7 @@
 				178FCB7F24B4779B0054212F /* SquadMembersReactor.swift */,
 				178FCB8124B477AA0054212F /* SquadThemeReactor.swift */,
 				175D1EE624D6DC7500DBC483 /* WelcomeReactor.swift */,
+				1783F18524ECB0CA004A9752 /* JoinSquadReactor.swift */,
 			);
 			path = Reactor;
 			sourceTree = "<group>";
@@ -658,6 +700,7 @@
 		179C051924B1FC2200A669FA /* Flicks */ = {
 			isa = PBXGroup;
 			children = (
+				1764AB9D24E0D71F00351C71 /* Model */,
 				179C051D24B1FC4500A669FA /* Reactor */,
 				179C051C24B1FC4100A669FA /* View */,
 				179C051E24B1FCC400A669FA /* FlicksViewController.swift */,
@@ -710,7 +753,7 @@
 		17B5ED7B24CED706009FA969 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				17E7EBBB24D7E6E7004BCA1C /* ImSDK.framework */,
+				1762467424DE937200FA7D3E /* ImSDK.framework */,
 				17B5ED7E24CED77E009FA969 /* UMCommon.framework */,
 			);
 			path = Libraries;
@@ -795,8 +838,6 @@
 				17BF5CAE24AEC7B600D5D8D8 /* Libr */,
 				17BF5CB124AEC82200D5D8D8 /* UserAPI.swift */,
 				174A839424CB2B0200ABB76D /* SquadAPI.swift */,
-				1775511224D65043004E54BE /* ActivitiesAPI.swift */,
-				1775511424D650CE004E54BE /* FlicksAPI.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -805,6 +846,7 @@
 			isa = PBXGroup;
 			children = (
 				178F468A24CAAF7A00FE966A /* AreaCode.plist */,
+				175AA12424E8B83D0064BA7A /* hangout_placeholder.jpeg */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -855,6 +897,15 @@
 			path = Color;
 			sourceTree = "<group>";
 		};
+		17C6DF6324E7BA5800B134D5 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				17C6DF6424E7BA6700B134D5 /* SquadActivity.swift */,
+				17C6DF6624E7D73200B134D5 /* ActivityMember.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		17F355DD24AED9E100AE00EC /* Rx+Moya */ = {
 			isa = PBXGroup;
 			children = (
@@ -889,6 +940,9 @@
 				179693D224CD92150023152A /* Rx+TImer.swift */,
 				179693D424CDC3D90023152A /* UIButton+Loading.swift */,
 				17B5DAB224DA501900A2A33F /* Array+Extension.swift */,
+				17460B6924E0F05F003ADE53 /* Rx+MJRefresh.swift */,
+				175AA12224E82EA30064BA7A /* Rx+UIViewController.swift */,
+				177C9EAC24EAE97400C294D1 /* Date+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -896,6 +950,8 @@
 		2E5ABBB239B3A7B24797C2BA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1762467924DE939E00FA7D3E /* libc.tbd */,
+				1762467824DE939100FA7D3E /* libc++.tbd */,
 				17B5ED8624CEF751009FA969 /* SystemConfiguration.framework */,
 				17B5ED8424CEF74A009FA969 /* libsqlite3.tbd */,
 				17B5ED8224CEF736009FA969 /* libz.tbd */,
@@ -979,6 +1035,7 @@
 				178F468B24CAAF7A00FE966A /* AreaCode.plist in Resources */,
 				170429D824AEBF530046F757 /* LaunchScreen.storyboard in Resources */,
 				170429D524AEBF530046F757 /* Assets.xcassets in Resources */,
+				175AA12524E8B83E0064BA7A /* hangout_placeholder.jpeg in Resources */,
 				170429D324AEBF4E0046F757 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1040,9 +1097,9 @@
 				17C561B124C34AD80016500A /* SquadNotificationsViewCell.swift in Sources */,
 				17F39BF324AED11F00EC90ED /* ReactorViewController.swift in Sources */,
 				17F39BE024AECE8F00EC90ED /* UIWindow+Extension.swift in Sources */,
+				17D89EAE24EE2C6100267350 /* TimeLineCollectionView.swift in Sources */,
 				174F6C1D24B7295800E5A1C6 /* Date+Helper.swift in Sources */,
 				1795369E24B04D4C00FE1185 /* DataCenter.swift in Sources */,
-				1775511524D650CE004E54BE /* FlicksAPI.swift in Sources */,
 				17F39BCF24AECD5800EC90ED /* GeneralModel.swift in Sources */,
 				1780D89B24CFFB5D0064DD28 /* UserTDO.swift in Sources */,
 				17C561AB24C32BD40016500A /* ApplyListViewController.swift in Sources */,
@@ -1050,12 +1107,14 @@
 				179536A624B181E400FE1185 /* SquadViewController.swift in Sources */,
 				178FCB9524B4B4490054212F /* MySquadsViewCell.swift in Sources */,
 				170A484B24C08B36009BFDEA /* SingleChooseTimeView.swift in Sources */,
+				17C6DF6724E7D73200B134D5 /* ActivityMember.swift in Sources */,
 				17F39BDF24AECE8F00EC90ED /* UINavigationController+Extension.swift in Sources */,
 				17F6493724C814D2008C334D /* TimeLineDrawView.swift in Sources */,
 				17F6493924C81529008C334D /* TimeLineLayer.swift in Sources */,
 				17D9AF4D24AF1EB800FEF4DA /* BaseCollectionView.swift in Sources */,
 				17F39BDB24AECE8F00EC90ED /* Runtime+Extension.swift in Sources */,
 				178FCB9024B4AEAF0054212F /* ActivityDetailViewController.swift in Sources */,
+				17460B6A24E0F05F003ADE53 /* Rx+MJRefresh.swift in Sources */,
 				17F355E924AEDD2500AE00EC /* RxMediaPicker.swift in Sources */,
 				178FCB7624B476E40054212F /* SquadNotificationsReactor.swift in Sources */,
 				178FCB8824B49ED70054212F /* FriendProfileViewCell.swift in Sources */,
@@ -1084,6 +1143,7 @@
 				178FCB8C24B4A8BF0054212F /* ChattingViewController.swift in Sources */,
 				17BF5CB524AEC91700D5D8D8 /* UserDefaults+Squads.swift in Sources */,
 				17C561AF24C32FA00016500A /* ApplyListViewCell.swift in Sources */,
+				17C6DF6524E7BA6700B134D5 /* SquadActivity.swift in Sources */,
 				172A4B9124B6D36300A69803 /* EditableAvatarView.swift in Sources */,
 				17F39BCD24AECC7700EC90ED /* GeneralError.swift in Sources */,
 				17E5FA6224B44FB300E8B819 /* SquadPreMenuView.swift in Sources */,
@@ -1091,6 +1151,7 @@
 				17D9AF5324B0297000FEF4DA /* NetworkLogger.swift in Sources */,
 				17BF5CB024AEC7E000D5D8D8 /* XAppToken.swift in Sources */,
 				172E8E5624C52C09002F9181 /* CreateFlickViewController.swift in Sources */,
+				1768166224E90515005A5581 /* AvtivityConfirmScheduledView.swift in Sources */,
 				17F355E724AEDB9000AE00EC /* Rx+UIAlertController.swift in Sources */,
 				17F39BE724AECFB800EC90ED /* UIImage+Extension.swift in Sources */,
 				172A4B8924B6927400A69803 /* BrickInputFieldStyle.swift in Sources */,
@@ -1112,10 +1173,12 @@
 				179C051524B1DD2900A669FA /* PaddingLabel.swift in Sources */,
 				17F39BDD24AECE8F00EC90ED /* String+Extension.swift in Sources */,
 				17F1722224B9A55E0081E4C0 /* CreateEventReactor.swift in Sources */,
+				1783F18424ECAF83004A9752 /* JoinSquadViewController.swift in Sources */,
 				17A1514124D3FDEA00E441DE /* CreateEventLocationCell.swift in Sources */,
 				17D9AF5524B03F8B00FEF4DA /* Rx+HGPlaceholders.swift in Sources */,
 				179536B924B1A63B00FE1185 /* SquadFickerCell.swift in Sources */,
 				171B0F3624C298030020DF15 /* AvtivityTimeSettingViewController.swift in Sources */,
+				172B83A024F15B5200521F03 /* TimeLineForegroundView.swift in Sources */,
 				170429D024AEBF4E0046F757 /* ViewController.swift in Sources */,
 				178FCB7224B46F6A0054212F /* SquadPreViewCell.swift in Sources */,
 				17787E2B24D31287002EC196 /* WelcomeViewController.swift in Sources */,
@@ -1136,6 +1199,7 @@
 				17F355E124AEDA0700AE00EC /* Observable+Response.swift in Sources */,
 				170429CC24AEBF4E0046F757 /* AppDelegate.swift in Sources */,
 				170A484D24C09220009BFDEA /* MembersGroupView.swift in Sources */,
+				1728DA1724EBC6510091A992 /* ActivityMapView.swift in Sources */,
 				17F39BE124AECE8F00EC90ED /* UIView+Extension.swift in Sources */,
 				17F355E524AEDACC00AE00EC /* Rx+Kingfisher.swift in Sources */,
 				17F6493524C8147F008C334D /* TimeLineCanvasView.swift in Sources */,
@@ -1143,6 +1207,7 @@
 				172E8E5C24C53767002F9181 /* CreateFlickContentViewCell.swift in Sources */,
 				179C04FD24B1A83F00A669FA /* SquadChannelsCell.swift in Sources */,
 				17BF5CB224AEC82200D5D8D8 /* UserAPI.swift in Sources */,
+				1764AB9F24E0D72E00351C71 /* FlickModel.swift in Sources */,
 				172E8E6224C55A88002F9181 /* ChattingPreviewReactor.swift in Sources */,
 				17F39BCB24AECBD600EC90ED /* Codable+Extension.swift in Sources */,
 				17E5FA6024B4207D00E8B819 /* SquadPreInfoView.swift in Sources */,
@@ -1155,10 +1220,12 @@
 				17F1722424B9A7070081E4C0 /* CreateEventTextEditedCell.swift in Sources */,
 				179536B224B1913200FE1185 /* MyProfileReactor.swift in Sources */,
 				17B5ED7A24CECFB4009FA969 /* App.swift in Sources */,
+				177C9EAD24EAE97400C294D1 /* Date+Extension.swift in Sources */,
 				179536AE24B18B7000FE1185 /* LoginReactor.swift in Sources */,
 				17D9AF5124B0294E00FEF4DA /* OnlineProvider.swift in Sources */,
 				1775D04924C6D798001C94E9 /* UITextField+Extension.swift in Sources */,
 				171B0F3A24C2A4B50020DF15 /* MultipleChooseTimeView.swift in Sources */,
+				1768166424E9614E005A5581 /* TimeLineAxisCalibrationCell.swift in Sources */,
 				179C050F24B1C78B00A669FA /* SquadGameReactor.swift in Sources */,
 				178FCB7E24B4778C0054212F /* SquadInvithNewReactor.swift in Sources */,
 				17C561AD24C32BE40016500A /* ApplyListReactor.swift in Sources */,
@@ -1172,6 +1239,7 @@
 				179C050324B1C5E800A669FA /* SquadSqrollViewCell.swift in Sources */,
 				17F6493D24C825B1008C334D /* ActivityTimeLineView.swift in Sources */,
 				17A1513F24D3C0F800E441DE /* CreateEventLocationViewController.swift in Sources */,
+				175AA12324E82EA30064BA7A /* Rx+UIViewController.swift in Sources */,
 				1716C16C24C499A000AD2899 /* FlicksSearchViewController.swift in Sources */,
 				17D3443924B60E4E00AEB0E5 /* RegisterViewController.swift in Sources */,
 				178FCB7424B476D40054212F /* SquadNotificationsViewController.swift in Sources */,
@@ -1189,13 +1257,13 @@
 				179C050D24B1C77B00A669FA /* SquadPhoneReactor.swift in Sources */,
 				178FCB8024B4779B0054212F /* SquadMembersReactor.swift in Sources */,
 				17E2B78124B587F1008EC166 /* MyProfileFooterView.swift in Sources */,
+				1783F18624ECB0CA004A9752 /* JoinSquadReactor.swift in Sources */,
 				17F6493F24C82B1E008C334D /* TimeLineDrawTapView.swift in Sources */,
 				171E07B824B31E7800603F76 /* ActivityShadowView.swift in Sources */,
 				171E07B424B31E4200603F76 /* SquadMembersView.swift in Sources */,
 				179693D524CDC3D90023152A /* UIButton+Loading.swift in Sources */,
 				17F355DF24AED9F800AE00EC /* MoyaProvider+Rx.swift in Sources */,
 				171B0F3C24C2A5360020DF15 /* ActivityDetailToolbar.swift in Sources */,
-				1775511324D65043004E54BE /* ActivitiesAPI.swift in Sources */,
 				178FCB7824B4771D0054212F /* SquadThemeViewController.swift in Sources */,
 				179536B624B1A5BF00FE1185 /* Reusable.swift in Sources */,
 				179C051724B1E15F00A669FA /* SquadSqrollCollectionCell.swift in Sources */,
@@ -1353,7 +1421,9 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Squads/Squads.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = X5J2T8L4Z6;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Squads/Libraries",
@@ -1459,7 +1529,9 @@
 				CODE_SIGN_ENTITLEMENTS = Squads/Squads.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = X5J2T8L4Z6;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Squads/Libraries",

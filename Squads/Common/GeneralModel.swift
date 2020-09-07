@@ -54,14 +54,14 @@ struct GeneralModel {
     struct List<T: Decodable>: Decodable {
         var records: Array<T>
         let total: Int
-        let size: Int
-        let current: Int
+        let pageSize: Int
+        let pageIndex: Int
         
-        init(records: Array<T>, total: Int, size: Int = 20, current: Int = 1) {
+        init(records: Array<T>, total: Int, pageSize: Int = 20, pageIndex: Int = 1) {
             self.records = records
             self.total = total
-            self.size = size
-            self.current = current
+            self.pageSize = pageSize
+            self.pageIndex = pageIndex
         }
     }
 

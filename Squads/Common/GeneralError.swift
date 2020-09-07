@@ -13,7 +13,7 @@ enum GeneralError: Error {
     case unknown    //未知错误
     case custom(String) //自定义错误, 一般提示给用户
     case mapping(String)   //解析失败, 一般不提示给用户, 只本地调试log使用
-    case newwork(code: Int, message: String) //服务器错误
+    case newwork(GeneralModel.Plain) //服务器错误
     case noConnection   //没有连接服务器
     case loginStatusDidExpired  //登录已过期
 }
@@ -23,8 +23,8 @@ extension GeneralError {
         switch self {
         case .custom, .unknown, .mapping:
             return nil
-        case let .newwork(code, _):
-            return code
+        case let .newwork(plain):
+            return plain.code
         case .noConnection:
             return nil
         case .loginStatusDidExpired:
@@ -57,8 +57,8 @@ extension GeneralError {
             return "未知错误"
         case let .mapping(str):
             return str
-        case let .newwork(_, message):
-            return message
+        case let .newwork(plain):
+            return plain.message
         case .noConnection:
             return "网络不通"
         case .loginStatusDidExpired:
@@ -78,23 +78,30 @@ extension GeneralError {
             return .mapping("未能为URLRequest编码参数")
         case let .jsonMapping(response):
             if let model = try? response.map(GeneralModel.Plain.self) {
-                return .newwork(code: model.code, message: model.message)
+                return .newwork(model)
             } else {
                 return .unknown
             }
         case let .objectMapping(error, response):
             if error is DecodingError {
-                return .mapping("❌解析错误:\n \(error) ")
+                let absoluteString = response.request.flatMap{ $0.url?.absoluteString } ?? ""
+                let responseString = (String(data: response.data, encoding: .utf8) ?? "未知")
+                return .mapping("❌解析错误:\n URL: \(absoluteString) \n Response: \(responseString) \n Error: \(error)")
             } else if let model = try? response.map(GeneralModel.Plain.self) {
-                return .newwork(code: model.code, message: model.message)
+                return .newwork(model)
             } else {
                 return .unknown
             }
         case let .statusCode(response):
             do {
-                //{"code":401,"message":"非法访问","success":false,"time":"2020-07-24 21:56:51"}
                 let plain = try response.map(GeneralModel.Plain.self)
-                return .mapping(plain.message)
+                switch plain.code {
+                case 401:
+                    //{"code":401,"message":"非法访问","success":false,"time":"2020-07-24 21:56:51"}
+                    return .loginStatusDidExpired
+                default:
+                    return .newwork(plain)
+                }
             } catch {
                 return .mapping("请求错误：\(response.statusCode), 描述：" + response.description)
             }

@@ -290,7 +290,7 @@ class SquadInvithNewViewController: ReactorViewController<SquadInvithNewReactor>
             .subscribe(onNext: { [unowned self] _ in
                 var rootViewController = UIApplication.shared.keyWindow?.rootViewController
                 rootViewController = (rootViewController as? UINavigationController)?.viewControllers.first
-                if rootViewController is LoginViewController || rootViewController is CreateSquadViewController {
+                if rootViewController is LoginViewController || rootViewController is WelcomeViewController {
                     Application.shared.presentInitialScreent()
                 } else {
                     self.dismiss(animated: true)

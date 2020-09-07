@@ -13,7 +13,10 @@ import RxDataSources
 
 class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITableViewDelegate {
 
+    private let rightBtn = UIButton()
     private var tableView = UITableView(frame: .zero, style: .grouped)
+    
+    private var currentSelectedTime: Array<TimePeriod>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,11 +33,9 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: leftBtn)
         
         //自定义右导航按钮
-        let rightBtn = UIButton()
         rightBtn.setTitle("Save", for: .normal)
         rightBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         rightBtn.setTitleColor(UIColor(red: 0.925, green: 0.384, blue: 0.337, alpha: 1), for: .normal)
-        rightBtn.addTarget(self, action: #selector(rightBtnBtnDidTapped), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: rightBtn)
         
         tableView.register(Reusable.createEventTextEditedCell)
@@ -56,7 +57,7 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
     
     override func bind(reactor: CreateEventReactor) {
         
-        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, CreateEventModelPrimaryKey>>(configureCell: { data, tableView, indexPath, model in
+        let dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, CreateEventModelPrimaryKey>>(configureCell: { [unowned self] data, tableView, indexPath, model in
             switch model {
             case is CreateEventTextEditor:
                 
@@ -77,9 +78,7 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
                             locationVC.title = "Location"
                             locationVC.itemSelected
                                 .map { item in
-                                    let location = SquadLocation(address: item.name ?? "",
-                                                                 longitude: item.placemark.coordinate.longitude,
-                                                                 latitude: item.placemark.coordinate.latitude)
+                                    let location = SquadLocation(item: item)
                                     return Reactor.Action.selectedTextEditor(CreateEventTextEditor.location(value: location, attachImageNamed: "CreateEvent Location"))
                                 }
                                 .bind(to: reactor.action)
@@ -112,8 +111,21 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
                 return cell
             case is CreateEventAvailability:
                 let cell = tableView.dequeue(Reusable.createEventAvailabilityCell)!
-                cell.dateList = (model as? CreateEventAvailability)?.dateList
                 cell.selectionStyle = .none
+
+                if let dateList = (reactor.currentState.repos[3] as? CreateEventCalendar)?.selectedDate {
+                    cell.chooseTimeView.sectionView.axisXDates.dateList = dateList
+                    cell.chooseTimeView.sectionView.itemView.setDataSource([], startOffTime: dateList.first)
+                }
+                
+                if let selectTime = self.currentSelectedTime {
+                    cell.chooseTimeView.sectionView.itemView.setDataSource(selectTime)
+                }
+                
+                cell.chooseTimeView.sectionView.itemView.timePeriodsDidSelectedCompletion = { list in
+                    self.currentSelectedTime = list
+                }
+                
                 return cell
             default:
                 fatalError("未配置cell")
@@ -123,6 +135,34 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
         reactor.state
             .map{ $0.repos.map{ SectionModel(model: "", items: [$0])} }
             .bind(to: tableView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.isLoading }
+            .bind(to: rx.loading)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.activityId }
+            .subscribe(onNext: { [unowned self] activityId in
+                let squadId = reactor.squadId
+                let detailReactor = ActivityDetailReactor(activityId: activityId, squadId: squadId)
+                let detailViewController = ActivityDetailViewController(reactor: detailReactor)
+                self.navigationController?.pushViewController(detailViewController, animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+        rightBtn.rx.tap
+            .map{ [unowned self] in
+                let list = self.currentSelectedTime
+                return Reactor.Action.createActivity(list)
+            }
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
     
@@ -165,11 +205,6 @@ class CreateEventViewController: ReactorViewController<CreateEventReactor>, UITa
     
     @objc
     private func leftBtnDidTapped() {
-        dismiss(animated: true)
-    }
-    
-    @objc
-    private func rightBtnBtnDidTapped() {
         dismiss(animated: true)
     }
 }

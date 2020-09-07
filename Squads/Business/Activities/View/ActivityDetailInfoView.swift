@@ -27,12 +27,13 @@ class ActivityDetailInfoView: BaseView {
         
         previewBtn.imageView?.contentMode = .scaleAspectFit
         
+        titleBtn.frame = CGRect(x: 0, y: 0, width: 74, height: 26)
+        
         addSubviews(titleBtn, locationBtn, previewBtn)
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        titleBtn.frame = CGRect(x: 0, y: 0, width: 74, height: 26)
         previewBtn.frame = CGRect(x: bounds.width - 36, y: (bounds.height - 36)/2, width: 36, height: 36)
         locationBtn.frame = CGRect(x: 0, y: bounds.height - 44, width: previewBtn.frame.minX - 10, height: 40)
     }

@@ -272,6 +272,14 @@ final class ChattingViewController: MessagesViewController, CustomNavigationBarI
         }
     }
     
+    public override var inputAccessoryView: UIView? {
+        return isInputBarHidden ? nil : messageInputBar
+    }
+
+    public override var canBecomeFirstResponder: Bool {
+        return !isInputBarHidden
+    }
+    
     @discardableResult
     override func resignFirstResponder() -> Bool {
         messageInputBar.inputTextView.resignFirstResponder()

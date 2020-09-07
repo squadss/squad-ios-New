@@ -18,7 +18,7 @@ class ActivityDetailToolbar: BaseView {
         var isButton: Bool { return button != nil }
         
         fileprivate var label: (text: String, color: UIColor, font: UIFont)?
-        fileprivate var button: (flag: String, title: String?, image: UIImage?, showShadow: Bool)?
+        fileprivate var button: (flag: String, title: String?, image: UIImage?, disableImage: UIImage?, showShadow: Bool, isEnabled: Bool)?
         
         /// 标题
         /// - Parameter text: 内容
@@ -39,11 +39,13 @@ class ActivityDetailToolbar: BaseView {
         /// - Parameter image: 按钮图片
         /// - Parameter showShadow: 是否显示阴影, 默认不显示
         static func button(flag: String,
-                           title: String?,
-                           image: UIImage?,
-                           showShadow: Bool = false) -> Description {
+                           title: String? = nil,
+                           image: UIImage? = nil,
+                           disableImage: UIImage? = nil,
+                           showShadow: Bool = false,
+                           isEnabled: Bool = true) -> Description {
             var description = Description()
-            description.button = (flag, title, image, showShadow)
+            description.button = (flag, title, image, disableImage, showShadow, isEnabled)
             return description
         }
     }
@@ -75,19 +77,10 @@ class ActivityDetailToolbar: BaseView {
         
         subviews.forEach{ $0.removeFromSuperview() }
         
-        if let description = dataSource.first(where: { $0.isLabel }) {
-            let titleLab = createLab(from: description)
-            addSubview(titleLab)
-        }
-        
         let buttons = dataSource.filter({ $0.isButton })
         if buttons.count > 1 {
-            
-            let list: Array<UIView> = buttons.map { (description)  in
-                return createBtn(from: description)
-            }
-            
-            let stackView = UIStackView(arrangedSubviews: list)
+            let subviews = buttons.map { createBtn(from: $0) }
+            let stackView = UIStackView(arrangedSubviews: subviews)
             stackView.axis = .horizontal
             stackView.spacing = multipleButtonMargin
             stackView.alignment = .fill
@@ -97,7 +90,63 @@ class ActivityDetailToolbar: BaseView {
             let btn = createBtn(from: buttons.first!)
             addSubview(btn)
         }
+        
+        if let description = dataSource.first(where: { $0.isLabel }) {
+            let titleLab = createLab(from: description)
+            if buttons.isEmpty {
+                titleLab.textAlignment = .center
+            } else {
+                titleLab.textAlignment = .left
+            }
+            insertSubview(titleLab, at: 0)
+        }
+        
     }
+    
+//    private func setupSubview() {
+        
+//        var newListView: Array<UIView>?
+//        var oldListView: Array<UIView>?
+//        if !subviews.isEmpty {
+//            newListView = Array()
+//            oldListView = subviews
+//        }
+//
+//        if let description = dataSource.first(where: { $0.isLabel }) {
+//            let titleLab = createLab(from: description)
+//            addSubview(titleLab)
+//            newListView?.append(titleLab)
+//        }
+//
+//        let buttons = dataSource.filter({ $0.isButton })
+//        if buttons.count > 1 {
+//            let subviews = buttons.map { createBtn(from: $0) }
+//            let stackView = UIStackView(arrangedSubviews: subviews)
+//            stackView.axis = .horizontal
+//            stackView.spacing = multipleButtonMargin
+//            stackView.alignment = .fill
+//            stackView.distribution = .fillEqually
+//            addSubview(stackView)
+//            newListView?.append(stackView)
+//        } else if buttons.count == 1 {
+//            let btn = createBtn(from: buttons.first!)
+//            addSubview(btn)
+//            newListView?.append(btn)
+//        }
+//
+//        layoutUI()
+//
+//        if let oldList = oldListView, let newList = newListView {
+//            let offsetX = bounds.width == 0 ? UIScreen.main.bounds.width : bounds.width
+//            newList.forEach{ $0.transform = CGAffineTransform(translationX: offsetX, y: 0) }
+//            UIView.animate(withDuration: 0.25, animations: {
+//                oldList.forEach{ $0.transform = CGAffineTransform(translationX: -offsetX, y: 0) }
+//                newList.forEach{ $0.transform = .identity }
+//            }) { (_) in
+//                oldList.forEach{ $0.removeFromSuperview() }
+//            }
+//        }
+//    }
     
     private func createLab(from description: Description) -> UILabel {
         let lab = UILabel()
@@ -107,7 +156,6 @@ class ActivityDetailToolbar: BaseView {
         lab.textColor = style.color
         lab.font = style.font
         lab.text = style.text
-        lab.textAlignment = .left
         lab.numberOfLines = 1
         return lab
     }
@@ -121,10 +169,13 @@ class ActivityDetailToolbar: BaseView {
             btn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
             btn.setTitle(title, for: .normal)
             btn.backgroundColor = .white
-            btn.setTitleColor(backgroundColor, for: .normal)
+            btn.theme.titleColor(from: UIColor.secondary, for: .normal)
         }
         if let image = style.image {
             btn.setImage(image, for: .normal)
+        }
+        if let disableImage = style.disableImage {
+            btn.setImage(disableImage, for: .disabled)
         }
         if style.showShadow {
             btn.layer.shadowColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25).cgColor
@@ -135,6 +186,7 @@ class ActivityDetailToolbar: BaseView {
         btn.flag = style.flag
         btn.layer.cornerRadius = buttonCornerRadius
         btn.addTarget(self, action: #selector(btnDidTapped(sender:)), for: .touchUpInside)
+        btn.isEnabled = style.isEnabled
         return btn
     }
     
@@ -164,7 +216,7 @@ class ActivityDetailToolbar: BaseView {
                                    height: singleButtonSize.height)
         default: break
         }
-        let buttonRect = button?.frame ?? CGRect(x: 10, y: 0, width: padding.right, height: 0)
+        let buttonRect = button?.frame ?? CGRect(x: bounds.width - padding.right, y: 0, width: padding.right, height: 0)
         label?.frame = CGRect(x: padding.left, y: padding.top, width: buttonRect.minX - padding.left, height: bounds.height - padding.top - padding.bottom)
     }
 }

@@ -45,9 +45,12 @@ target 'Squads' do
   pod 'MessageKit'
   # 图片浏览器
   pod 'JXPhotoBrowser', :git => 'https://github.com/JiongXing/PhotoBrowser.git'
+  # 相册多选
+  pod 'TZImagePickerController'
   # Calendar日历
   pod 'JTAppleCalendar'
   # Custom Emoji
   pod 'ISEmojiView'
-  
+  # 下拉刷新
+  pod 'MJRefresh'
 end

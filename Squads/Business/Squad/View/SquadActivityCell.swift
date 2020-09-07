@@ -17,7 +17,7 @@ class SquadActivityCell: BaseTableViewCell {
     var dateLab = UILabel()
     var titleLab = UILabel()
     var contentLab = UILabel()
-    var membersView = SquadMembersView()
+    var membersView = SquadMembersView<ActivityMember>()
     
     var containterView = ActivityShadowView()
     

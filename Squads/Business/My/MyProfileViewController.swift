@@ -36,13 +36,15 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
     }
     
     override func initData() {
-        
+        guard let user = User.currentUser() else {
+            return
+        }
         headerView.applyBtn.isHidden = false
-        headerView.applyBtn.setTitle("2 Requests", for: .normal)
+        headerView.applyBtn.setTitle("Requests", for: .normal)
         headerView.applyBtn.addTarget(self, action: #selector(applyBtnDidTapped), for: .touchUpInside)
-        headerView.contentLab.text = "@username"
-        headerView.nicknameLab.text = "Name"
-        headerView.avatarView.kf.setImage(with: URL(string: "http://image.biaobaiju.com/uploads/20180803/23/1533309823-fPyujECUHR.jpg"))
+        headerView.contentLab.text = user.username
+        headerView.nicknameLab.text = user.nickname
+        headerView.avatarView.kf.setImage(with: user.avatar.asURL)
     }
     
     override func setupView() {
@@ -138,18 +140,26 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
             .subscribe(onNext: { [unowned self] flag in
                 switch flag {
                 case "profile":
-                    //FIXME: - 暂时为空
-                    let preReactor = SquadPreReactor(squadId: 0)
-                    let preViewController = SquadPreViewController(reactor: preReactor)
-                    let nav = BaseNavigationController(rootViewController: preViewController)
-                    nav.modalPresentationStyle = .fullScreen
-                    self.present(nav, animated: true)
+                    if let squadId = UserDefaults.standard.topSquad {
+                        let preReactor = SquadPreReactor(squadId: squadId)
+                        let preViewController = SquadPreViewController(reactor: preReactor)
+                        let nav = BaseNavigationController(rootViewController: preViewController)
+                        nav.modalPresentationStyle = .fullScreen
+                        self.present(nav, animated: true)
+                    }
                 case "notifications":
-                    break
+                    let notificationReactor = SquadNotificationsReactor()
+                    let vc = SquadNotificationsViewController(reactor: notificationReactor)
+                    vc.title = "Notifications"
+                    self.navigationController?.pushViewController(vc, animated: true)
                 case "inviteFrients":
-                    break
+                    if let squadId = UserDefaults.standard.topSquad {
+                        let invithNewReactor = SquadInvithNewReactor(squadId: squadId)
+                        let vc = SquadInvithNewViewController(reactor: invithNewReactor)
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
                 case "help":
-                    break
+                    self.showToast(message: "It has not been opened yet, please look forward to it")
                 case "logOut":
                     let alert = UIAlertController(title: "Make sure to leave Squad?", message: nil, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
@@ -171,3 +181,4 @@ class MyProfileViewController: ReactorViewController<MyProfileReactor> {
             .disposed(by: disposeBag)
     }
 }
+

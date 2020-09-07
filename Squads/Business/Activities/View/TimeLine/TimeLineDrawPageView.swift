@@ -24,6 +24,17 @@ class TimeLineDrawPageView: TimeLineDrawView {
         return timePeriodSubject.asObservable()
     }
     
+    private let key = "SelectLayerKey"
+    private var commonLayer: TimeLineLayer?
+    
+    override var startOffTime: Int {
+        didSet {
+            let changed: CGFloat = -CGFloat(startOffTime - oldValue) * gridHeight * 2
+            commonLayer?.rect.origin.y += changed
+            pendingEvent?.frame.origin.y += changed
+        }
+    }
+    
     private var prevOffset: CGPoint = .zero
     private var pendingEvent: UIView?
     private var lockSlideDirection: Bool?
@@ -34,6 +45,14 @@ class TimeLineDrawPageView: TimeLineDrawView {
         panGestureRecognizer.addTarget(self, action: #selector(handleResizeHandlePanGesture(_:)))
         panGestureRecognizer.cancelsTouchesInView = true
         addGestureRecognizer(panGestureRecognizer)
+    }
+    
+    // 传入一个区域开始绘制矩形, 传入 .zero 表示清空画板
+    private func draw(with rect: CGRect) {
+        if commonLayer == nil {
+            commonLayer = insertColor(color.uiColor, key: key)
+        }
+        commonLayer?.rect = rect
     }
     
     @objc
@@ -99,15 +118,25 @@ class TimeLineDrawPageView: TimeLineDrawView {
         }
         
         if sender.state == .ended {
-            lockSlideDirection = nil
-            //FIXME: -需要优化
-            pendingEvent?.frame = drawRect
-            clearDraw()
-            commitEditing()
             
-            if let timePeriod = selectedTimePeriod {
+            lockSlideDirection = nil
+            
+            //FIXME: -需要优化
+            let drawRect = commonLayer?.rect ?? .zero
+            pendingEvent?.frame = drawRect
+            
+            // 清空画板
+//            draw(with: .zero)
+            
+            // 根据绘制区域获取时间段
+            if let timePeriod = getTimePeriod(with: drawRect) {
                 timePeriodSubject.onNext(timePeriod)
             }
         }
+    }
+    
+    var selectedTimePeriod: TimePeriod? {
+        let drawRect = commonLayer?.rect ?? .zero
+        return getTimePeriod(with: drawRect)
     }
 }

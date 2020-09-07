@@ -9,6 +9,7 @@
 import Foundation
 import RxSwift
 import UIKit
+import Photos
 import AVFoundation
 import MobileCoreServices
 
@@ -72,7 +73,7 @@ open class RxMediaPicker: NSObject, UIImagePickerControllerDelegate, UINavigatio
     
     open func takePhoto(device: UIImagePickerController.CameraDevice = .rear,
                         flashMode: UIImagePickerController.CameraFlashMode = .auto,
-                        editable: Bool = false) -> Observable<(UIImage, UIImage?)> {
+                        editable: Bool = false) -> Observable<(UIImage, UIImage?, PHAsset?)> {
         return Observable.create { [unowned self] observer in
             self.currentAction = RxMediaPickerAction.photo(observer: observer)
             
@@ -96,7 +97,7 @@ open class RxMediaPicker: NSObject, UIImagePickerControllerDelegate, UINavigatio
     }
     
     open func selectImage(source: UIImagePickerController.SourceType = .photoLibrary,
-                          editable: Bool = false) -> Observable<(UIImage, UIImage?)> {
+                          editable: Bool = false) -> Observable<(UIImage, UIImage?, PHAsset?)> {
         return Observable.create { [unowned self] observer in
             self.currentAction = RxMediaPickerAction.photo(observer: observer)
             
@@ -112,14 +113,20 @@ open class RxMediaPicker: NSObject, UIImagePickerControllerDelegate, UINavigatio
     }
     
     func processPhoto(info: [UIImagePickerController.InfoKey : Any],
-                      observer: AnyObserver<(UIImage, UIImage?)>) {
+                      observer: AnyObserver<(UIImage, UIImage?, PHAsset?)>) {
         guard let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage else {
             observer.on(.error(RxMediaPickerError.generalError))
             return
         }
         
         let editedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage
-        observer.onNext((image, editedImage))
+        
+        var assetImage: PHAsset?
+        if #available(iOS 11.0, *) {
+            assetImage = info[UIImagePickerController.InfoKey.phAsset] as? PHAsset
+        }
+        
+        observer.onNext((image, editedImage, assetImage))
         observer.onCompleted()
     }
     
@@ -219,7 +226,7 @@ open class RxMediaPicker: NSObject, UIImagePickerControllerDelegate, UINavigatio
 }
 
 enum RxMediaPickerAction {
-    case photo(observer: AnyObserver<(UIImage, UIImage?)>)
+    case photo(observer: AnyObserver<(UIImage, UIImage?, PHAsset?)>)
     case video(observer: AnyObserver<URL>, maxDuration: TimeInterval)
 }
 

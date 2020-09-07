@@ -12,12 +12,6 @@ import RxCocoa
 
 class CreateSquadViewController: BaseViewController {
     
-    override var allowedCustomBackBarItem: Bool {
-        return false
-    }
-    
-    var isShowLeftBarButtonItem: Bool = true
-    
     private var imageView = UIImageView()
     private var tipsLab = UILabel()
     private var inputField = UITextField()
@@ -34,17 +28,15 @@ class CreateSquadViewController: BaseViewController {
         view.addSubview(contentView)
         view.theme.backgroundColor = UIColor.background
         
-        let buttonItem = UIBarButtonItem()
-        buttonItem.title = "Next"
-        buttonItem.style = .plain
-        buttonItem.theme.tintColor = UIColor.secondary
-        navigationItem.rightBarButtonItem = buttonItem
+        let rightBarButtonItem = UIBarButtonItem()
+        rightBarButtonItem.title = "Next"
+        rightBarButtonItem.style = .plain
+        rightBarButtonItem.theme.tintColor = UIColor.secondary
+        navigationItem.rightBarButtonItem = rightBarButtonItem
         
-        if isShowLeftBarButtonItem {
-            let buttonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(backBarButtonItemDidTapped))
-            buttonItem.theme.tintColor = UIColor.text
-            navigationItem.leftBarButtonItem = buttonItem
-        }
+        let leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(backBarButtonItemDidTapped))
+        leftBarButtonItem.theme.tintColor = UIColor.text
+        navigationItem.leftBarButtonItem = leftBarButtonItem
         
         setupContentView()
     }
@@ -124,7 +116,6 @@ class CreateSquadViewController: BaseViewController {
             case .success(let model):
                 
                 self.hideLoading()
-                DataCenter.topSquad = model
                 UserDefaults.standard.topSquad = model.id
                 
                 let reactor = SquadInvithNewReactor(squadId: model.id)

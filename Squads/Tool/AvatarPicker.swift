@@ -37,7 +37,7 @@ class AvatarPicker: NSObject, RxMediaPickerDelegate {
         picker = RxMediaPicker(delegate: self)
     }
     
-    func image(optionSet: AvatarPickerOptionSet, delegate: UIViewController) -> Observable<(UIImage, UIImage?)> {
+    func image(optionSet: AvatarPickerOptionSet, delegate: UIViewController) -> Observable<(UIImage, UIImage?, PHAsset?)> {
         
         self.parent = delegate
         
@@ -53,17 +53,19 @@ class AvatarPicker: NSObject, RxMediaPickerDelegate {
         let alert = UIAlertController(title: "select photo", message: nil, preferredStyle: .actionSheet)
         delegate.present(alert, animated: true)
         
-        return alert.addAction(actions: actions).flatMap { [unowned self] (value) -> Observable<(UIImage, UIImage?)> in
+        return alert.addAction(actions: actions).flatMap { [unowned self] (value) -> Observable<(UIImage, UIImage?, PHAsset?)> in
             switch value {
-            case 1:
-                return self.picker.selectImage(editable: true)
-            case 2:
-                return self.picker.takePhoto()
-            default:
-                return Observable.empty()
+            case 1: return self.picker.selectImage(editable: true)
+            case 2: return self.picker.takePhoto()
+            default: return Observable.empty()
             }
         }
         .observeOn(MainScheduler.instance)
+    }
+    
+    func camera(delegate: UIViewController) -> Observable<(UIImage, UIImage?, PHAsset?)> {
+        self.parent = delegate
+        return self.picker.takePhoto()
     }
     
     func present(picker: UIImagePickerController) {
