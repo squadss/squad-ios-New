@@ -26,11 +26,11 @@ squadDetail.changeMessage = "Please enter the Event name";
 squadDetail.changeConfirm = "Confirm";
 
 squadDetail.confirmDeleteTitle = "Are you sure you want to delete this event?";
-squadDetail.deleteSuccess = "Delete Event!";
+squadDetail.deleteSuccess = "Deleted Event!";
 squadDetail.joinSquadSuccessTip = "Joined new Squad!";
 squadDetail.notFoundSquadTip = "No available squad was found!";
 squadDetail.activityPlaceholder = "No activities currently planned. Create one!";
-squadDetail.flicksPlaceholder = "No flicks currently planned. ";
+squadDetail.flicksPlaceholder = "Add Flicks for the squad's slideshow! ";
 squadInvite.successTip = "Invitation Success";
 squadInvite.failureTip = "Invitation failed";
 
