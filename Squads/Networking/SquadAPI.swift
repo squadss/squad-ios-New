@@ -26,7 +26,7 @@ enum SquadAPI {
     case deleteSquad(id: String)
     
     /// 更新Squad
-    case updateSquad(name: String, avator: Data, remark: String)
+    case updateSquad(id: Int, name: String?, avator: Data?)
     
     /// 获取当前置顶的squad
     case quardTopSquad
@@ -151,7 +151,7 @@ enum SquadAPI {
     case deleteMediaWithFlick(id: Int)
     
     // 小组-媒体内容分页列表
-    case getPageListWithFlick(pageIndex: Int, pageSize: Int, keyword: String)
+    case getPageListWithFlick(squadId: Int, pageIndex: Int, pageSize: Int, keyword: String)
     
     // 某条媒体内容详情
     case mediaDetailWithFlick(id: Int)
@@ -233,14 +233,14 @@ extension SquadAPI: TargetType {
         case .updateGoingStatus:
             return "squadActivityGoing/update"
         case let .queryMembersActivityGoingStatus(activityId, isAccept):
-            let status: Int = isAccept ? 1 : -1
+            let status: Int = isAccept ? 1 : 0
             return "squadActivityGoing/memberList/\(activityId)/\(status)"
         case .queryActivityGoingStatus(let activityId):
             return "squadActivityGoing/status/\(activityId)"
         case .isAlreadyRegistered, .deleteInviteRecord, .inviteFriends:
             return ""
-        case .getPageListWithFlick:
-            return "squadMedia/getPageList"
+        case .getPageListWithFlick(let squadId, _, _, _):
+            return "squadMedia/getPageList/\(squadId)"
         case .addMediaWithFlick:
             return "squadMedia/add"
         case .deleteMediaWithFlick(let id):
@@ -410,9 +410,10 @@ extension SquadAPI: TargetType {
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
         case .deleteSquad, .querySquad, .quardTopSquad, .querySquadByInviteCode, .queryAllSquads, .queryAllFriends, .myInviteRecords:
             return .requestPlain
-
-        case let .updateSquad(name, avator, remark):
-            let params = ["squadName": name, "logoImgBase64": avator.base64EncodedString(options: .lineLength64Characters), "createRemark": remark]
+        case let .updateSquad(id, name, avator):
+            var params: [String : Any] = ["id": id]
+            name.flatMap{ params["squadName"] = $0 }
+            avator.flatMap{ params["logoImgBase64"] = $0.base64EncodedString(options: .lineLength64Characters) }
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
         case let .createLinkBySquad(squadId):
             return .requestParameters(parameters: [
@@ -543,7 +544,7 @@ extension SquadAPI: TargetType {
                 "mediaType": mediaType.rawValue,
                 "media": media.map{ $0.base64EncodedString(options: .lineLength64Characters) }
             ], encoding: JSONEncoding.default)
-        case let .getPageListWithFlick(pageIndex, pageSize, keyword):
+        case let .getPageListWithFlick(squadId, pageIndex, pageSize, keyword):
             return .requestParameters(parameters: [
                 "keyword": keyword,
                 "pageIndex": pageIndex,

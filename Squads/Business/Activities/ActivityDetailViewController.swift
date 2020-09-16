@@ -85,7 +85,7 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
 
         action.filter{ $0 == 0 }
            .trackInputAlert(title: NSLocalizedString("squadDetail.changeTitle", comment: ""), placeholder: NSLocalizedString("squadDetail.changeMessage", comment: ""), default: NSLocalizedString("squadDetail.changeConfirm", comment: ""), target: self)
-           .map{ Reactor.Action.setDetail(nil, title: $0, location: nil) }
+            .map{ Reactor.Action.setDetail(setTime: nil, title: $0, location: nil) }
            .bind(to: reactor!.action)
            .disposed(by: disposeBag)
 
@@ -97,16 +97,16 @@ class ActivityDetailViewController: ReactorViewController<ActivityDetailReactor>
 
         action.filter{ $0 == 1 }
            .subscribe(onNext: { [unowned self] type in
-               let locationVC = CreateEventLocationViewController()
-               locationVC.title = "Location"
-               locationVC.itemSelected.map { item in
-                   let location = SquadLocation(item: item)
-                   return Reactor.Action.setDetail(nil, title: nil, location: location)
-               }
-               .bind(to: self.reactor!.action)
-               .disposed(by: self.disposeBag)
-               let nav = UINavigationController(rootViewController: locationVC)
-               self.present(nav, animated: true)
+                let locationVC = CreateEventLocationViewController()
+                locationVC.title = "Location"
+                locationVC.itemSelected.map { item in
+                    let location = SquadLocation(item: item)
+                    return Reactor.Action.setDetail(setTime: nil, title: nil, location: location)
+                }
+                .bind(to: self.reactor!.action)
+                .disposed(by: self.disposeBag)
+                let nav = UINavigationController(rootViewController: locationVC)
+                self.present(nav, animated: true)
            })
            .disposed(by: disposeBag)
     }
@@ -229,11 +229,11 @@ extension ActivityDetailViewController {
                 .button(flag: "confirmGoing",
                        image: UIImage(named: "Activity Confirm Normal"),
                        disableImage: UIImage(named: "Activity Confirm Focus"),
-                       isEnabled: currentMember.isGoing == false),
+                       isEnabled: !(currentMember.isGoing == true)),
                 .button(flag: "cancelGoing",
                        image: UIImage(named: "Activity Reject Normal"),
                        disableImage: UIImage(named: "Activity Reject Focus"),
-                       isEnabled: currentMember.isGoing == true)]
+                       isEnabled: !(currentMember.isGoing == false))]
         }
     }
     
@@ -271,7 +271,7 @@ extension ActivityDetailViewController {
                 }
                 
                 settingViewController.didSelectTime
-                    .map{ Reactor.Action.setDetail($0, title: nil, location: nil) }
+                    .map{ Reactor.Action.setDetail(setTime: $0, title: nil, location: nil) }
                     .bind(to: reactor.action)
                     .disposed(by: self.disposeBag)
             })
@@ -335,27 +335,16 @@ extension ActivityDetailViewController {
             infoView.titleBtn.layer.cornerRadius = 13
             infoView.titleBtn.contentHorizontalAlignment = .center
         case .setTime:
-            let startTime = detail.startTime?.toDate("yyyy-MM-dd HH:mm:ss", region: .current)
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateStyle = .medium
-            dateFormatter.timeStyle = .short
-            dateFormatter.locale = .init(identifier: "en_US")
-            var dateString = ""
-            if let date = startTime?.date {
-                dateString = dateFormatter.string(from: date)
-            }
-            //"Saturday, April 4 at 1 PM"
-            
+            let startTime = detail.formatterStartTime()
+            // 本地上传的时间戳给服务器, 服务器这里返回的时间为北京时区,需要转为本地时区显示
             infoView.titleBtn.contentHorizontalAlignment = .left
             infoView.titleBtn.theme.backgroundColor = UIColor.background
             infoView.titleBtn.theme.titleColor(from: UIColor.secondary, for: .normal)
             infoView.titleBtn.frame.size.width = 200
             infoView.titleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-            infoView.titleBtn.setTitle(dateString, for: .normal)
+            infoView.titleBtn.setTitle(startTime?.date ?? "TBD", for: .normal)
             infoView.titleBtn.layer.cornerRadius = 0
         }
-        
-        infoView.isHidden = false
         
         if let address = detail.position?.address {
             infoView.locationBtn.isHidden = false
@@ -363,6 +352,9 @@ extension ActivityDetailViewController {
         } else {
             infoView.locationBtn.isHidden = true
         }
+        
+        infoView.isHidden = false
+        infoView.setNeedsLayout()
         infoView.previewBtn.setImage(detail.activityType.image, for: .normal)
     }
     
@@ -419,12 +411,10 @@ extension ActivityDetailViewController {
                 membersView.setBottomSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.waitingMembersTitle", comment: ""), list: members))
             }
         case .setTime:
-            if let members = detail.goingMembers {
-                membersView.setTopSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.goingMembersTitle", comment: ""), list: members))
-            }
-            if let members = detail.rejectMembers {
-                membersView.setBottomSection(section: MembersSection<User>(title: NSLocalizedString("squadDetail.rejectMembersTitle", comment: ""), list: members))
-            }
+            let topTitle = NSLocalizedString("squadDetail.goingMembersTitle", comment: "")
+            membersView.setTopSection(section: MembersSection<User>(title: topTitle, list: detail.goingMembers ?? []))
+            let bottomTitle = NSLocalizedString("squadDetail.rejectMembersTitle", comment: "")
+            membersView.setBottomSection(section: MembersSection<User>(title: bottomTitle, list: detail.rejectMembers ?? []))
         }
     }
     

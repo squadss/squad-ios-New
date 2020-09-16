@@ -7,22 +7,23 @@
 //
 
 import Foundation
+import SwiftDate
 
 struct SquadActivity: Codable, Equatable {
+    
+    typealias TimeModel = (date: String, month: String, day: String)
+    
     var id: Int = 0
     var accountId: Int = 0
     var squadId: Int = 0
     var title: String!
     var activityType: EventCategory
     var activityStatus: ActivityStatus
+    
     var startTime: String?
     var endTime: String?
     var position: SquadLocation?
-    
-    // 显示开始的日期和月份
-    var startDay: String = ""
-    var startMonth: String = ""
-    var startDate: String = "TBD"
+    var gmtCreate: String?
     
     var responsedMembers: Array<ActivityMember>?
     var waitingMembers: Array<User>?
@@ -41,19 +42,7 @@ struct SquadActivity: Codable, Equatable {
         activityStatus = try decoder.decode("activityStatus")
         startTime = try decoder.decodeIfPresent("startTime")
         endTime = try decoder.decodeIfPresent("endTime")
-        
-        if let unwrappedStartTime = startTime {
-            let date = unwrappedStartTime.toDate("yyyy-MM-dd HH:mm:ss", region: .current)
-            let dateComponents = date?.dateComponents
-            dateComponents?.month.flatMap{ startMonth = String($0) }
-            dateComponents?.day.flatMap{ startDay = String($0) }
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateStyle = .medium
-            dateFormatter.timeStyle = .short
-            dateFormatter.locale = .init(identifier: "en_US")
-            date.flatMap{ startDate = dateFormatter.string(from: $0.date) }
-        }
+        gmtCreate = try decoder.decodeIfPresent("gmtCreate")
         
         let address = try decoder.decodeIfPresent("address", as: String.self)
         let latitude = try decoder.decodeIfPresent("latitude", as: String.self)
@@ -70,6 +59,7 @@ struct SquadActivity: Codable, Equatable {
         try encoder.encode(title, for: "title")
         try encoder.encode(activityType, for: "activityType")
         try encoder.encode(activityStatus, for: "activityStatus")
+        try encoder.encode(gmtCreate, for: "gmtCreate")
     }
     
     func isEquadTo(_ other: SquadActivity) -> Bool {
@@ -110,6 +100,34 @@ struct SquadActivity: Codable, Equatable {
         var this = self
         this.requestStatus = true
         return this
+    }
+    
+    /// 返回(date, month, day)
+    func formatterStartTime() -> TimeModel? {
+        // startTime 服务器使用的是北京时区, 需要先按照北京时区转为时间戳, 在将时间戳按照本地时区转为日期字符串显示
+        guard let unwrappedStartTime = startTime else { return nil }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 8 * 60 * 60)
+        let date = dateFormatter.date(from: unwrappedStartTime)
+        if let unwrappedNewDate = date {
+            
+            dateFormatter.timeZone = .current
+            dateFormatter.calendar = .current
+            dateFormatter.dateStyle = .medium
+            dateFormatter.timeStyle = .short
+            dateFormatter.locale = .current
+            
+            let date = dateFormatter.string(from: unwrappedNewDate.date)
+            dateFormatter.dateFormat = "MMM"
+            let month = dateFormatter.string(from: unwrappedNewDate.date)
+            dateFormatter.dateFormat = "dd"
+            let day = dateFormatter.string(from: unwrappedNewDate.date)
+            return (date, month, day)
+        } else {
+            return nil
+        }
     }
     
     #if DEBUG

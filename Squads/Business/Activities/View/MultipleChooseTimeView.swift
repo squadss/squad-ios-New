@@ -48,7 +48,7 @@ class MultipleChooseTimeView: UIView {
         tapView.cellStyle = .num
         
         displayView = ActivityTimeSectionView(itemView: tapView)
-        displayView.title = "SQUAD AVAILABILIT"
+        displayView.title = "SQUAD AVAILABILITY"
         
         drawView = ActivityTimeSectionView(itemView: pageView)
         drawView.title = "CLICK YOUR TIME"

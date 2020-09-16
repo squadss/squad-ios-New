@@ -34,9 +34,9 @@ class EditableAvatarView: BaseView {
                 if canEditView?.superview == nil {
                     setupCanEditView()
                 }
+                canEditView?.isHidden = false
             } else {
-                canEditView?.removeFromSuperview()
-                canEditView = nil
+                canEditView?.isHidden = true
             }
         }
     }
@@ -47,6 +47,8 @@ class EditableAvatarView: BaseView {
     override func setupView() {
         imageBtn.adjustsImageWhenHighlighted = false
         imageBtn.clipsToBounds = true
+        imageBtn.imageView?.contentMode = .scaleAspectFill
+        imageBtn.setImage(placeholderImage, for: .normal)
         addSubviews(imageBtn)
     }
     
@@ -62,7 +64,6 @@ class EditableAvatarView: BaseView {
         canEditView = UIButton()
         canEditView?.setImage(UIImage(named: "Edit Group"), for: .normal)
         canEditView?.addTarget(self, action: #selector(canEditBtnDidTapped), for: .touchUpInside)
-        imageBtn.setImage(placeholderImage, for: .normal)
         addSubview(canEditView!)
     }
     
@@ -82,8 +83,8 @@ extension Reactive where Base == EditableAvatarView {
     
     func setImage(for state: UIControl.State = .normal) -> Binder<URL?> {
         return Binder(self.base, binding: { (view, url) in
+            view.imageBtn.kf.setImage(with: url, for: state, placeholder: view.placeholderImage, options: [.keepCurrentImageWhileLoading])
             view.imageBtn.isSelected = state == .selected
-            view.imageBtn.kf.setImage(with: url, for: state, placeholder: view.placeholderImage)
         })
     }
     

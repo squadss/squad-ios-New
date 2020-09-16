@@ -137,8 +137,8 @@ class ActivityCalendarCell: BaseTableViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        calendayView.frame = CGRect(x: 0, y: 0, width: 73, height: bounds.height)
-        containterView.frame = CGRect(x: calendayView.frame.maxX, y: 0, width: bounds.width - calendayView.frame.maxX, height: bounds.height)
+        calendayView.frame = CGRect(x: 0, y: 0, width: 73, height: bounds.height - 2)
+        containterView.frame = CGRect(x: calendayView.frame.maxX, y: 0, width: bounds.width - calendayView.frame.maxX, height: bounds.height - 2)
         menuView.frame = CGRect(x: containterView.contentView.frame.width - 90 - 10, y: 8, width: 90, height: 45)
         statusView.frame = CGRect(x: containterView.contentView.frame.width - 200 - 13, y: 14, width: 200, height: 14)
     }

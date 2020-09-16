@@ -16,7 +16,8 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
     private var bottomDescriptionLab = UILabel()
     private var inputField = UITextField()
     private var confirmBtn = UIButton()
-    
+    private var tipLabel = UILabel()
+    private var indicatorView = UIActivityIndicatorView(style: .gray)
     override func viewDidLoad() {
         super.viewDidLoad()
         view.theme.backgroundColor = UIColor.background
@@ -36,6 +37,12 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
         confirmBtn.setBackgroundImage(UIImage(color: UIColor(red: 0.937, green: 0.486, blue: 0.447, alpha: 1)), for: .normal)
         view.addSubview(confirmBtn)
         
+        let loadingView = UIView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+        indicatorView.frame = CGRect(x: 5, y: 5, width: 20, height: 20)
+        indicatorView.hidesWhenStopped = true
+        loadingView.addSubview(indicatorView)
+        inputField.rightView = loadingView
+        inputField.rightViewMode = .always
         inputField.placeholder = "Input Code"
         inputField.backgroundColor = UIColor(red: 0.946, green: 0.946, blue: 0.946, alpha: 1)
         inputField.borderStyle = .none
@@ -58,12 +65,17 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
         bottomDescriptionLab.font = UIFont.systemFont(ofSize: 16)
         bottomDescriptionLab.theme.textColor = UIColor.textGray
         view.addSubview(bottomDescriptionLab)
+        
+        tipLabel.textAlignment = .center
+        tipLabel.font = UIFont.systemFont(ofSize: 12)
+        tipLabel.theme.textColor = UIColor.secondary
+        view.addSubview(tipLabel)
     }
     
     override func setupConstraints() {
         
         titleLab.snp.makeConstraints { (maker) in
-            let offsetY: CGFloat = UIScreen.main.bounds.height > 667 ? 130 : 70
+            let offsetY: CGFloat = UIScreen.main.bounds.height > 667 ? 100 : 70
             maker.leading.trailing.equalToSuperview()
             if #available(iOS 11, *) {
                 maker.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(offsetY)
@@ -82,6 +94,11 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
             maker.leading.trailing.equalToSuperview().inset(47)
             maker.height.equalTo(50)
             maker.top.equalTo(topDescriptionLab.snp.bottom).offset(30)
+        }
+        
+        tipLabel.snp.makeConstraints { (maker) in
+            maker.top.equalTo(inputField.snp.bottom).offset(8)
+            maker.leading.trailing.equalToSuperview()
         }
         
         bottomDescriptionLab.snp.makeConstraints { (maker) in
@@ -104,30 +121,31 @@ class WelcomeViewController: ReactorViewController<WelcomeReactor> {
         
         reactor.state
             .compactMap{ $0.toast }
-            .bind(to: rx.toastNormal)
+            .bind(to: tipLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .compactMap{ $0.isLoading }
-            .bind(to: rx.loading)
+            .bind(to: indicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
         
         reactor.state
-            .map{ $0.squadDetail != nil }
-            .subscribe(onNext: { [unowned self] state in
-                if state {
-                    self.inputField.theme.textColor = UIColor.secondary
+            .map{ $0.squadDetail }
+            .distinctUntilChanged({ $0?.id == $1?.id })
+            .subscribe(onNext: { [unowned self] detail in
+                if let unwrappedDetail = detail {
+                    self.tipLabel.text = unwrappedDetail.squadName + " is available!"
                 } else {
-                    self.inputField.theme.textColor = UIColor.textGray
+                    self.tipLabel.text = nil
                 }
             })
             .disposed(by: disposeBag)
         
         reactor.state
-            .compactMap{ $0.joinSuccess }
-            .subscribe(onNext: { [unowned self] _ in
-                //TODO: 是否需要将加入的squad设为默认的, 后面需要讨论
-                self.dismiss(animated: true)
+            .compactMap{ $0.joinSquadId }
+            .subscribe(onNext: { id in
+                UserDefaults.standard.topSquad = id
+                Application.shared.presentInitialScreent()
             })
             .disposed(by: disposeBag)
         

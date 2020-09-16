@@ -7,58 +7,76 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 import RxDataSources
 import JXPhotoBrowser
 
 class SquadPreViewController: ReactorViewController<SquadPreReactor> {
 
-    var infoView = SquadPreInfoView()
-    var menuView = SquadPreMenuView()
-    
-    var tableView = UITableView()
+    private var tableView = UITableView()
+    private let picker = AvatarPicker()
+    private var infoView = SquadPreInfoView()
+    private var menuView = SquadPreMenuView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
     }
 
     override func setupView() {
-        
-        let leftBarItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(leftBarItemDidTapped))
-        leftBarItem.theme.tintColor = UIColor.text
-        let rightBarItem = UIBarButtonItem(image: UIImage(named: "Navigation More"), style: .plain, target: self, action: #selector(rightBarItemDidTapped))
-        rightBarItem.theme.tintColor = UIColor.text
-        navigationItem.leftBarButtonItem = leftBarItem
-        navigationItem.rightBarButtonItem = rightBarItem
-        
+        setupTableView()
+        setupNavigationItem()
+    }
+    
+    private func setupTableView() {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 320))
         headerView.theme.backgroundColor = UIColor.background
-        
         infoView.frame = CGRect(x: 50, y: 32, width: headerView.frame.width - 100, height: 160)
         menuView.frame = CGRect(x: 50, y: infoView.frame.maxY + 45, width: headerView.frame.width - 100, height: 40)
         headerView.addSubviews(infoView, menuView)
         
-        #if DEBUG
-        // 点击三次获取SquadId, 便于进行邀请, 此功能只在DEBUG下生效
-        let tap = UITapGestureRecognizer()
-        tap.numberOfTapsRequired = 3
-        tap.rx.event
-            .subscribe(onNext: { _ in
-                if let id = self.reactor?.currentState.squadDetail?.id {
-                    UIPasteboard.general.string = "\(id)"
-                    self.showToast(message: "复制SquadId成功")
-                }
-            })
-            .disposed(by: disposeBag)
-        headerView.addGestureRecognizer(tap)
-        #endif
-        
-        tableView.rowHeight = 55
+        let rowHeight: CGFloat = UIScreen.main.bounds.height > 667 ? 55 : 45
+        tableView.rowHeight = rowHeight
         tableView.tableHeaderView = headerView
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
         tableView.register(Reusable.squadPreViewCell)
         view.addSubview(tableView)
+    }
+    
+    private func setupNavigationItem() {
+        
+        let leftBarItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(leftBarItemDidTapped))
+        leftBarItem.theme.tintColor = UIColor.text
+        navigationItem.leftBarButtonItem = leftBarItem
+        
+        let rightBarItem = UIBarButtonItem()
+        rightBarItem.image = UIImage(named: "Navigation More")
+        rightBarItem.style = .plain
+        rightBarItem.theme.tintColor = UIColor.text
+        navigationItem.rightBarButtonItem = rightBarItem
+        
+        let action: Observable<Int> = rightBarItem.rx.tap
+            .flatMap{ [weak self] _ -> Observable<Int> in
+                
+                let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+                var actions = Array<RxAlertAction>()
+                actions.append(RxAlertAction(title: "Change Squad Title", type: 0, style: .default))
+                actions.append(RxAlertAction(title: "Cancel", type: -1, style: .cancel))
+                return actionSheet
+                    .addAction(actions: actions)
+                    .map{ $0 }
+                    .do(onSubscribed: {
+                       self?.present(actionSheet, animated: true, completion: nil)
+                    })
+            }
+            .share()
+
+            action.filter{ $0 == 0 }
+                .trackInputAlert(title: NSLocalizedString("squadDetail.changeTitle", comment: ""), placeholder: NSLocalizedString("squadDetail.changeMessage", comment: ""), default: NSLocalizedString("squadDetail.changeConfirm", comment: ""), target: self)
+                .map{ Reactor.Action.setDetail(avatar: nil, squadName: $0) }
+                .bind(to: reactor!.action)
+                .disposed(by: disposeBag)
     }
     
     override func setupConstraints() {
@@ -76,6 +94,16 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
             cell.selectionStyle = .none
             return cell
         })
+        
+        reactor.state
+            .compactMap{ $0.toast }
+            .bind(to: rx.toastNormal)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap{ $0.isLoading }
+            .bind(to: rx.loading)
+            .disposed(by: disposeBag)
         
         reactor.state
             .map{ [SectionModel(model: "", items: $0.repos)] }
@@ -154,15 +182,21 @@ class SquadPreViewController: ReactorViewController<SquadPreReactor> {
             browser.show()
         })
         .disposed(by: disposeBag)
+        
+        infoView.canEditTap
+            .flatMap { [unowned self] in
+                self.picker.image(optionSet: [.camera, .photo], delegate: self)
+            }
+            .map{
+                let data = $0.0.compressImage(toByte: 200000)
+                return Reactor.Action.setDetail(avatar: data, squadName: nil)
+            }
+            .bind(to: reactor.action)
+            .disposed(by: rx.disposeBag)
     }
     
     @objc
     private func leftBarItemDidTapped() {
         self.dismiss(animated: true)
-    }
-    
-    @objc
-    private func rightBarItemDidTapped() {
-        
     }
 }

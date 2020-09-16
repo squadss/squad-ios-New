@@ -72,6 +72,8 @@ class CreateSquadViewController: BaseViewController {
         gradientLayer.frame = CGRect(x: 34, y: tipsLab.frame.maxY + 8, width: viewWidth - 2 * 34, height: 44)
         contentView.layer.addSublayer(gradientLayer)
         
+        inputField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 10))
+        inputField.leftViewMode = .always
         inputField.borderStyle = .none
         inputField.backgroundColor = .white
         inputField.layer.cornerRadius = 8

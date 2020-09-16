@@ -19,7 +19,7 @@ class WelcomeReactor: Reactor {
     }
     
     enum Mutation {
-        case setSquadDetail(SquadDetail)
+        case setSquadDetail(SquadDetail?)
         case setToast(String)
         case setLoading(Bool)
         case setJoinState(Bool, String)
@@ -29,7 +29,7 @@ class WelcomeReactor: Reactor {
         var toast: String?
         var isLoading: Bool?
         var squadDetail: SquadDetail?
-        var joinSuccess: Bool?
+        var joinSquadId: Int?
     }
     
     var initialState = State()
@@ -45,7 +45,7 @@ class WelcomeReactor: Reactor {
                 .map { result in
                     switch result {
                     case .success(let model): return .setSquadDetail(model)
-                    case .failure: return .setLoading(false)
+                    case .failure: return .setSquadDetail(nil)
                     }
                 }
                 .startWith(.setLoading(true))
@@ -93,9 +93,13 @@ class WelcomeReactor: Reactor {
             state.isLoading = false
             state.squadDetail = detail
         case let .setJoinState(s, toast):
-            state.isLoading = false
-            state.joinSuccess = s
+            if s {
+                state.joinSquadId = state.squadDetail?.id
+            } else {
+                state.joinSquadId = nil
+            }
             state.toast = toast
+            state.isLoading = false
         }
         return state
     }

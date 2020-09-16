@@ -26,7 +26,7 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
         
         let layoutInsets = UIApplication.shared.keyWindow?.layoutInsets ?? .zero
         
-        tableView.rowHeight = 110
+        tableView.rowHeight = 112
         tableView.separatorStyle = .none
         tableView.register(Reusable.activityCalendarCell)
         tableView.theme.backgroundColor = UIColor.background
@@ -64,10 +64,9 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
         let user: User? = User.currentUser()
         
         dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, SquadActivity>>(configureCell: { (data, tableView, indexPath, model) -> UITableViewCell in
-            
+            let startTime = model.formatterStartTime()
             let cell = tableView.dequeue(Reusable.activityCalendarCell)!
             cell.titleLab.text = model.title
-            cell.dateLab.text = model.startDate
             cell.pritureView.image = model.activityType.image
             
             if model.activityStatus == .prepare {
@@ -84,25 +83,40 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
                     }
                     cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
                 }
+                cell.dateLab.text = "TBD"
             } else {
+                
                 cell.menuView.isHidden = false
                 cell.statusView.isHidden = true
                 cell.containterView.borderColor = .red
-                if let members = model.goingMembers, !members.isEmpty {
+                
+                var isGoing: Bool?
+                
+                if let members = model.goingMembers {
                     if members.contains(where: { $0.id == user?.id }) {
-                        (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = true
-                        (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = false
+                        isGoing = true
                     }
                     cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
-                } else if let members = model.rejectMembers, !members.isEmpty {
-                    if members.contains(where: { $0.id == user?.id }) {
-                        (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = false
-                        (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
-                    }
-                } else {
-                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
-                    (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = true
                 }
+                
+                if let members = model.rejectMembers, isGoing == nil {
+                    if members.contains(where: { $0.id == user?.id }) {
+                        isGoing = false
+                    }
+                }
+                
+                switch isGoing {
+                case .some(true):
+                    (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = true
+                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = false
+                case .some(false):
+                    (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = false
+                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = true
+                case .none:
+                    (cell.menuView.arrangedSubviews.first as? UIButton)?.isSelected = false
+                    (cell.menuView.arrangedSubviews.last as? UIButton)?.isSelected = false
+                }
+                cell.dateLab.text = startTime?.date ?? "TBD"
             }
             
             if case .virtual = model.activityType {
@@ -111,8 +125,8 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
                 cell.contentLab.text = address
             }
             
-            cell.calendayView.day = model.startDay
-            cell.calendayView.month = model.startMonth
+            cell.calendayView.day = startTime?.day ?? ""
+            cell.calendayView.month = startTime?.month ?? ""
             cell.selectionStyle = .none
             
             cell.tapObservable

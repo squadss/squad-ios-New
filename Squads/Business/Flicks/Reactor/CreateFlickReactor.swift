@@ -120,7 +120,7 @@ class CreateFlickReactor: Reactor {
                 state.isDenied = isDenied
             }
         case .setPhoto(let list):
-            if state.selectedPhotos?.elementsEqual(list) == false {
+            if state.selectedPhotos == nil || state.selectedPhotos?.elementsEqual(list) == false {
                 state.selectedPhotos = list
             }
         case .setDeletePhoto(let asset):
@@ -182,6 +182,7 @@ class CreateFlickReactor: Reactor {
             let options = PHImageRequestOptions()
             options.isNetworkAccessAllowed = true
             options.deliveryMode = .highQualityFormat
+            options.resizeMode = .none
             
             // 使用多线程下载图片
             var resultDatas = Array<Data>()
@@ -192,22 +193,31 @@ class CreateFlickReactor: Reactor {
                 for asset in assets {
                     asyncGroup.enter()
                     
-                    if #available(iOS 13, *) {
-                        ids.append(PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { (data, _, _, _) in
-                            if let data = data {
-                                resultDatas.append(data)
-                            }
-                            asyncGroup.leave()
-                        })
-                    } else {
-                        ids.append(PHImageManager.default().requestImageData(for: asset, options: options) { (data, _, orientation, _) in
-                            if let data = data {
-                                //FIXME: - 需要处理图片旋转问题
-                                resultDatas.append(data)
-                            }
-                            asyncGroup.leave()
-                        })
-                    }
+                    // 先获取图片对象, 在从图片中取data, 图片比例会小
+                    ids.append(PHImageManager.default().requestImage(for: asset, targetSize: PHImageManagerMaximumSize, contentMode: .aspectFill, options: options) { (image, _) in
+                        if let data = image?.compressImage(toByte: 200000) {
+                            resultDatas.append(data)
+                        }
+                        asyncGroup.leave()
+                    })
+                    
+                    // 这种方式图片会很大, 普通一张图片在1M左右
+//                    if #available(iOS 13, *) {
+//                        ids.append(PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { (data, _, _, _) in
+//                            if let data = data {
+//                                resultDatas.append(data)
+//                            }
+//                            asyncGroup.leave()
+//                        })
+//                    } else {
+//                        ids.append(PHImageManager.default().requestImageData(for: asset, options: options) { (data, _, orientation, _) in
+//                            if let data = data {
+//                                //FIXME: - 需要处理图片旋转问题
+//                                resultDatas.append(data)
+//                            }
+//                            asyncGroup.leave()
+//                        })
+//                    }
                 }
             
                 asyncGroup.notify(queue: .main, execute: {

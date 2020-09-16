@@ -170,7 +170,7 @@ class SquadReactor: Reactor {
                 
                 let acitivityObservable: Observable<Result<[SquadActivity], GeneralError>> = provider.request(target: .queryActivities(squadId: currentSquadId), model: Array<SquadActivity>.self, atKeyPath: .data).asObservable()
                 
-                let flickObservable: Observable<Result<GeneralModel.List<FlickModel>, GeneralError>> = provider.request(target: .getPageListWithFlick(pageIndex: 1, pageSize: 10, keyword: ""), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable()
+                let flickObservable: Observable<Result<GeneralModel.List<FlickModel>, GeneralError>> = provider.request(target: .getPageListWithFlick(squadId: currentSquadId, pageIndex: 1, pageSize: 10, keyword: ""), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable()
                 
                 return Observable.zip(acitivityObservable, flickObservable).map { (aR, fR) in
                     switch (aR, fR) {
@@ -320,7 +320,7 @@ class SquadReactor: Reactor {
                         }
                     }
                     
-                    let flicksObservable: Observable<[FlickModel]> = self.provider.request(target: .getPageListWithFlick(pageIndex: 1, pageSize: 10, keyword: ""), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable().map {
+                    let flicksObservable: Observable<[FlickModel]> = self.provider.request(target: .getPageListWithFlick(squadId: detail.id, pageIndex: 1, pageSize: 10, keyword: ""), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable().map {
                         switch $0 {
                         case .success(let page): return page.records
                         case .failure: return []

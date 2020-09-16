@@ -49,6 +49,22 @@ enum TimeColor: Int {
         if self == .level5 { return .level5 }
         return TimeColor(rawValue: rawValue + 1)!
     }
+    
+    func next(in colors: [TimeColor]) -> TimeColor {
+        guard
+            let index = colors.firstIndex(of: self),
+            colors.indices.contains(index + 1)
+            else { return self }
+        return colors[index + 1]
+    }
+    
+    func prev(in colors: [TimeColor]) -> TimeColor {
+        guard
+            let index = colors.firstIndex(of: self),
+            colors.indices.contains(index - 1)
+            else { return self }
+        return colors[index - 1]
+    }
 }
 
 struct TimePeriod: Hashable, Codable {

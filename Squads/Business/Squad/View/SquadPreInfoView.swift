@@ -49,9 +49,9 @@ class SquadPreInfoView: BaseView {
                 if canEditView?.superview == nil {
                     setupCanEditView()
                 }
+                canEditView?.isHidden = false
             } else {
-                canEditView?.removeFromSuperview()
-                canEditView = nil
+                canEditView?.isHidden = true
             }
         }
     }
