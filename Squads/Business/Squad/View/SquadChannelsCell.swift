@@ -44,9 +44,9 @@ class SquadChannelsCell: BaseTableViewCell {
         unreadLab.theme.textColor = UIColor.background
         unreadLab.font = UIFont.systemFont(ofSize: 10)
         unreadLab.textAlignment = .center
-        unreadLab.theme.backgroundColor = UIColor.primary
-        unreadLab.layer.maskCorners(10, rect: CGRect(origin: .zero, size: unreadSize))
-        unreadLab.clipsToBounds = true
+        unreadLab.theme.backgroundColor = UIColor.secondary
+        unreadLab.layer.cornerRadius = 10
+        unreadLab.layer.masksToBounds = true
         
         line.backgroundColor = UIColor(red: 0.949, green: 0.949, blue: 0.949, alpha: 1)
         contentView.addSubviews(pritureView, titleLab, contentLab, dateLab, unreadLab, line)

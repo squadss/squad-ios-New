@@ -28,7 +28,7 @@ class SquadSqrollViewCell: BaseTableViewCell, UICollectionViewDataSource, UIColl
     override func setupView() {
         
         let layout = UICollectionViewFlowLayout()
-        layout.itemSize = CGSize(width: 97, height: 97)
+        layout.itemSize = CGSize(width: 97, height: 127)
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 8
         layout.minimumInteritemSpacing = 2

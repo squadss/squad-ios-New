@@ -31,11 +31,15 @@ class ActivityDetailReactor: Reactor {
     }
     
     enum Action {
+        // 请求活动详情
         case requestDetail
-        case setDetail(Array<TimePeriod>?, title: String?, location: SquadLocation?)
+        // 设置活动详情  setTime: 活动开始的时间 title: 活动标题 location: 活动的位置
+        case setDetail(setTime:Array<TimePeriod>?, title: String?, location: SquadLocation?)
+        // 设置我的参与/拒绝状态
         case handlerGoing(isAccept: Bool)
-        // 选择我的时间
+        // 活动还没有开始的时候, 新增/变更我的可用的时间
         case selectTimes(Array<TimePeriod>)
+        // 删除这个活动
         case deleteEvent
     }
     
@@ -43,7 +47,7 @@ class ActivityDetailReactor: Reactor {
         case setToast(String)
         case setLoading(Bool)
         case setRepos(detail: SquadActivity)
-        case setActivity(title: String?, location: SquadLocation?, status: ActivityStatus?)
+        case setActivity(title: String?, location: SquadLocation?, setTime:Array<TimePeriod>?)
         case setExitActivity
         case adjustGoingMembers(isAccept: Bool, toast: String)
     }
@@ -134,7 +138,7 @@ class ActivityDetailReactor: Reactor {
             let status: ActivityStatus? = times?.isEmpty == false ? .setTime : nil
             return provider.request(target: .setActivityInfo(activityId: activityId, squadId: squadId, title: title, location: location, setTime: times?.first, status: status), model: GeneralModel.Plain.self).asObservable().map { result in
                 switch result {
-                case .success: return .setActivity(title: title, location: location, status: status)
+                case .success: return .setActivity(title: title, location: location, setTime: times)
                 case .failure(let error): return .setToast(error.message)
                 }
             }.startWith(.setLoading(true))
@@ -208,31 +212,40 @@ class ActivityDetailReactor: Reactor {
                     members = [user]
                 } else if members?.contains(user) == false {
                     members?.append(user)
-                    state.repos?.goingMembers = members
-                    state.repos?.rejectMembers?.removeAll(where: { $0 == user })
                 }
+                state.repos?.goingMembers = members
+                state.repos?.rejectMembers?.removeAll(where: { $0 == user })
             } else {
                 var members = state.repos?.rejectMembers
                 if members == nil {
                     members = [user]
                 } else if members?.contains(user) == false {
                     members?.append(user)
-                    state.repos?.rejectMembers = members
-                    state.repos?.goingMembers?.removeAll(where: { $0 == user })
                 }
+                state.repos?.rejectMembers = members
+                state.repos?.goingMembers?.removeAll(where: { $0 == user })
             }
             state.isLoading = false
             state.toast = toast
             state.currentMemberProfile?.isGoing = isAccept
-        case let .setActivity(title, location, activityStatus):
+        case let .setActivity(title, location, times):
             if let unwrappedTitle = title {
                 state.repos?.title = unwrappedTitle
             }
             if let unwrappedLocation = location {
                 state.repos?.position = unwrappedLocation
             }
-            if let unwrappedStatus = activityStatus {
+            let status: ActivityStatus? = times?.isEmpty == false ? .setTime : nil
+            if let unwrappedStatus = status {
                 state.repos?.activityStatus = unwrappedStatus
+                
+                if let timestamp = times?.first?.beginning {
+                    let date = Date(timeIntervalSince1970: timestamp)
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                    formatter.timeZone = TimeZone(secondsFromGMT: 8 * 60 * 60)
+                    state.repos?.startTime = formatter.string(from: date)
+                }
             }
             state.isLoading = false
         case .setExitActivity:

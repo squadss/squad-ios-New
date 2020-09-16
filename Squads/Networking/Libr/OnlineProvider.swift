@@ -30,8 +30,8 @@ final class OnlineProvider<Target> where Target: Moya.TargetType {
     
     static var plugins: [PluginType] {
         
-//        let logger = NetworkLogger()
-        let logger = NetworkLoggerPlugin()
+        let logger = NetworkLogger()
+//        let logger = NetworkLoggerPlugin()
         
         var list: Array<PluginType> = [logger]
         

@@ -101,7 +101,6 @@
 		179536B224B1913200FE1185 /* MyProfileReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536B124B1913200FE1185 /* MyProfileReactor.swift */; };
 		179536B424B192BE00FE1185 /* UIButton+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536B324B192BE00FE1185 /* UIButton+Extension.swift */; };
 		179536B624B1A5BF00FE1185 /* Reusable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536B524B1A5BF00FE1185 /* Reusable.swift */; };
-		179536B924B1A63B00FE1185 /* SquadFickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179536B824B1A63B00FE1185 /* SquadFickerCell.swift */; };
 		179693CE24CD36040023152A /* CreateSquadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179693CD24CD36040023152A /* CreateSquadViewController.swift */; };
 		179693D124CD5A5C0023152A /* SquadDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179693D024CD5A5C0023152A /* SquadDetail.swift */; };
 		179693D324CD92150023152A /* Rx+TImer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179693D224CD92150023152A /* Rx+TImer.swift */; };
@@ -224,7 +223,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		170429C824AEBF4E0046F757 /* Squads.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Squads.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		170429C824AEBF4E0046F757 /* Squadss.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Squadss.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		170429CB24AEBF4E0046F757 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		170429CD24AEBF4E0046F757 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		170429CF24AEBF4E0046F757 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -321,7 +320,6 @@
 		179536B124B1913200FE1185 /* MyProfileReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileReactor.swift; sourceTree = "<group>"; };
 		179536B324B192BE00FE1185 /* UIButton+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+Extension.swift"; sourceTree = "<group>"; };
 		179536B524B1A5BF00FE1185 /* Reusable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reusable.swift; sourceTree = "<group>"; };
-		179536B824B1A63B00FE1185 /* SquadFickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadFickerCell.swift; sourceTree = "<group>"; };
 		179693CD24CD36040023152A /* CreateSquadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateSquadViewController.swift; sourceTree = "<group>"; };
 		179693D024CD5A5C0023152A /* SquadDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadDetail.swift; sourceTree = "<group>"; };
 		179693D224CD92150023152A /* Rx+TImer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rx+TImer.swift"; sourceTree = "<group>"; };
@@ -466,7 +464,7 @@
 		170429C924AEBF4E0046F757 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				170429C824AEBF4E0046F757 /* Squads.app */,
+				170429C824AEBF4E0046F757 /* Squadss.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -631,7 +629,6 @@
 		179536A724B181F600FE1185 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				179536B824B1A63B00FE1185 /* SquadFickerCell.swift */,
 				179C04FA24B1A82D00A669FA /* SquadActivityCell.swift */,
 				179C04FC24B1A83E00A669FA /* SquadChannelsCell.swift */,
 				179C04FE24B1AE5E00A669FA /* SquadPlaceholderCell.swift */,
@@ -998,7 +995,7 @@
 			);
 			name = Squads;
 			productName = Squads;
-			productReference = 170429C824AEBF4E0046F757 /* Squads.app */;
+			productReference = 170429C824AEBF4E0046F757 /* Squadss.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1185,7 +1182,6 @@
 				1783F18424ECAF83004A9752 /* JoinSquadViewController.swift in Sources */,
 				17A1514124D3FDEA00E441DE /* CreateEventLocationCell.swift in Sources */,
 				17D9AF5524B03F8B00FEF4DA /* Rx+HGPlaceholders.swift in Sources */,
-				179536B924B1A63B00FE1185 /* SquadFickerCell.swift in Sources */,
 				171B0F3624C298030020DF15 /* AvtivityTimeSettingViewController.swift in Sources */,
 				172B83A024F15B5200521F03 /* TimeLineForegroundView.swift in Sources */,
 				170429D024AEBF4E0046F757 /* ViewController.swift in Sources */,
@@ -1534,7 +1530,7 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.wieed.squad.dev;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Squadss;
 				SWIFT_OBJC_BRIDGING_HEADER = "Squads/Squads-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -1642,7 +1638,7 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.wieed.squad.dev;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Squadss;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Squads/Squads-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

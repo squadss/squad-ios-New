@@ -16,18 +16,6 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
 
     private let tableView = UITableView(frame: .zero, style: .grouped)
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, FlicksReactor.Model<FlickModel>>>!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .white
-        
-        //self.tableView.spr_endRefreshing()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-    }
 
     override func setupView() {
         
@@ -53,12 +41,21 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
         searchView.backgroundColor = UIColor(red: 0.917, green: 0.917, blue: 0.917, alpha: 1)
         searchView.addSubview(searchBtn)
         
-        tableView.delegate = self
+//        let footerView = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 60))
+//        let titleLab = UILabel()
+//        titleLab.font = UIFont.systemFont(ofSize: 12)
+//        titleLab.text = "No more Flicks!"
+//        titleLab.textAlignment = .center
+//        titleLab.theme.textColor = UIColor.textGray
+//        titleLab.frame = CGRect(x: 0, y: 10, width: view.bounds.width, height: 20)
+//        footerView.addSubview(titleLab)
+        
         tableView.tableHeaderView = searchView
-        tableView.tableFooterView = UIView()
+        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: 0.001, height: 10))
         tableView.separatorStyle = .none
         tableView.register(Reusable.flicksListViewCell)
         view.addSubview(tableView)
+        tableView.rx.setDelegate(self).disposed(by: disposeBag)
     }
     
     override func setupConstraints() {
@@ -97,7 +94,6 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
                     browser.cellClassAtIndex = { _ in JXPhotoBrowserImageCell.self }
                     browser.pageIndex = pageIndex
                     browser.show()
-                    print(pageIndex)
                 })
                 .disposed(by: cell.disposeBag)
             
@@ -109,10 +105,10 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
-        reactor.state
-            .compactMap{ $0.isLoading }
-            .bind(to: tableView.rx.loading)
-            .disposed(by: disposeBag)
+//        reactor.state
+//            .compactMap{ $0.isLoading }
+//            .bind(to: tableView.rx.loading)
+//            .disposed(by: disposeBag)
         
         reactor.state
             .compactMap{ $0.toast }
@@ -120,26 +116,31 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter{ $0.isLoading == false }
-            .subscribe(onNext: { [unowned self] _ in
-                self.tableView.spr_endRefreshing()
+            .map { $0.isExistMoreData }
+            .subscribe(onNext: { [unowned self] state in
+                if state {
+                    self.tableView.spr_endRefreshing()
+                } else {
+                    self.tableView.spr_endRefreshingWithNoMoreData()
+                }
             })
             .disposed(by: disposeBag)
         
         rx.viewDidLoad
-            .map{ _ in Reactor.Action.refreshData(keyword: "") }
+            .map{ _ in Reactor.Action.loadData(keyword: "", isRefresh: true) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         tableView.rx.autoFooter
-            .map{ _ in Reactor.Action.loadData(keyword: "") }
+            .map{ _ in Reactor.Action.loadData(keyword: "", isRefresh: false) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
     
     @objc
     private func searchBtnDidTapped() {
-        let searchVC = FlicksSearchViewController()
+        guard let squadId = reactor?.squadId else { return }
+        let searchVC = FlicksSearchViewController(squadId: squadId)
         searchVC.hero.isEnabled = true
         searchVC.hero.modalAnimationType = .selectBy(presenting: .fade, dismissing: .fade)
         searchVC.modalPresentationStyle = .fullScreen
@@ -155,7 +156,7 @@ class FlicksViewController: ReactorViewController<FlicksReactor>, UITableViewDel
         present(nav, animated: true)
         flickReactor.state
             .filter{ $0.postSuccess == true }
-            .map{ _ in Reactor.Action.refreshData(keyword: "") }
+            .map{ _ in Reactor.Action.loadData(keyword: "", isRefresh: true) }
             .bind(to: reactor!.action)
             .disposed(by: disposeBag)
     }

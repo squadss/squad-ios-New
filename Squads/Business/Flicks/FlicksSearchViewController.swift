@@ -10,15 +10,27 @@ import UIKit
 import RxSwift
 import RxCocoa
 import RxDataSources
+import JXPhotoBrowser
 
 class FlicksSearchViewController: BaseViewController, UITableViewDelegate {
 
+    private var cancelBtn = UIButton()
     private var disposeBag = DisposeBag()
+    private var searchField = UITextField()
+    private var provider = OnlineProvider<SquadAPI>()
     private var tableView = UITableView(frame: .zero, style: .grouped)
     private var dataSource: RxTableViewSectionedReloadDataSource<SectionModel<String, FlicksReactor.Model<FlickModel>>>!
     
-    private var searchField = UITextField()
-    private var cancelBtn = UIButton()
+    let squadId: Int
+    
+    init(squadId: Int) {
+        self.squadId = squadId
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,9 +49,8 @@ class FlicksSearchViewController: BaseViewController, UITableViewDelegate {
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
         tableView.register(Reusable.flicksListViewCell)
-        tableView.theme.backgroundColor = UIColor.background
         view.addSubview(tableView)
-        
+        tableView.theme.backgroundColor = UIColor.background
         setupCancelBtn()
         setupSearchField()
     }
@@ -110,21 +121,59 @@ class FlicksSearchViewController: BaseViewController, UITableViewDelegate {
         }
     }
     
-    func bind(reactor: FlicksReactor) {
+    override func addTouchAction() {
+        
         dataSource = RxTableViewSectionedReloadDataSource<SectionModel<String, FlicksReactor.Model<FlickModel>>>(configureCell: { data, tableView, indexPath, model in
             let cell = tableView.dequeue(Reusable.flicksListViewCell)!
+            let list = model.data.pirtureList
             cell.contentWidth = model.contentWidth
-            cell.pirtureList = model.data.pirtureList
+            cell.pirtureList = list
             cell.contentLab.text = model.data.content
             cell.dateBtn.setTitle(model.data.dateString, for: .normal)
             cell.likeBtn.setTitle(model.data.likeNum, for: .normal)
             cell.commonBtn.setTitle(model.data.commonNum, for: .normal)
             cell.selectionStyle = .none
+            
+            cell.pirtureDidTapped
+                .subscribe(onNext: { pageIndex in
+                    let browser = JXPhotoBrowser()
+                    browser.numberOfItems = { list.count }
+                    browser.reloadCellAtIndex = { context in
+                        let cell = context.cell as? JXPhotoBrowserImageCell
+                        cell?.imageView.kf.setImage(with: list[context.index], placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+                    }
+                    browser.cellClassAtIndex = { _ in JXPhotoBrowserImageCell.self }
+                    browser.pageIndex = pageIndex
+                    browser.show()
+                    print(pageIndex)
+                })
+                .disposed(by: cell.disposeBag)
+            
             return cell
         })
         
-        reactor.state
-            .map{ $0.repos.map{ SectionModel(model: "", items: [$0]) } }
+        searchField.rx.text.orEmpty
+            .throttle(RxTimeInterval.milliseconds(500), scheduler: MainScheduler.instance)
+            .flatMap{ [unowned self] text -> Observable<Result<GeneralModel.List<FlickModel>, GeneralError>> in
+                if text.isEmpty {
+                    return Observable.just(.failure(.unknown))
+                } else {
+                    return self.provider.request(target: .getPageListWithFlick(squadId: self.squadId, pageIndex: 1, pageSize: 10, keyword: text), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data).asObservable()
+                }
+            }
+            .map{ result in
+                switch result {
+                case .success(let paging):
+                    let items = paging.records.map{ (model) -> FlicksReactor.Model<FlickModel> in
+                        let height = FlicksListViewCell.calcTotalHeight(pirtureNums: model.pirtureList.count)
+                        let width = FlicksListViewCell.calcContentWidth(string: model.content)
+                        return FlicksReactor.Model(data: model, totalHeight: height, contentWidth: width)
+                    }
+                    return [SectionModel(model: "", items: items)]
+                case .failure:
+                    return []
+                }
+            }
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
     }

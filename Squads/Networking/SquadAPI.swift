@@ -26,7 +26,7 @@ enum SquadAPI {
     case deleteSquad(id: String)
     
     /// 更新Squad
-    case updateSquad(name: String, avator: Data, remark: String)
+    case updateSquad(id: Int, name: String?, avator: Data?)
     
     /// 获取当前置顶的squad
     case quardTopSquad
@@ -410,9 +410,10 @@ extension SquadAPI: TargetType {
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
         case .deleteSquad, .querySquad, .quardTopSquad, .querySquadByInviteCode, .queryAllSquads, .queryAllFriends, .myInviteRecords:
             return .requestPlain
-
-        case let .updateSquad(name, avator, remark):
-            let params = ["squadName": name, "logoImgBase64": avator.base64EncodedString(options: .lineLength64Characters), "createRemark": remark]
+        case let .updateSquad(id, name, avator):
+            var params: [String : Any] = ["id": id]
+            name.flatMap{ params["squadName"] = $0 }
+            avator.flatMap{ params["logoImgBase64"] = $0.base64EncodedString(options: .lineLength64Characters) }
             return .requestParameters(parameters: params, encoding: JSONEncoding.default)
         case let .createLinkBySquad(squadId):
             return .requestParameters(parameters: [
