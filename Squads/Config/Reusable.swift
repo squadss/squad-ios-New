@@ -11,8 +11,6 @@ import ReusableKit
 
 enum Reusable {
     
-    static let squadFickerCell = ReusableCell<SquadFickerCell>()
-    
     static let squadActivityCell = ReusableCell<SquadActivityCell>()
     
     static let squadChannelsCell = ReusableCell<SquadChannelsCell>()

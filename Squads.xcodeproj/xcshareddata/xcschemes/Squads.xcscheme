@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "170429C724AEBF4E0046F757"
-               BuildableName = "Squads.app"
+               BuildableName = "Squadss.app"
                BlueprintName = "Squads"
                ReferencedContainer = "container:Squads.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "170429C724AEBF4E0046F757"
-            BuildableName = "Squads.app"
+            BuildableName = "Squadss.app"
             BlueprintName = "Squads"
             ReferencedContainer = "container:Squads.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "170429C724AEBF4E0046F757"
-            BuildableName = "Squads.app"
+            BuildableName = "Squadss.app"
             BlueprintName = "Squads"
             ReferencedContainer = "container:Squads.xcodeproj">
          </BuildableReference>

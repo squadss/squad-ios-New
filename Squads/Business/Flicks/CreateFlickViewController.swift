@@ -328,11 +328,6 @@ class CreateFlickViewController: ReactorViewController<CreateFlickReactor>, UICo
     }
     
     @objc
-    private func rightBtnBtnDidTapped() {
-        dismiss(animated: true)
-    }
-    
-    @objc
     private func keyboardWillShowNotification(_ notification: Notification) {
         guard inputBar.transform == .identity else { return }
         let insetsBottom = UIApplication.shared.keyWindow?.layoutInsets.bottom ?? 0

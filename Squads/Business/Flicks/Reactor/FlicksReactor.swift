@@ -20,20 +20,20 @@ class FlicksReactor: Reactor {
     }
     
     enum Action {
-        case refreshData(keyword: String)
-        case loadData(keyword: String)
+        case loadData(keyword: String, isRefresh: Bool)
     }
     
     enum Mutation {
         case setLoading(Bool)
         case setToast(String)
-        case setRepos(Array<Model<FlickModel>>, isRefresh: Bool)
+        case setRepos(Array<Model<FlickModel>>, isRefresh: Bool, isExistMoreData: Bool)
     }
     
     struct State {
         var repos = Array<Model<FlickModel>>()
         var toast: String?
         var isLoading: Bool?
+        var isExistMoreData: Bool = true
     }
     
     let squadId: Int
@@ -45,18 +45,16 @@ class FlicksReactor: Reactor {
     }
     
     struct Paging {
-        var size: Int = 10
+        let size: Int = 10
         var index: Int = 1
         var total: Int = 0
         
         mutating func reset() {
             index = 1
-            size = 10
         }
         
         mutating func nextPage() {
             index += 1
-            size = 10
         }
     }
     
@@ -64,12 +62,37 @@ class FlicksReactor: Reactor {
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .refreshData(let keyword):
-            self.paging.reset()
-            return self.requestData(keyword: keyword, isRefresh: true)
-        case .loadData(let keyword):
-            self.paging.nextPage()
-            return self.requestData(keyword: keyword, isRefresh: false)
+        case .loadData(let keyword, let isRefresh):
+            
+            if isRefresh { self.paging.reset() }
+            
+            let api: SquadAPI = .getPageListWithFlick(squadId: squadId,
+                                                      pageIndex: self.paging.index,
+                                                      pageSize: self.paging.size,
+                                                      keyword: keyword)
+            return provider
+                .request(target: api, model: GeneralModel.List<FlickModel>.self, atKeyPath: .data)
+                .asObservable()
+                .map { [unowned self] result in
+                    switch result {
+                    case .success(let pagation):
+                        
+                        // 服务器的 pagation.pageIndex是我传过去的值, 不能依靠这个计算
+                        self.paging.total = pagation.total
+                        if pagation.canLoadNext {
+                            self.paging.nextPage()
+                        }
+                        
+                        return .setRepos(pagation.records.map{ (model) in
+                            let height = FlicksListViewCell.calcTotalHeight(pirtureNums: model.pirtureList.count)
+                            let width = FlicksListViewCell.calcContentWidth(string: model.content)
+                            return Model(data: model, totalHeight: height, contentWidth: width)
+                        }, isRefresh: isRefresh, isExistMoreData: pagation.existMore)
+                    case .failure(let error):
+                        return .setToast(error.message)
+                    }
+                }
+                .startWith(.setLoading(true))
         }
     }
     
@@ -82,8 +105,9 @@ class FlicksReactor: Reactor {
         case .setToast(let s):
             state.isLoading = false
             state.toast = s
-        case .setRepos(let list, let isRefresh):
+        case .setRepos(let list, let isRefresh, let isExistMoreData):
             state.isLoading = false
+            state.isExistMoreData = isExistMoreData
             if isRefresh {
                 state.repos = list
             } else {
@@ -91,29 +115,6 @@ class FlicksReactor: Reactor {
             }
         }
         return state
-    }
-    
-    private func requestData(keyword: String, isRefresh: Bool) -> Observable<Mutation> {
-        return provider.request(target: .getPageListWithFlick(squadId: squadId, pageIndex: self.paging.index, pageSize: self.paging.size, keyword: keyword), model: GeneralModel.List<FlickModel>.self, atKeyPath: .data)
-        .asObservable()
-        .map { [unowned self] result in
-            switch result {
-            case .success(let pagation):
-                
-                self.paging.index = pagation.pageIndex
-                self.paging.size = pagation.pageSize
-                self.paging.total = pagation.total
-                
-                return .setRepos(pagation.records.map{ (model) in
-                    return Model(data: model,
-                                 totalHeight: FlicksListViewCell.calcTotalHeight(pirtureNums: model.pirtureList.count),
-                                 contentWidth: FlicksListViewCell.calcContentWidth(string: model.content))
-                }, isRefresh: isRefresh)
-            case .failure(let error):
-                return .setToast(error.message)
-            }
-        }
-        .startWith(.setLoading(true))
     }
 }
 

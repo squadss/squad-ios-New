@@ -110,9 +110,13 @@ class FlicksListViewCell: BaseTableViewCell {
             let rect = CGRect(x: x, y: y, width: itemWidth, height: itemWidth)
             listView[i].frame = rect
         }
-        stackView.frame = CGRect(x: bounds.width - insert.right - 100, y: bounds.height - 38, width: 100, height: 36)
+        //FIXME: - 这一版没有加喜欢/评论的功能, 暂时隐藏
+//        stackView.frame = CGRect(x: bounds.width - insert.right - 100, y: bounds.height - 38, width: 100, height: 36)
+//        contentLab.frame = CGRect(x: insert.left, y: bounds.height - 30, width: contentWidth, height: 17)
+//        dateBtn.frame = CGRect(x: contentLab.frame.maxX + 5, y: contentLab.frame.minY, width: stackView.frame.minX - contentLab.frame.maxX - 5, height: 17)
+        
         contentLab.frame = CGRect(x: insert.left, y: bounds.height - 30, width: contentWidth, height: 17)
-        dateBtn.frame = CGRect(x: contentLab.frame.maxX + 5, y: contentLab.frame.minY, width: stackView.frame.minX - contentLab.frame.maxX - 5, height: 17)
+        dateBtn.frame = CGRect(x: contentLab.frame.maxX + 5, y: contentLab.frame.minY, width: bounds.width - contentLab.frame.maxX - insert.right - 5, height: 17)
     }
     
     override func prepareForReuse() {

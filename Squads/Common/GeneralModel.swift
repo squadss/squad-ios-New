@@ -63,6 +63,20 @@ struct GeneralModel {
             self.pageSize = pageSize
             self.pageIndex = pageIndex
         }
+        
+        /*
+         self.paging.total = pagation.total
+         if pagation.canLoadNext {
+             self.paging.nextPage()
+         }
+         */
+        var canLoadNext: Bool {
+            return (pageIndex - 1) * pageSize < total
+        }
+        
+        var existMore: Bool {
+            return pageIndex * pageSize < total
+        }
     }
 
 }

@@ -20,6 +20,7 @@ class SquadPreReactor: Reactor {
     
     enum Action {
         case refreshSquadDetail
+        case setDetail(avatar: Data?, squadName: String?)
     }
     
     enum Mutation {
@@ -60,6 +61,13 @@ class SquadPreReactor: Reactor {
             return provider.request(target: .querySquad(id: squadId, setTop: false), model: SquadDetail.self, atKeyPath: .data).asObservable().map { result in
                 switch result {
                 case .success(let detail): return .setSquadDetail(detail)
+                case .failure(let error): return .setToast(error.message)
+                }
+            }.startWith(.setLoading(true))
+        case let .setDetail(avatar, squadName):
+            return provider.request(target: .updateSquad(id: squadId, name: squadName, avator: avatar), model: GeneralModel.Plain.self).asObservable().map { result in
+                switch result {
+                case .success: return .setToast("")
                 case .failure(let error): return .setToast(error.message)
                 }
             }.startWith(.setLoading(true))

@@ -215,7 +215,8 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
                     if let members = model.goingMembers, !members.isEmpty {
                         cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
                     }
-                    cell.dateLab.text = model.startDate
+                    let startTime = model.formatterStartTime()
+                    cell.dateLab.text = startTime?.date ?? "TBD"
                     cell.containterView.borderColor = .red
                 }
                 
@@ -485,7 +486,7 @@ final class SquadViewController: ReactorViewController<SquadReactor>, UITableVie
         case is SquadChannel:
             return 70.0
         case is Array<URL>:
-            return 100.0
+            return 130.0
         default:
             fatalError("没有配置cell")
         }
