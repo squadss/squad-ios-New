@@ -88,15 +88,44 @@ class SquadInvithNewReactor: Reactor {
                 }
             }
         case .makeInvitation:
-            return Observable.from(currentState.members?.map{ $0.user.id } ?? [])
+            
+            let members = currentState.members?.map{ $0.user.id } ?? []
+            
+            let channels = provider.request(target: .getSquadChannel(squadId: squadId), model: Array<CreateChannel>.self, atKeyPath: .data)
+                .asObservable()
+                .flatMap { (result) -> Observable<Result<Void, GeneralError>> in
+                    switch result {
+                    case .success(let list):
+                        return Observable.from(list.map{ $0.id }).flatMap { channelId -> Observable<Result<Void, GeneralError>> in
+                            return self.inviteJoinGroup(groupId: String(channelId), members: members.map{ String($0) })
+                        }.reduce(.success(())) { (total, result) -> Result<Void, GeneralError> in
+                            switch (total, result) {
+                            case (.success, .success): return .success(())
+                            case (.failure(let error), .failure), (.failure(let error), .success), (.success, .failure(let error)):
+                                return .failure(error)
+                            }
+                        }
+                    case .failure(let error):
+                        return Observable.just(.failure(error))
+                    }
+                }
+            
+            let invitesFriends = Observable.from(members)
                 .flatMap { userId -> Observable<Result<GeneralModel.Plain, GeneralError>> in
                     return self.provider.request(target: .inviteFriend(squadId: self.squadId, userId: userId), model: GeneralModel.Plain.self).asObservable()
                 }
                 .reduce(false) { (total, result) -> Bool in
                     return total || result.error == nil
                 }
-                .map { state in
-                    return state ? .setInviteSuccess(NSLocalizedString("squadInvite.successTip", comment: "")) : .setToast(NSLocalizedString("squadInvite.failureTip", comment: ""))
+            
+            return Observable.zip(channels, invitesFriends)
+                .map { result, state in
+                    switch result {
+                    case .success:
+                        return state ? .setInviteSuccess(NSLocalizedString("squadInvite.successTip", comment: "")) : .setToast(NSLocalizedString("squadInvite.failureTip", comment: ""))
+                    case .failure(let error):
+                        return .setToast(error.message)
+                    }
                 }
                 .startWith(.setLoading(true))
         case let .visibleContacts(phoneList, isDenied):
@@ -183,6 +212,25 @@ class SquadInvithNewReactor: Reactor {
             state.linkText = str
         }
         return state
+    }
+   
+    
+    /// 批量邀请好友加入群
+    /// - Parameters:
+    ///   - groupId: 群id
+    ///   - members: 成员列表
+    /// - Returns: 加入结果
+    func inviteJoinGroup(groupId: String, members: Array<String>) -> Observable<Result<Void, GeneralError>> {
+        return Observable.create { (observer) -> Disposable in
+            V2TIMManager.sharedInstance()?.inviteUser(toGroup: groupId, userList: members, succ: { _ in
+                observer.onNext(.success(()))
+                observer.onCompleted()
+            }, fail: { (code, string) in
+                observer.onNext(.failure(.custom(string ?? "")))
+                observer.onCompleted()
+            })
+            return Disposables.create()
+        }
     }
 }
 

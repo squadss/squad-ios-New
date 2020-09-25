@@ -59,7 +59,7 @@ class CreateEventLabelsCell: BaseTableViewCell {
             btn.layer.cornerRadius = 16
             btn.setTitleColor(.white, for: .selected)
             btn.addTarget(self, action: #selector(btnDidTapped(sender:)), for: .touchUpInside)
-            addSubview(btn)
+            contentView.addSubview(btn)
             listView.append(btn)
         }
     }
@@ -91,7 +91,7 @@ class CreateEventLabelsCell: BaseTableViewCell {
         let marginLeft: CGFloat = 33
         let marginTop: CGFloat = 12
         let marginBottom: CGFloat = 12
-        let itemWidth: CGFloat = (bounds.width - marginRight * 2 - marginLeft * 2)/3
+        let itemWidth: CGFloat = (contentView.bounds.width - marginRight * 2 - marginLeft * 2)/3
         
         for index in 0..<listView.count {
             let view = listView[index]

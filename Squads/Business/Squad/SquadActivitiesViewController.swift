@@ -80,6 +80,8 @@ final class SquadActivitiesViewController: ReactorViewController<SquadActivities
                     if let mine = members.first(where: { $0.accountId == user?.id }) {
                         let title = mine.isResponded ? "Time TBD" : "ADD AVAILABILITY"
                         cell.statusView.setTitle(title, for: .normal)
+                    } else {
+                        cell.statusView.setTitle("ADD AVAILABILITY", for: .normal)
                     }
                     cell.membersView.setMembers(members: members.map{ $0.avatar.asURL })
                 }

@@ -51,7 +51,9 @@ class ApplyListReactor: Reactor {
             let accountId = User.currentUser()!.id
             return provider.request(target: .addMember(squadId: squadId, accountId: accountId), model: GeneralModel.Plain.self).asObservable().map { result in
                 switch result {
-                case .success(let plain): return .setInvite(squadId: squadId, state: .accepted, toast: plain.message)
+                case .success:
+                    let toast = NSLocalizedString("squadApply.joinSuccess", comment: "")
+                    return .setInvite(squadId: squadId, state: .accepted, toast: toast)
                 case .failure(let error): return .setToast(error.message)
                 }
             }.startWith(.setLoading(true))

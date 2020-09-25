@@ -1,13 +1,17 @@
 
-
+system.sendCodeSuccessful = "Send a success!";
+system.registerSuccess = "Registered successfully";
 system.loginSuccess = "Login successful!";
 system.loginExpired = "Authentication has expired!";
 system.relogin = "Log In";
 system.wrongOperation = "Wrong operation!";
+system.updateSuccess = "Modify the success!";
 
 createEvent.categoryTip = "Please select a category!";
 createEvent.titleTip = "Name your event!";
 createEvent.selectTimeTip = "Add your availability!";
+
+createFlick.publishTip = "Release success!";
 
 squadDetail.prepareSetTimeTitle = "Know your squad's availability?";
 squadDetail.prepareTitle = "Add your availability!";
@@ -31,7 +35,13 @@ squadDetail.joinSquadSuccessTip = "Joined new Squad!";
 squadDetail.notFoundSquadTip = "No available squad was found!";
 squadDetail.activityPlaceholder = "No activities currently planned. Create one!";
 squadDetail.flicksPlaceholder = "Add Flicks for the squad's slideshow! ";
+
+squadDetail.confirmGoing = "You've confirmed your participation";
+squadDetail.rejectGoing = "You've confirmed that you can't attend";
+
 squadInvite.successTip = "Invitation Success";
 squadInvite.failureTip = "Invitation failed";
+
+squadApply.joinSuccess = "Join the success!";
 
 squadSettingTime.neverChosenTip = "No time has been chosen";

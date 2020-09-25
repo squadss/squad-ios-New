@@ -126,7 +126,6 @@ class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
             .disposed(by: disposeBag)
         
         timer
-            .debug()
             .filter{ $0 == totalSeconds }
             .flatMap { [unowned self] _ -> Observable<Result<GeneralModel.Plain, GeneralError>> in
                 guard
@@ -142,8 +141,9 @@ class VerificationCodeViewController: BaseViewController, BrickInputFieldStyle {
             }
             .subscribe(onNext: { [unowned self] result in
                 switch result {
-                case .success(let plain):
-                    self.showToast(message: plain.message)
+                case .success:
+                    let toast = NSLocalizedString("system.sendCodeSuccessful", comment: "")
+                    self.showToast(message: toast)
                 case .failure(let error):
                     self.showToast(message: error.message)
                 }

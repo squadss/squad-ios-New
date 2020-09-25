@@ -101,7 +101,9 @@ class CreateFlickReactor: Reactor {
                 return self.provider.request(target: .addMediaWithFlick(squadId: self.squadId, mediaType: .priture, media: $0, title: title, url: url), model: GeneralModel.Plain.self)
             }.asObservable().map{ result -> Mutation in
                 switch result {
-                case .success(let plain): return .setUploadSuccess(state: true, toast: plain.message)
+                case .success:
+                    let toast = NSLocalizedString("createFlick.publishTip", comment: "")
+                    return .setUploadSuccess(state: true, toast: toast)
                 case .failure(let error): return .setToast(error.message)
                 }
             }.startWith(.setLoading(true))
