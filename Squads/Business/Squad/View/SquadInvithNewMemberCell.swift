@@ -26,7 +26,7 @@ class SquadInvithNewMemberCell: BaseCollectionViewCell {
                 closeBtn = UIButton()
                 closeBtn?.addTarget(self, action: #selector(closeBtnAction), for: .touchUpInside)
                 closeBtn?.setImage(UIImage(named: "Cancel Invite"), for: .normal)
-                addSubview(closeBtn!)
+                contentView.addSubview(closeBtn!)
             }
             closeBtn?.isHidden = false
         }
@@ -45,7 +45,7 @@ class SquadInvithNewMemberCell: BaseCollectionViewCell {
         
         avatarBtn.imageView?.layer.cornerRadius = 25
         avatarBtn.imageView?.layer.masksToBounds = true
-        addSubviews(nicknameLab, avatarBtn)
+        contentView.addSubviews(nicknameLab, avatarBtn)
     }
     
     override func prepareForReuse() {

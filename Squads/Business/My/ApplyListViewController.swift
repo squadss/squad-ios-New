@@ -61,7 +61,7 @@ class ApplyListViewController: ReactorViewController<ApplyListReactor>, UITableV
             let cell = tableView.dequeue(Reusable.applyListViewCell)!
             cell.avatarView.kf.setImage(with: model.inviteSquadLogoPath?.asURL, for: .normal)
             cell.selectionStyle = .none
-            cell.nicknameLab.text = model.inviterNickname
+            cell.nicknameLab.text = model.inviteSquadName
             cell.contentLab.text = "Invited by " + model.inviterNickname
             
             switch model.inviteStatus {

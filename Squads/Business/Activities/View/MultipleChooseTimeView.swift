@@ -64,23 +64,38 @@ class MultipleChooseTimeView: UIView {
             tapView.scrollHalfHour(hour * 2, animated: animated)
         }
         
-        pageView.timePeriodsDidSelectedCompletion = { list in
-            tapView.setDataSource(self.originList + list)
+        pageView.timePeriodsDidSelectedCompletion = { myTime in
+            print(myTime)
+            tapView.setDataSource(self.exceptOwnList + myTime)
         }
     }
     
-    private var originList = Array<TimePeriod>()
+    // 除了我的其余所有的时间段数组
+    private var exceptOwnList = Array<TimePeriod>()
     private var isFirstSetData: Bool = true
     func setDataSource(myTime: Array<TimePeriod>, originList: Array<TimePeriod>) {
         
-        self.originList = originList
-        self.originList.removeAll(where: { myTime.contains($0) })
+        guard !originList.isEmpty else { return }
         
-        drawView.itemView.setDataSource(myTime)
         displayView.itemView.setDataSource(originList)
         
+        // 将自己选择的时间剔除掉, 便于在选择时间后, 重新加上选择的时间, 才是所有的时间
+        var _originList = originList
+        // myTime可能为空, 如果不是创建者而是参与者,他第一次进来就是空
+        if !myTime.isEmpty {
+            myTime.forEach {
+                if let index = _originList.firstIndex(of: $0) {
+                    _originList.remove(at: index)
+                }
+            }
+            drawView.itemView.setDataSource(myTime)
+        } else {
+            drawView.itemView.setDataSource([], startOffTime: originList.first?.startOffTime)
+        }
+        self.exceptOwnList = _originList
+        
         if isFirstSetData {
-            axisView.scrollToAdaptDate(array: myTime)
+            axisView.scrollToAdaptDate(array: originList)
             isFirstSetData = false
         }
     }

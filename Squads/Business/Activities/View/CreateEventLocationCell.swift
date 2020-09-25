@@ -26,8 +26,6 @@ class CreateEventLocationCell: BaseTableViewCell {
         
         iconView.contentMode = .center
         contentView.addSubviews(contentLab, titleLab, iconView)
-        
-        
     }
     
     override func layoutSubviews() {
