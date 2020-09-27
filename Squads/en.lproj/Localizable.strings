@@ -1,9 +1,9 @@
 
-system.sendCodeSuccessful = "Send a success!";
-system.registerSuccess = "Registered successfully";
-system.loginSuccess = "Login successful!";
+system.sendCodeSuccessful = "Code sent!";
+system.registerSuccess = "Registered successfully!";
+system.loginSuccess = "Logged in!";
 system.loginExpired = "Authentication has expired!";
-system.relogin = "Log In";
+system.relogin = "Log in";
 system.wrongOperation = "Wrong operation!";
 system.updateSuccess = "Modify the success!";
 
@@ -11,7 +11,7 @@ createEvent.categoryTip = "Please select a category!";
 createEvent.titleTip = "Name your event!";
 createEvent.selectTimeTip = "Add your availability!";
 
-createFlick.publishTip = "Release success!";
+createFlick.publishTip = "Release successful!";
 
 squadDetail.prepareSetTimeTitle = "Know your squad's availability?";
 squadDetail.prepareTitle = "Add your availability!";
@@ -32,16 +32,16 @@ squadDetail.changeConfirm = "Confirm";
 squadDetail.confirmDeleteTitle = "Are you sure you want to delete this event?";
 squadDetail.deleteSuccess = "Deleted Event!";
 squadDetail.joinSquadSuccessTip = "Joined new Squad!";
-squadDetail.notFoundSquadTip = "No available squad was found!";
+squadDetail.notFoundSquadTip = "No available Squad was found!";
 squadDetail.activityPlaceholder = "No activities currently planned. Create one!";
-squadDetail.flicksPlaceholder = "Add Flicks for the squad's slideshow! ";
+squadDetail.flicksPlaceholder = "Add Flicks for the Squad's slideshow! ";
 
-squadDetail.confirmGoing = "You've confirmed your participation";
-squadDetail.rejectGoing = "You've confirmed that you can't attend";
+squadDetail.confirmGoing = "Confirmed going!";
+squadDetail.rejectGoing = "Confirmed not attending!";
 
-squadInvite.successTip = "Invitation Success";
-squadInvite.failureTip = "Invitation failed";
+squadInvite.successTip = "Invitation sent!";
+squadInvite.failureTip = "Invitation failed!";
 
-squadApply.joinSuccess = "Join the success!";
+squadApply.joinSuccess = "Joined Squad!";
 
 squadSettingTime.neverChosenTip = "No time has been chosen";
