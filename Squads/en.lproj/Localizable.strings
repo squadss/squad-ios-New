@@ -4,8 +4,8 @@ system.registerSuccess = "Registered successfully!";
 system.loginSuccess = "Logged in!";
 system.loginExpired = "Authentication has expired!";
 system.relogin = "Log in";
-system.wrongOperation = "Wrong operation!";
-system.updateSuccess = "Modify the success!";
+system.wrongOperation = "Error";
+system.updateSuccess = "Updated successfully!";
 
 createEvent.categoryTip = "Please select a category!";
 createEvent.titleTip = "Name your event!";
