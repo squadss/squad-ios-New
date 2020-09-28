@@ -125,8 +125,10 @@ class CreateSquadViewController: BaseViewController {
 //                let urlPath = Bundle.main.path(forResource: "normal_channel_avatar", ofType: "jpg")
 //                let url = URL(fileURLWithPath: urlPath!)
 //                let avatarData = try! Data(contentsOf: url)
-                let image = UIImage(named: "Normal Channel")!
-                let avatarData = image.jpegData(compressionQuality: 1.0)!
+                let image = UIImage(named: "Normal Channel")?.drawColor(.white)
+                guard let avatarData = image?.jpegData(compressionQuality: 1.0) else {
+                    return .empty()
+                }
                 
                 return self.provider.request(target: .createChannel(squadId: detail.id, name: "Main", avatar: avatarData, ownerAccountId: accountId), model: CreateChannel.self, atKeyPath: .data).asObservable().flatMap { result -> Observable<Void> in
                     switch result {

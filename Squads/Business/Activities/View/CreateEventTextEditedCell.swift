@@ -69,12 +69,12 @@ class CreateEventTextEditedCell: BaseTableViewCell, UITextFieldDelegate {
         textField.font = UIFont.systemFont(ofSize: 14)
         textField.delegate = self
         textField.isEnabled = false
-        addSubviews(textField, separatorLine)
+        contentView.addSubviews(textField, separatorLine)
         addInputAccessoryView()
         
         tap = UITapGestureRecognizer(target: self, action: #selector(didTapped))
         tap.isEnabled = false
-        addGestureRecognizer(tap)
+        contentView.addGestureRecognizer(tap)
     }
     
     override func prepareForReuse() {

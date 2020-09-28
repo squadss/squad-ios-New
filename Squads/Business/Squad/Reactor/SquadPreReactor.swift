@@ -24,7 +24,7 @@ class SquadPreReactor: Reactor {
     }
     
     enum Mutation {
-        case setSquadDetail(SquadDetail)
+        case setSquadDetail(SquadDetail, toast: String?)
         case setToast(String)
         case setLoading(Bool)
     }
@@ -60,14 +60,16 @@ class SquadPreReactor: Reactor {
         case .refreshSquadDetail:
             return provider.request(target: .querySquad(id: squadId, setTop: false), model: SquadDetail.self, atKeyPath: .data).asObservable().map { result in
                 switch result {
-                case .success(let detail): return .setSquadDetail(detail)
+                case .success(let detail): return .setSquadDetail(detail, toast: nil)
                 case .failure(let error): return .setToast(error.message)
                 }
             }.startWith(.setLoading(true))
         case let .setDetail(avatar, squadName):
-            return provider.request(target: .updateSquad(id: squadId, name: squadName, avator: avatar), model: GeneralModel.Plain.self).asObservable().map { result in
+            return provider.request(target: .updateSquad(id: squadId, name: squadName, avator: avatar), model: SquadDetail.self, atKeyPath: .data).asObservable().map { result in
                 switch result {
-                case .success: return .setToast("")
+                case .success(let detail):
+                    let toast = NSLocalizedString("system.updateSuccess", comment: "")
+                    return .setSquadDetail(detail, toast: toast)
                 case .failure(let error): return .setToast(error.message)
                 }
             }.startWith(.setLoading(true))
@@ -83,8 +85,9 @@ class SquadPreReactor: Reactor {
         case .setToast(let s):
             state.isLoading = false
             state.toast = s
-        case .setSquadDetail(let detail):
+        case .setSquadDetail(let detail, let toast):
             state.isLoading = false
+            state.toast = toast
             state.squadDetail = detail
         }
         return state

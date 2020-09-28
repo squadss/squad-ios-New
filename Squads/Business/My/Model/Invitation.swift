@@ -32,4 +32,5 @@ struct Invitation : Codable {
     var inviteSquadId: Int
     var inviteSquadLogoPath: String?
     var inviteStatus: Status
+    var inviteSquadName: String
 }

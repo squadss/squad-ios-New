@@ -57,7 +57,9 @@ class SquadActivitiesReactor: Reactor {
         case let .handlerGoing(isAccept, activityId):
             return provider.request(target: .updateGoingStatus(activityId: activityId, isAccept: isAccept), model: GeneralModel.Plain.self).asObservable().map { result in
                 switch result {
-                case .success(let plain): return .setGoingStatus(activityId: activityId, isGoing: isAccept, toast: plain.message)
+                case .success:
+                    let toast: String = isAccept ? NSLocalizedString("squadDetail.confirmGoing", comment: "") : NSLocalizedString("squadDetail.rejectGoing", comment: "")
+                    return .setGoingStatus(activityId: activityId, isGoing: isAccept, toast: toast)
                 case .failure(let error): return .setToast(error.message)
                 }
             }

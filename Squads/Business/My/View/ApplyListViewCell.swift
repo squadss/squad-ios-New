@@ -39,7 +39,7 @@ class ApplyListViewCell: BaseTableViewCell {
         actionBtn.layer.maskCorners(3, rect: CGRect(x: 0, y: 0, width: 37, height: 21))
         actionBtn.clipsToBounds = true
         
-        addSubviews(avatarView, nicknameLab, contentLab, actionBtn)
+        contentView.addSubviews(avatarView, nicknameLab, contentLab, actionBtn)
         avatarView.snp.makeConstraints { (maker) in
             maker.leading.equalTo(34)
             maker.centerY.equalToSuperview()

@@ -73,15 +73,14 @@ class TimeLineAxisControl: BaseView, UIScrollViewDelegate {
     /// 根据传入的时间段列表, 滚动到其适应的位置
     /// - Parameter array: 时间段列表
     func scrollToAdaptDate(array: Array<TimePeriod>) {
+        // 更加传入的时间段数组找到合适的时间戳
         guard let adaptTimestamp = getAdaptDate(array: array) else {
             return
         }
         let calendar = Calendar.current
         let adaptDate = Date(timeIntervalSince1970: adaptTimestamp)
         let components = calendar.dateComponents([.year, .month, .day, .hour], from: adaptDate)
-        if let hour = components.hour {
-            scrollToDate(hour: hour)
-        }
+        components.hour.flatMap { scrollToDate(hour: $0) }
     }
     
     func getAdaptDate(array: Array<TimePeriod>) -> TimeInterval? {

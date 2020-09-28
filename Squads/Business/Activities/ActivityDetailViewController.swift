@@ -297,9 +297,9 @@ extension ActivityDetailViewController {
         }
         chooseTimeView.isHidden = false
         
-        // 这里必须传个时间数组过来, 并且不能为空, 因为我们是根据myTime中的第一个元素, 来判断当前选择的日期是哪天
+        // 这里必须传个时间数组过来, 并且不能为空, 因为我们是根据members.myTime中的第一个元素, 来判断当前选择的日期是哪天
         // 如果后面需求变更了, myTime可为空, 则必须在CreateEvent中增加一个日期的字段, 来表示活动选择的日期
-        if !currentMember.myTime.isEmpty, let members = detail.responsedMembers {
+        if let members = detail.responsedMembers, !members.isEmpty {
             let originList = members.flatMap{ $0.myTime }
             chooseTimeView.setDataSource(myTime: currentMember.myTime, originList: originList)
         }

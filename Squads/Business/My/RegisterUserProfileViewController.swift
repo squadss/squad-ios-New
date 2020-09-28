@@ -146,8 +146,9 @@ class RegisterUserProfileViewController: BaseViewController, BrickInputFieldStyl
                 self.confirmBtn.isEnabled = true
                 
                 switch result {
-                case .success(let model):
-                    self.showToast(message: model.message)
+                case .success:
+                    let toast = NSLocalizedString("system.registerSuccess", comment: "")
+                    self.showToast(message: toast)
                     self.navigationController?.popToRootViewController(animated: true)
                 case .failure(let error):
                     self.showToast(message: error.message)
